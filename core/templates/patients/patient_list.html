@@ -1,0 +1,92 @@
+<!-- patient_list.html -->
+<div class="h-100 p-4 bg-white rounded-3 shadow-sm">
+    <div class="border-bottom border-success border-3 pb-2 mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h3 class="text-success mb-0">
+                    <i class="bi bi-people me-2"></i>Listado de Pacientes
+                </h3>
+            </div>
+            <div class="col-md-6 mt-3 mt-md-0">
+                <form method="get" action="{% url 'patient_list' %}" class="d-flex" id="search-form">
+                    <div class="input-group">
+                        <input type="text" 
+                               class="form-control form-control-sm" 
+                               name="q" 
+                               placeholder="Buscar por nombre..." 
+                               value="{{ request.GET.q }}">
+                        <button type="submit" 
+                                class="btn btn-success btn-sm" 
+                                title="Buscar">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Nombre Completo</th>
+                    <th>Fecha de Nacimiento</th>
+                    <th>Edad</th>
+                    <th>Sexo</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td>{{ patient.first_name }} {{ patient.last_name }}</td>
+                    <td>{{ patient.date_of_birth|date:"d/m/Y" }}</td>
+                    <td>{{ patient.date_of_birth|timesince }}</td>
+                    <td>{{ patient.gender }}</td>
+                    <td class="text-end">
+                        <div class="d-inline-flex gap-2">
+                            <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="post" action="{% url 'patient_remove' patient.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" 
+                                        class="btn btn-sm btn-outline-danger" 
+                                        title="Eliminar" 
+                                        onclick="return confirm('¿Estás seguro de eliminar este paciente?');">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">
+                        No hay pacientes registrados
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    document.getElementById('search-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const query = document.querySelector('#search-form input[name="q"]').value;
+        
+        // Construct the full URL with query parameters
+        const url = `{% url 'patient_list' %}?q=${encodeURIComponent(query)}`;
+        
+        // Reload the patient list via AJAX
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('mainContent').innerHTML = html;
+        });
+    });
+</script>

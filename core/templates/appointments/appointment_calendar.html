@@ -1,0 +1,34 @@
+{% load static custom_tags %}
+<div class="container mt-4">
+    <h3 class="mb-4">Calendario de Citas - {{ current_month }}</h3>
+    
+    <!-- Weekday Header -->
+    <div class="row border bg-primary text-white">
+        {% for day in weekday_headers %}
+            <div class="col p-2 text-center fw-bold">{{ day }}</div>
+        {% endfor %}
+    </div>
+    
+    <!-- Calendar Grid -->
+    {% for week in month_days %}
+    <div class="row border">
+        {% for day in week %}
+            <div class="col p-2 border text-center {% if day.month != current_month_num %}bg-light{% endif %}">
+                <!-- Day Name and Number -->
+                <div class="small text-muted">{{ day|date:"D" }}</div>
+                <div class="fw-bold">{{ day.day }}</div>
+                
+                <!-- Appointments Count -->
+                {% if day.month == current_month_num %}
+                    <div class="mt-1">
+                        <span class="badge bg-primary rounded-pill">
+                            {{ appointments_dict|get_item:day.isoformat }}
+                            cita{{ appointments_dict|get_item:day.isoformat|pluralize }}
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>

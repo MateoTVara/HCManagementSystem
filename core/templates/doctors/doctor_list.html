@@ -1,0 +1,95 @@
+<!-- doctor_list.html -->
+<div class="h-100 p-4 bg-white rounded-3 shadow-sm">
+    <div class="border-bottom border-primary border-3 pb-2 mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h3 class="text-primary mb-0">
+                    <i class="bi bi-heart-pulse me-2"></i>Listado de Médicos
+                </h3>
+            </div>
+            <div class="col-md-6 mt-3 mt-md-0">
+                <form method="get" action="{% url 'doctor_list' %}" class="d-flex" id="search-form">
+                    <div class="input-group">
+                        <input type="text" 
+                               class="form-control form-control-sm" 
+                               name="q" 
+                               placeholder="Buscar por nombre o especialidad..." 
+                               value="{{ request.GET.q }}">
+                        <button type="submit" 
+                                class="btn btn-primary btn-sm" 
+                                title="Buscar">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Médico</th>
+                    <th>Especialidad</th>
+                    <th>Contacto</th>
+                    <th class="text-end">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doctor in doctors %}
+                <tr>
+                    <td>
+                        <strong>Dr(a). {{ doctor.user.get_full_name }}</strong>
+                        <div class="text-muted small">{{ doctor.user.get_role_display }}</div>
+                    </td>
+                    <td>{{ doctor.department.name }}</td>
+                    <td>
+                        <div>{{ doctor.user.email }}</div>
+                        <div class="text-muted small">Último acceso: {{ doctor.user.last_login|date:"d/m/Y"|default:"Nunca" }}</div>
+                    </td>
+                    <td class="text-end">
+                        <div class="d-inline-flex gap-2">
+                            <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="post" action="{% url 'doctor_remove' doctor.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" 
+                                        class="btn btn-sm btn-outline-danger" 
+                                        title="Eliminar" 
+                                        onclick="return confirm('¿Estás seguro de eliminar este médico?');">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">
+                        No hay médicos registrados
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+// Handle search form submission for AJAX
+document.getElementById('search-form')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const query = document.querySelector('input[name="q"]').value;
+    const url = `{% url 'doctor_list' %}?q=${encodeURIComponent(query)}`;
+    
+    fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById('mainContent').innerHTML = html;
+    });
+});
+</script>
