@@ -14,7 +14,6 @@ from django.contrib.auth.decorators import login_not_required, login_required
 
 @login_not_required
 def login_view(request):
-    # Obtener la url de redirección
     next_url = request.GET.get('next') or request.POST.get('next')  
     
     if request.method == 'POST':
@@ -24,12 +23,11 @@ def login_view(request):
         
         if user:
             login(request, user)
-            # Redirigir a la url de redirección o a la página de inicio
             return redirect(next_url if next_url else 'dashboard')
         
         return render(request, 'login.html', {
             'error': 'Credenciales inválidas',
-            'next': next_url  #Preservar la url de redirección
+            'next': next_url
         })
     
     return render(request, 'login.html', {'next': next_url})
@@ -72,9 +70,8 @@ def appointment_register(request):
 
 def appointment_list(request):
     query = request.GET.get('q', '')
-    print("Search Query:", query)  # Debugging line
-
     appointments = Appointment.objects.all()
+    
     if query:
         appointments = appointments.filter(
             Q(patient__first_name__icontains=query) | 
@@ -82,7 +79,7 @@ def appointment_list(request):
             Q(doctor__user__first_name__icontains=query) |
             Q(doctor__user__last_name__icontains=query)
         )
-    print("Appointments Found:", appointments.count())  # Debugging line
+            
     return render(request, 'appointments/appointment_list.html', {'appointments': appointments})
 
 def appointment_remove(request, pk):
@@ -97,7 +94,6 @@ def appointment_calendar(request):
     current_year = today.year
     current_month = today.month
 
-    # Get appointments count per day
     appointments = (Appointment.objects
                     .filter(date__year=current_year, date__month=current_month)
                     .values('date')
@@ -105,7 +101,6 @@ def appointment_calendar(request):
     
     appointments_dict = {appt['date'].isoformat(): appt['total'] for appt in appointments}
 
-    # Generate calendar grid
     cal = calendar.Calendar(firstweekday=6)
     month_days = cal.monthdatescalendar(current_year, current_month)
 
@@ -129,26 +124,20 @@ def patient_register(request):
     else:
         form = PatientRegister()
     
-    # Determinar la plantilla a usar basado en el tipo de solicitud
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        template = 'patients/patient_register.html'
-    else:
-        None
-    
+    template = 'patients/patient_register.html' if request.headers.get('X-Requested-With') == 'XMLHttpRequest' else None
     return render(request, template, {'form': form})
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def patient_list(request):
     query = request.GET.get('q', '')
-    print("Search Query:", query)  # Debugging line
-
     patients = Patient.objects.all()
+    
     if query:
         patients = patients.filter(
             Q(first_name__icontains=query) | 
             Q(last_name__icontains=query)
         )
-    print("Patients Found:", patients.count())  # Debugging line
+    
     return render(request, 'patients/patient_list.html', {'patients': patients})
 
 @role_required(['ADMIN', 'MANAGEMENT'])
@@ -167,7 +156,7 @@ def doctor_list(request):
         doctors = doctors.filter(
             Q(user__first_name__icontains=query) |
             Q(user__last_name__icontains=query) |
-            Q(department__name__icontains=query)
+            Q(specialty__icontains=query)  # Cambio clave aquí
         )
     
     return render(request, 'doctors/doctor_list.html', {

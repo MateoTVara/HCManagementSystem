@@ -2,8 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MinValueValidator
 
-# Create your models here.
-
 class User(AbstractUser):
     ROLE_CHOICES = [
         ('ADMIN', 'Administrador del Sistema'),
@@ -43,34 +41,30 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.get_full_name()} ({self.get_role_display()})"
 
-class Department(models.Model):
-    name = models.CharField(max_length=100, unique=True, verbose_name="Nombre del Departamento")
-    description = models.TextField(blank=True, verbose_name="Descripción")
-    
-    def __str__(self):
-        return self.name
-    
-    class Meta:
-        verbose_name = "Departamento Médico"
-        verbose_name_plural = "Departamentos Médicos"
-
 class Doctor(models.Model):
+    SPECIALTY_CHOICES = [
+        ('CARDIOLOGY', 'Cardiología'),
+        ('DERMATOLOGY', 'Dermatología'),
+        ('NEUROLOGY', 'Neurología'),
+        ('PEDIATRICS', 'Pediatría'),
+        ('OTHER', 'Otra Especialidad'),
+    ]
+    
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
         related_name='doctor_profile',
         verbose_name="Usuario asociado"
     )
-    department = models.ForeignKey(
-        Department,
-        on_delete=models.SET_NULL,
-        null=True,
-        verbose_name="Departamento"
+    specialty = models.CharField(
+        max_length=50,
+        choices=SPECIALTY_CHOICES,
+        default='OTHER',
+        verbose_name="Especialidad Médica"
     )
-    license_number = models.CharField(max_length=50, unique=True, verbose_name="Número de Licencia Médica")
     
     def __str__(self):
-        return f"Dr(a). {self.user.get_full_name()} ({self.department})"
+        return f"Dr(a). {self.user.get_full_name()} ({self.get_specialty_display()})"
     
     class Meta:
         verbose_name = "Médico"
@@ -97,6 +91,11 @@ class Patient(models.Model):
     phone = models.CharField(max_length=20, blank=True, verbose_name="Teléfono")
     address = models.TextField(blank=True, verbose_name="Dirección")
     email = models.EmailField(blank=True, verbose_name="Correo Electrónico")
+    allergies = models.TextField(
+        blank=True,
+        verbose_name="Alergias",
+        help_text="Lista de alergias del paciente, incluyendo severidad y reacciones"
+    )
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -139,6 +138,7 @@ class Appointment(models.Model):
         default='P',
         verbose_name="Estado"
     )
+    notes = models.TextField(blank=True, verbose_name="Notas posteriores a la cita")
     
     def __str__(self):
         return f"{self.patient} con {self.doctor} el {self.date} a las {self.time}"
@@ -146,7 +146,7 @@ class Appointment(models.Model):
     class Meta:
         verbose_name = "Cita"
         verbose_name_plural = "Citas"
-        ordering = ['-date', '-time']  # Most recent first
+        ordering = ['-date', '-time']
         indexes = [
             models.Index(fields=['date']),
             models.Index(fields=['time']),
@@ -159,7 +159,6 @@ class Appointment(models.Model):
                 violation_error_message="El médico ya tiene una cita programada en este horario"
             ),
         ]
-    notes = models.TextField(blank=True, verbose_name="Notas posteriores a la cita")
 
 class MedicalRecord(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name="Paciente")
@@ -216,35 +215,13 @@ class Prescription(models.Model):
     frequency = models.CharField(max_length=100, verbose_name="Frecuencia")
     duration = models.CharField(max_length=50, verbose_name="Duración del Tratamiento")
     instructions = models.TextField(blank=True, verbose_name="Instrucciones Especiales")
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='A', verbose_name="Estado")
-    
+     
     def __str__(self):
         return f"Receta de {self.medication} para {self.medical_record.patient}"
     
     class Meta:
         verbose_name = "Receta Médica"
         verbose_name_plural = "Recetas Médicas"
-
-class Allergy(models.Model):
-    SEVERITY_CHOICES = [
-        ('M', 'Leve'),
-        ('MO', 'Moderada'),
-        ('S', 'Severa'),
-    ]
-    
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name="Paciente")
-    name = models.CharField(max_length=100, verbose_name="Alergia")
-    severity = models.CharField(max_length=2, choices=SEVERITY_CHOICES, verbose_name="Severidad")
-    reaction_description = models.TextField(verbose_name="Descripción de la Reacción")
-    first_diagnosed = models.DateField(null=True, blank=True, verbose_name="Fecha del Primer Diagnóstico")
-    
-    def __str__(self):
-        return f"{self.patient} - Alergia a {self.name}"
-    
-    class Meta:
-        verbose_name = "Alergia"
-        verbose_name_plural = "Alergias"
-        unique_together = ['patient', 'name']
 
 class EmergencyContact(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name="Paciente")
@@ -260,53 +237,14 @@ class EmergencyContact(models.Model):
         verbose_name = "Contacto de Emergencia"
         verbose_name_plural = "Contactos de Emergencia"
 
-class Room(models.Model):
-    ROOM_TYPE_CHOICES = [
-        ('GEN', 'General'),
-        ('ICU', 'UCI'),
-        ('OR', 'Quirófano'),
-        ('ER', 'Sala de Emergencias'),
-    ]
-    
-    number = models.CharField(max_length=10, unique=True, verbose_name="Número de Habitación")
-    type = models.CharField(max_length=5, choices=ROOM_TYPE_CHOICES, verbose_name="Tipo de Habitación")
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, verbose_name="Departamento")
-    
-    def __str__(self):
-        return f"Habitación {self.number} ({self.get_type_display()})"
-    
-    class Meta:
-        verbose_name = "Habitación"
-        verbose_name_plural = "Habitaciones"
-
-class Bed(models.Model):
-    BED_STATUS_CHOICES = [
-        ('A', 'Disponible'),
-        ('O', 'Ocupada'),
-        ('M', 'En Mantenimiento'),
-    ]
-    
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, verbose_name="Habitación")
-    bed_number = models.CharField(max_length=10, verbose_name="Número de Cama")
-    status = models.CharField(max_length=1, choices=BED_STATUS_CHOICES, default='A', verbose_name="Estado")
-    
-    def __str__(self):
-        return f"Cama {self.bed_number} en {self.room}"
-    
-    class Meta:
-        verbose_name = "Cama"
-        verbose_name_plural = "Camas"
-        unique_together = ['room', 'bed_number']
-
 class Admission(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name="Paciente")
-    bed = models.ForeignKey(Bed, on_delete=models.CASCADE, verbose_name="Cama")
     admission_date = models.DateTimeField(verbose_name="Fecha de Ingreso")
     discharge_date = models.DateTimeField(null=True, blank=True, verbose_name="Fecha de Alta")
     reason = models.TextField(verbose_name="Motivo de Ingreso")
     
     def __str__(self):
-        return f"Ingreso de {self.patient} en {self.bed}"
+        return f"Ingreso de {self.patient} el {self.admission_date.date()}"
     
     class Meta:
         verbose_name = "Ingreso"

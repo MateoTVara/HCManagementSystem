@@ -34,6 +34,7 @@
                     <th>Fecha de Nacimiento</th>
                     <th>Edad</th>
                     <th>Sexo</th>
+                    <th>Alergias</th>
                     <th class="text-end">Acciones</th>
                 </tr>
             </thead>
@@ -43,7 +44,8 @@
                     <td>{{ patient.first_name }} {{ patient.last_name }}</td>
                     <td>{{ patient.date_of_birth|date:"d/m/Y" }}</td>
                     <td>{{ patient.date_of_birth|timesince }}</td>
-                    <td>{{ patient.gender }}</td>
+                    <td>{{ patient.get_gender_display }}</td>
+                    <td>{{ patient.allergies|truncatechars:30 }}</td>
                     <td class="text-end">
                         <div class="d-inline-flex gap-2">
                             <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
@@ -63,7 +65,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center text-muted py-4">
+                    <td colspan="6" class="text-center text-muted py-4">
                         No hay pacientes registrados
                     </td>
                 </tr>
@@ -73,14 +75,12 @@
     </div>
 </div>
 <script>
-    document.getElementById('search-form').addEventListener('submit', function(e) {
+    document.getElementById('search-form')?.addEventListener('submit', function(e) {
         e.preventDefault();
         const query = document.querySelector('#search-form input[name="q"]').value;
         
-        // Construct the full URL with query parameters
         const url = `{% url 'patient_list' %}?q=${encodeURIComponent(query)}`;
         
-        // Reload the patient list via AJAX
         fetch(url, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         })

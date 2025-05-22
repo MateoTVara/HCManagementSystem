@@ -68,7 +68,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center text-muted py-4">
+                    <td colspan="5" class="text-center text-muted py-4">  <!-- Corregido colspan de 4 a 5 -->
                         No hay citas registradas
                     </td>
                 </tr>
@@ -83,7 +83,7 @@
 document.getElementById('search-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
     const query = document.querySelector('input[name="q"]').value;
-    const url = `{% url 'doctor_list' %}?q=${encodeURIComponent(query)}`;
+    const url = `{% url 'appointment_list' %}?q=${encodeURIComponent(query)}`;  <!-- Corregido doctor_list → appointment_list -->
     
     fetch(url, {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
