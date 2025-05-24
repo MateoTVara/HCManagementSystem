@@ -132,7 +132,12 @@ def patient_register(request):
                     )
             
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return render(request, 'patients/patient_register.html', {'form': PatientRegister()})
+                # <-- Cambia aquí: pasa allergies y severity_choices
+                return render(request, 'patients/patient_register.html', {
+                    'form': PatientRegister(),
+                    'allergies': allergies,
+                    'severity_choices': PatientAllergy.SEVERITY_CHOICES
+                })
             return redirect('dashboard')
     else:
         form = PatientRegister()
