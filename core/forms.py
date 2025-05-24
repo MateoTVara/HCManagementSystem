@@ -30,10 +30,6 @@ class PatientRegister(forms.ModelForm):
                 'rows': 2,
                 'class': 'form-control'
             }),
-            'allergies': forms.Textarea(attrs={
-                'rows': 3,
-                'class': 'form-control'
-            }),
             'first_name': forms.TextInput(attrs={
                 'class': 'form-control'
             }),
@@ -45,5 +41,8 @@ class PatientRegister(forms.ModelForm):
             }),
             'email': forms.EmailInput(attrs={
                 'class': 'form-control'
+            }),
+            'allergies': forms.CheckboxSelectMultiple(attrs={
+                'class': 'form-check-input'
             }),
         }

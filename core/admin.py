@@ -4,7 +4,7 @@ from .models import (
     User, Doctor, Patient, Appointment,
     MedicalRecord, Medication,
     Prescription, EmergencyContact,
-    Admission
+    Admission, Allergy
 )
 
 class CustomUserAdmin(UserAdmin):
@@ -28,6 +28,12 @@ class DoctorAdmin(admin.ModelAdmin):
     list_display = ('user', 'specialty')
     list_filter = ('specialty',)
     search_fields = ('user__first_name', 'user__last_name')
+
+@admin.register(Allergy)
+class AllergyAdmin(admin.ModelAdmin):
+    list_display = ('name', 'severity', 'common_reactions')
+    search_fields = ('name',)
+    list_filter = ('severity',)
 
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):

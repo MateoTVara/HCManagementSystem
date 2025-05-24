@@ -70,6 +70,20 @@ class Doctor(models.Model):
         verbose_name = "Médico"
         verbose_name_plural = "Médicos"
 
+class Allergy(models.Model):
+    SEVERITY_CHOICES = [
+        ('leve', 'Leve'),
+        ('moderada', 'Moderada'),
+        ('grave', 'Grave'),
+    ]
+    
+    name = models.CharField(max_length=100, verbose_name="Nombre de la alergia")
+    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES, verbose_name="Severidad")
+    common_reactions = models.TextField(verbose_name="Reacciones comunes")
+
+    def __str__(self):
+        return f"{self.name} ({self.get_severity_display()})"
+
 class Patient(models.Model):
     BLOOD_TYPE_CHOICES = [
         ('A+', 'A+'), ('A-', 'A-'),
@@ -91,10 +105,11 @@ class Patient(models.Model):
     phone = models.CharField(max_length=20, blank=True, verbose_name="Teléfono")
     address = models.TextField(blank=True, verbose_name="Dirección")
     email = models.EmailField(blank=True, verbose_name="Correo Electrónico")
-    allergies = models.TextField(
+    allergies = models.ManyToManyField(
+        Allergy,
         blank=True,
         verbose_name="Alergias",
-        help_text="Lista de alergias del paciente, incluyendo severidad y reacciones"
+        help_text="Seleccione las alergias conocidas del paciente"
     )
     
     def __str__(self):

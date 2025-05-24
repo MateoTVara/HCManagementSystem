@@ -40,6 +40,7 @@ function attachFormHandlers() {
             });
         });
     });
+    initHandlers();
 }
 
 // CSRF Token Helper
@@ -60,6 +61,44 @@ function handleSidebar() {
         sidebar.classList.remove('sidebar-collapsed');
     }
 }
+
+// Función para manejar el buscador de alergias
+function handleAllergySearch() {
+    document.addEventListener('input', function(e) {
+        if(e.target && e.target.id === 'allergySearch') {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            const container = document.getElementById('allergyList');
+            
+            if(!container) return; // Si no existe el contenedor, salir
+            
+            const items = container.getElementsByClassName('allergy-item');
+            let visibleCount = 0;
+
+            Array.from(items).forEach(item => {
+                const label = item.querySelector('.form-check-label').textContent.toLowerCase();
+                const matches = label.includes(searchTerm);
+                item.style.display = matches ? 'block' : 'none';
+                visibleCount += matches ? 1 : 0;
+            });
+
+            const noResults = document.getElementById('noResults');
+            if(noResults) {
+                noResults.classList.toggle('d-none', visibleCount > 0);
+            }
+        }
+    });
+}
+
+function initHandlers() {
+    handleAllergySearch();
+    // Agrega aquí otras inicializaciones necesarias
+}
+
+// Inicialización al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    initHandlers();
+    handleSidebar();
+});
 
 // Initial call
 handleSidebar();
