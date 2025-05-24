@@ -114,10 +114,23 @@ def appointment_calendar(request):
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR'])
 def patient_register(request):
+    allergies = Allergy.objects.all()  # Obtener todas las alergias
+    
     if request.method == 'POST':
         form = PatientRegister(request.POST)
         if form.is_valid():
-            form.save()
+            patient = form.save()
+            
+            # Procesar alergias
+            for allergy in allergies:
+                if form.cleaned_data.get(f'allergy_{allergy.id}'):
+                    PatientAllergy.objects.create(
+                        patient=patient,
+                        allergy=allergy,
+                        severity=form.cleaned_data[f'severity_{allergy.id}'],
+                        patient_reactions=form.cleaned_data[f'reactions_{allergy.id}']
+                    )
+            
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return render(request, 'patients/patient_register.html', {'form': PatientRegister()})
             return redirect('dashboard')
@@ -125,7 +138,11 @@ def patient_register(request):
         form = PatientRegister()
     
     template = 'patients/patient_register.html' if request.headers.get('X-Requested-With') == 'XMLHttpRequest' else None
-    return render(request, template, {'form': form})
+    return render(request, template, {
+        'form': form,
+        'allergies': allergies,
+        'severity_choices': PatientAllergy.SEVERITY_CHOICES
+    })
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def patient_list(request):

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Appointment, Patient
+from .models import Appointment, Patient, PatientAllergy, Allergy
 
 class AppointmentRegister(forms.ModelForm):
     class Meta:
@@ -13,7 +13,7 @@ class AppointmentRegister(forms.ModelForm):
 class PatientRegister(forms.ModelForm):
     class Meta:
         model = Patient
-        fields = ['first_name', 'last_name', 'date_of_birth', 'gender', 'blood_type',
+        fields = ['dni', 'first_name', 'last_name', 'date_of_birth', 'gender', 'blood_type',
                   'phone', 'address', 'email', 'allergies']
         widgets = {
             'date_of_birth': forms.DateInput(attrs={
@@ -28,6 +28,9 @@ class PatientRegister(forms.ModelForm):
             }),
             'address': forms.Textarea(attrs={
                 'rows': 2,
+                'class': 'form-control'
+            }),
+            'dni': forms.TextInput(attrs={
                 'class': 'form-control'
             }),
             'first_name': forms.TextInput(attrs={
@@ -46,3 +49,22 @@ class PatientRegister(forms.ModelForm):
                 'class': 'form-check-input'
             }),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.allergies = Allergy.objects.all()
+        for allergy in self.allergies:
+            self.fields[f'allergy_{allergy.id}'] = forms.BooleanField(
+                required=False,
+                label=allergy.name
+            )
+            self.fields[f'severity_{allergy.id}'] = forms.ChoiceField(
+                choices=PatientAllergy.SEVERITY_CHOICES,
+                required=False,
+                label="Severidad"
+            )
+            self.fields[f'reactions_{allergy.id}'] = forms.CharField(
+                widget=forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+                required=False,
+                label="Reacciones"
+            )
