@@ -4,7 +4,7 @@ from .models import (
     User, Doctor, Patient, Appointment,
     MedicalRecord, Medication,
     Prescription, EmergencyContact,
-    Admission, Allergy
+    Admission, Allergy, PatientAllergy
 )
 
 class CustomUserAdmin(UserAdmin):
@@ -31,13 +31,12 @@ class DoctorAdmin(admin.ModelAdmin):
 
 @admin.register(Allergy)
 class AllergyAdmin(admin.ModelAdmin):
-    list_display = ('name', 'severity', 'common_reactions')
+    list_display = ('name', 'common_reactions')
     search_fields = ('name',)
-    list_filter = ('severity',)
 
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'date_of_birth', 'gender', 'blood_type', 'allergies_preview')
+    list_display = ('full_name', 'date_of_birth', 'gender', 'blood_type')
     list_filter = ('gender', 'blood_type')
     search_fields = ('first_name', 'last_name')
     ordering = ('last_name', 'first_name')
@@ -45,10 +44,12 @@ class PatientAdmin(admin.ModelAdmin):
     def full_name(self, obj):
         return f"{obj.last_name}, {obj.first_name}"
     full_name.short_description = 'Nombre completo'
-    
-    def allergies_preview(self, obj):
-        return obj.allergies[:50] + '...' if len(obj.allergies) > 50 else obj.allergies
-    allergies_preview.short_description = 'Alergias'
+
+@admin.register(PatientAllergy)
+class PatientAllergyAdmin(admin.ModelAdmin):
+    list_display = ('patient', 'allergy', 'severity', 'patient_reactions')
+    list_filter = ('severity',)
+    search_fields = ('patient__first_name', 'patient__last_name', 'allergy__name')
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):

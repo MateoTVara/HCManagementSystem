@@ -62,6 +62,8 @@ class Doctor(models.Model):
         default='OTHER',
         verbose_name="Especialidad Médica"
     )
+
+    dni = models.CharField(max_length=8, unique=True, verbose_name="DNI")
     
     def __str__(self):
         return f"Dr(a). {self.user.get_full_name()} ({self.get_specialty_display()})"
@@ -71,18 +73,12 @@ class Doctor(models.Model):
         verbose_name_plural = "Médicos"
 
 class Allergy(models.Model):
-    SEVERITY_CHOICES = [
-        ('leve', 'Leve'),
-        ('moderada', 'Moderada'),
-        ('grave', 'Grave'),
-    ]
-    
     name = models.CharField(max_length=100, verbose_name="Nombre de la alergia")
-    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES, verbose_name="Severidad")
     common_reactions = models.TextField(verbose_name="Reacciones comunes")
 
     def __str__(self):
-        return f"{self.name} ({self.get_severity_display()})"
+        return self.name
+
 
 class Patient(models.Model):
     BLOOD_TYPE_CHOICES = [
@@ -97,6 +93,7 @@ class Patient(models.Model):
         ('F', 'Femenino'),
     ]
 
+    dni = models.CharField(max_length=8, unique=True, verbose_name="DNI")
     first_name = models.CharField(max_length=100, verbose_name="Nombre")
     last_name = models.CharField(max_length=100, verbose_name="Apellido")
     date_of_birth = models.DateField(verbose_name="Fecha de nacimiento")
@@ -107,6 +104,7 @@ class Patient(models.Model):
     email = models.EmailField(blank=True, verbose_name="Correo Electrónico")
     allergies = models.ManyToManyField(
         Allergy,
+        through='PatientAllergy',  # Agregamos referencia a la tabla intermedia
         blank=True,
         verbose_name="Alergias",
         help_text="Seleccione las alergias conocidas del paciente"
@@ -122,6 +120,31 @@ class Patient(models.Model):
         indexes = [
             models.Index(fields=['last_name', 'first_name']),
         ]
+
+class PatientAllergy(models.Model):
+    SEVERITY_CHOICES = [
+        ('leve', 'Leve'),
+        ('moderada', 'Moderada'),
+        ('grave', 'Grave'),
+    ]
+    
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    allergy = models.ForeignKey(Allergy, on_delete=models.CASCADE)
+    severity = models.CharField(
+        max_length=10, 
+        choices=SEVERITY_CHOICES, 
+        verbose_name="Severidad"
+    )
+    patient_reactions = models.TextField(verbose_name="Reacciones del paciente")
+    date_registered = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de registro")
+
+    class Meta:
+        verbose_name = "Alergia del Paciente"
+        verbose_name_plural = "Alergias de los Pacientes"
+        unique_together = ('patient', 'allergy')  # Evita duplicados
+
+    def __str__(self):
+        return f"{self.patient} - {self.allergy} ({self.severity})"
 
 class Appointment(models.Model):
     patient = models.ForeignKey(
