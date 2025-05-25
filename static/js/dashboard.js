@@ -90,6 +90,75 @@ function handleAllergySearch() {
     });
 }
 
+// Función para crear y mostrar modal con contenido HTML
+function showModal(contentHtml) {
+  // Si ya hay modal, lo borramos para evitar duplicados
+  let existingModal = document.getElementById('ajaxModal');
+  if (existingModal) existingModal.remove();
+
+  // Crear modal Bootstrap (usando clases Bootstrap 5)
+  const modalDiv = document.createElement('div');
+  modalDiv.id = 'ajaxModal';
+  modalDiv.className = 'modal fade';
+  modalDiv.tabIndex = -1;
+  modalDiv.innerHTML = `
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body">
+          ${contentHtml}
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modalDiv);
+
+  // Inicializar modal con Bootstrap JS
+  let modal = new bootstrap.Modal(modalDiv);
+  modal.show();
+
+  // Attach handler para el submit del formulario dentro del modal
+  const form = modalDiv.querySelector('form');
+  if (form) {
+    form.id = 'addAllergyForm'; // para evitar conflictos con otros forms
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      // enviar formulario con AJAX
+      fetch(form.action, {
+        method: form.method,
+        body: new FormData(form),
+        headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken')}
+      })
+      .then(r => r.text())
+      .then(html => {
+        // Reemplaza el contenido del modal con la nueva respuesta
+        modalDiv.querySelector('.modal-body').innerHTML = html;
+        // Si quieres cerrar modal al guardar, detecta si hay formulario o mensaje de éxito
+        // Por ejemplo, si no hay formulario, cierras el modal
+        if (!modalDiv.querySelector('form')) {
+          modal.hide();
+        }
+      });
+    });
+  }
+}
+
+// Evento click para abrir modal alergia
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('#btnAddAllergy');
+  if (btn) {
+    e.preventDefault();
+    const url = btn.getAttribute('data-url');
+    fetch(url, {
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(r => r.text())
+    .then(html => {
+      showModal(html);
+    });
+  }
+});
+
+
 function initHandlers() {
     handleAllergySearch();
     // Agrega aquí otras inicializaciones necesarias

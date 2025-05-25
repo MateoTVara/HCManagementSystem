@@ -10,6 +10,11 @@ class AppointmentRegister(forms.ModelForm):
             'time': forms.TimeInput(attrs={'type': 'time'}),
         }
 
+class AllergyRegister(forms.ModelForm):
+    class Meta:
+        model = Allergy
+        fields = ['name', 'common_reactions']
+
 class PatientRegister(forms.ModelForm):
     class Meta:
         model = Patient

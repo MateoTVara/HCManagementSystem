@@ -192,3 +192,20 @@ def doctor_remove(request, pk):
         doctor = Doctor.objects.get(pk=pk)
         doctor.delete()
     return redirect('doctor_list')
+
+def allergy_register(request):
+    if request.method == 'POST':
+        form = AllergyRegister(request.POST)
+        if form.is_valid():
+            form.save()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return render(request, 'allergies/allergy_register.html', {'form': AllergyRegister()})
+            return redirect('dashboard')
+        else:
+            pass
+    else:
+        form = AllergyRegister()
+
+    template = 'allergies/allergy_register.html' if request.headers.get('X-Requested-With') == 'XMLHttpRequest' else None
+    
+    return render(request, template, {'form': form})
