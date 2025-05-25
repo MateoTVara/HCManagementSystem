@@ -21,10 +21,11 @@ document.querySelectorAll('[data-ajax]').forEach(link => {
 // Modified form handler (replace your existing attachFormHandlers)
 function attachFormHandlers() {
     document.querySelectorAll('form').forEach(form => {
+        // Ignora el formulario del modal de alergia
+        if (form.id === 'addAllergyForm') return;
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             const isSearch = form.method.toLowerCase() === 'get';
-            
             fetch(isSearch ? `${form.action}?${new URLSearchParams(new FormData(form))}` : form.action, {
                 method: form.method,
                 body: isSearch ? null : new FormData(form),

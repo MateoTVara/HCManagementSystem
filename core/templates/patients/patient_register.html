@@ -57,12 +57,16 @@
             <div class="col-12">
                 <label class="form-label">Alergias</label>
                 
-                <!-- Buscador -->
-                <div class="mb-3">
+                <!-- Buscador y botón para nueva alergia -->
+                <div class="mb-3 d-flex align-items-center gap-2">
                     <input type="text" 
-                        class="form-control" 
+                        class="form-control"
                         placeholder="Buscar alergias..." 
-                        id="allergySearch">
+                        id="allergySearch"
+                        style="max-width: 300px;">
+                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addAllergyModal">
+                        <i class="bi bi-plus-circle"></i> Nueva Alergia
+                    </button>
                 </div>
 
                 <!-- Contenedor de checkboxes -->
@@ -127,6 +131,34 @@
 </div>
 
 
+<!-- Modal para agregar alergia -->
+<div class="modal fade" id="addAllergyModal" tabindex="-1" aria-labelledby="addAllergyModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="addAllergyForm" class="modal-content" method="post" action="javascript:void(0);">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addAllergyModalLabel">Registrar Nueva Alergia</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="newAllergyName" class="form-label">Nombre de la alergia</label>
+          <input type="text" class="form-control" id="newAllergyName" name="name" required>
+        </div>
+        <div class="mb-3">
+          <label for="newAllergyReactions" class="form-label">Reacciones comunes</label>
+          <textarea class="form-control" id="newAllergyReactions" name="common_reactions" rows="2"></textarea>
+        </div>
+        <div id="addAllergyError" class="text-danger small"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success">Registrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('allergySearch');
@@ -146,6 +178,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
         noResults.classList.toggle('d-none', visibleItems > 0);
     });
+
+    // Handler para el formulario del modal de alergia
+    const addAllergyForm = document.getElementById('addAllergyForm');
+    if (addAllergyForm) {
+        addAllergyForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const name = document.getElementById('newAllergyName').value.trim();
+            const common_reactions = document.getElementById('newAllergyReactions').value.trim();
+            const errorDiv = document.getElementById('addAllergyError');
+            errorDiv.textContent = '';
+
+            fetch('/ruta/a/tu/vista/ajax/', { // <-- Cambia esto por la URL real de tu vista AJAX
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ name, common_reactions })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Cierra el modal correctamente
+                    const modalEl = document.getElementById('addAllergyModal');
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.hide();
+                    // Limpia el overlay si queda
+                    document.body.classList.remove('modal-open');
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    addAllergyForm.reset();
+                    // Aquí puedes agregar la nueva alergia al DOM si quieres
+                } else {
+                    errorDiv.textContent = data.error || 'Error al registrar la alergia.';
+                }
+            })
+            .catch(() => {
+                errorDiv.textContent = 'Error de red.';
+            });
+        });
+    }
 });
 </script>
 
