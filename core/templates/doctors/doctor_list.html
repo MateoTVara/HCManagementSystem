@@ -43,7 +43,7 @@
                         <strong>Dr(a). {{ doctor.user.get_full_name }}</strong>
                         <div class="text-muted small">{{ doctor.user.get_role_display }}</div>
                     </td>
-                    <td>{{ doctor.get_specialty_display }}</td> <!-- Cambio clave aquí -->
+                    <td>{{ doctor.get_specialty_display }}</td>
                     <td>
                         <div>{{ doctor.user.email }}</div>
                         <div class="text-muted small">Último acceso: {{ doctor.user.last_login|date:"d/m/Y"|default:"Nunca" }}</div>
@@ -78,7 +78,6 @@
 </div>
 
 <script>
-// Handle search form submission for AJAX
 document.getElementById('search-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
     const query = document.querySelector('input[name="q"]').value;

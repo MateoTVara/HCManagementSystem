@@ -152,7 +152,6 @@ document.addEventListener('DOMContentLoaded', function() {
         noResults.classList.toggle('d-none', visibleItems > 0);
     });
 
-    // Handler para el formulario del modal de alergia
     const addAllergyForm = document.getElementById('addAllergyForm');
     if (addAllergyForm) {
         addAllergyForm.addEventListener('submit', function(e) {
@@ -164,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const errorDiv = document.getElementById('addAllergyError');
             errorDiv.textContent = '';
 
-            fetch('/ruta/a/tu/vista/ajax/', { // <-- Cambia esto por la URL real de tu vista AJAX
+            fetch('/ruta/a/tu/vista/ajax/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -1,5 +1,5 @@
 from functools import wraps
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from core.models import *
 from .forms import *
 from django.db.models import Q, Count
@@ -114,14 +114,13 @@ def appointment_calendar(request):
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR'])
 def patient_register(request):
-    allergies = Allergy.objects.all()  # Obtener todas las alergias
+    allergies = Allergy.objects.all()
     
     if request.method == 'POST':
         form = PatientRegister(request.POST)
         if form.is_valid():
             patient = form.save()
             
-            # Procesar alergias
             for allergy in allergies:
                 if form.cleaned_data.get(f'allergy_{allergy.id}'):
                     PatientAllergy.objects.create(
@@ -132,7 +131,6 @@ def patient_register(request):
                     )
             
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                # <-- Cambia aquí: pasa allergies y severity_choices
                 return render(request, 'patients/patient_register.html', {
                     'form': PatientRegister(),
                     'allergies': allergies,
@@ -194,18 +192,37 @@ def doctor_remove(request, pk):
     return redirect('doctor_list')
 
 def allergy_register(request):
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = AllergyRegister(request.POST)
+        if form.is_valid():
+            allergy = form.save()
+            data = {
+                'success': True,
+                'allergy': {
+                    'id': allergy.id,
+                    'name': allergy.name,
+                }
+            }
+            return JsonResponse(data)
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+    # caso normal (no AJAX)
     if request.method == 'POST':
         form = AllergyRegister(request.POST)
         if form.is_valid():
             form.save()
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return render(request, 'allergies/allergy_register.html', {'form': AllergyRegister()})
             return redirect('dashboard')
-        else:
-            pass
     else:
         form = AllergyRegister()
 
-    template = 'allergies/allergy_register.html' if request.headers.get('X-Requested-With') == 'XMLHttpRequest' else None
-    
-    return render(request, template, {'form': form})
+    return render(request, 'allergies/allergy_register.html', {'form': form})
+
+
+def allergy_list_partial(request):
+    allergies = Allergy.objects.all()
+    severity_choices = PatientAllergy.SEVERITY_CHOICES
+    return render(request, 'allergies/partials/allergy_list.html', {
+        'allergies': allergies,
+        'severity_choices': severity_choices
+    })

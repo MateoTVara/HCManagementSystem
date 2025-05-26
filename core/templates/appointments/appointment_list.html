@@ -68,7 +68,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">  <!-- Corregido colspan de 4 a 5 -->
+                    <td colspan="5" class="text-center text-muted py-4">
                         No hay citas registradas
                     </td>
                 </tr>
@@ -79,7 +79,6 @@
 </div>
 
 <script>
-// Handle search form submission for AJAX
 document.getElementById('search-form')?.addEventListener('submit', function(e) {
     e.preventDefault();
     const query = document.querySelector('input[name="q"]').value;

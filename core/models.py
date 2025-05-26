@@ -104,7 +104,7 @@ class Patient(models.Model):
     email = models.EmailField(blank=True, verbose_name="Correo Electrónico")
     allergies = models.ManyToManyField(
         Allergy,
-        through='PatientAllergy',  # Agregamos referencia a la tabla intermedia
+        through='PatientAllergy',
         blank=True,
         verbose_name="Alergias",
         help_text="Seleccione las alergias conocidas del paciente"
@@ -141,7 +141,7 @@ class PatientAllergy(models.Model):
     class Meta:
         verbose_name = "Alergia del Paciente"
         verbose_name_plural = "Alergias de los Pacientes"
-        unique_together = ('patient', 'allergy')  # Evita duplicados
+        unique_together = ('patient', 'allergy')
 
     def __str__(self):
         return f"{self.patient} - {self.allergy} ({self.severity})"

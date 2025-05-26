@@ -76,7 +76,6 @@ class PatientRegister(forms.ModelForm):
     
     def save(self, commit=True):
         patient = super().save(commit)
-        # Procesar alergias incluyendo las nuevas
         for allergy in Allergy.objects.all():
             if self.cleaned_data.get(f'allergy_{allergy.id}'):
                 PatientAllergy.objects.update_or_create(
