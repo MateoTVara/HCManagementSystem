@@ -8,15 +8,31 @@
     <form method="post" action="{% url 'appointment_register' %}">
         {% csrf_token %}
         <div class="row g-3">
-            {% for field in form %}
+            <!-- Primera Fila -->
             <div class="col-md-6">
-                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                <small class="form-text text-muted d-block mt-1">{{ field.help_text }}</small>
-                {% endif %}
+                <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.patient.label }}</label>
+                {{ form.patient }}
             </div>
-            {% endfor %}
+            <div class="col-md-6">
+                <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.doctor.label }}</label>
+                {{ form.doctor }}
+            </div>
+
+            <!-- Segunda Fila -->
+            <div class="col-md-6">
+                <label for="{{ form.date.id_for_label }}" class="form-label">{{ form.date.label }}</label>
+                {{ form.date }}
+            </div>
+            <div class="col-md-6">
+                <label for="{{ form.time.id_for_label }}" class="form-label">{{ form.time.label }}</label>
+                {{ form.time }}
+            </div>
+
+            <!-- Tercera Fila -->
+            <div class="col-md-6">
+                <label for="{{ form.reason.id_for_label }}" class="form-label">{{ form.reason.label }}</label>
+                {{ form.reason }}
+            </div>
         </div>
         <div class="mt-4">
             <button type="submit" class="btn btn-primary px-5">

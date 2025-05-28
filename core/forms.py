@@ -6,8 +6,24 @@ class AppointmentRegister(forms.ModelForm):
         model = Appointment
         fields = ['patient', 'doctor', 'date', 'time', 'reason']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-            'time': forms.TimeInput(attrs={'type': 'time'}),
+            'date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control'
+            }),
+            'time': forms.TimeInput(attrs={
+                'type': 'time',
+                'class': 'form-control'
+            }),
+            'patient': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'doctor': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'reason': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'form-control'
+            }),
         }
 
 class AllergyRegister(forms.ModelForm):

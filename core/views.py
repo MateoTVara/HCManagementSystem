@@ -155,7 +155,8 @@ def patient_list(request):
     if query:
         patients = patients.filter(
             Q(first_name__icontains=query) | 
-            Q(last_name__icontains=query)
+            Q(last_name__icontains=query) |
+            Q(dni__icontains=query)
         )
     
     return render(request, 'patients/patient_list.html', {'patients': patients})
