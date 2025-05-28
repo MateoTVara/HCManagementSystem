@@ -45,7 +45,6 @@
                     <td>{{ patient.date_of_birth|date:"d/m/Y" }}</td>
                     <td>{{ patient.date_of_birth|timesince }}</td>
                     <td>{{ patient.get_gender_display }}</td>
-                    <td>{{ patient.allergies|truncatechars:30 }}</td>
                     <td class="text-end">
                         <div class="d-inline-flex gap-2">
                             <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
