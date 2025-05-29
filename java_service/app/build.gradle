@@ -6,8 +6,11 @@
  */
 
 plugins {
+    id 'java'
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+    id 'org.springframework.boot' version '3.2.12'
+    id 'io.spring.dependency-management' version '1.1.4'
 }
 
 repositories {
@@ -16,9 +19,20 @@ repositories {
 }
 
 dependencies {
-    // Use JUnit Jupiter for testing.
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    
+    // Apache POI (Excel)
+    implementation 'org.apache.poi:poi:5.2.3'
+    implementation 'org.apache.poi:poi-ooxml:5.2.3'
+    
+    // PostgreSQL
+    runtimeOnly 'org.postgresql:postgresql'
+    
+    // Pruebas
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation libs.junit.jupiter
-
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // This dependency is used by the application.
@@ -34,7 +48,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = 'org.example.App'
+    mainClass = 'com.hcmanagement.ReportApplication'
 }
 
 tasks.named('test') {

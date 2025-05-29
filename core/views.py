@@ -9,6 +9,8 @@ from django.views.generic import View
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_not_required, login_required
+import requests
+from django.http import HttpResponse
 
 # Create your views here.
 
@@ -227,3 +229,20 @@ def allergy_list_partial(request):
         'allergies': allergies,
         'severity_choices': severity_choices
     })
+
+def export_patients_excel(request):
+    patients = Patient.objects.values('dni', 'first_name', 'last_name', 'date_of_birth')
+    data = []
+    for p in patients:
+        p = dict(p)
+        # Convierte date_of_birth a string en formato ISO (YYYY-MM-DD)
+        if p['date_of_birth']:
+            p['date_of_birth'] = p['date_of_birth'].isoformat()
+        data.append(p)
+    java_service_url = 'http://localhost:8080/generate/excel'
+    response = requests.post(java_service_url, json=data)
+    if response.status_code == 200:
+        resp = HttpResponse(response.content, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        resp['Content-Disposition'] = 'attachment; filename="pacientes.xlsx"'
+        return resp
+    return HttpResponse("Error generando el archivo", status=500)
