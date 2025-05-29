@@ -242,6 +242,11 @@ def appointment_edit(request, pk):
         else:
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
+    # AJAX GET: solo el formulario para el modal
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = AppointmentEdit(instance=appointment)
+        return render(request, 'appointments/appointment_edit.html', {'form': form, 'appointment': appointment})
+
     # caso normal (no AJAX)
     if request.method == 'POST':
         form = AppointmentEdit(request.POST, instance=appointment)
