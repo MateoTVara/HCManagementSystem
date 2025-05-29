@@ -169,6 +169,7 @@ function attachEditAppointmentFormHandler() {
             .then(r => r.text())
             .then(html => {
               document.getElementById('mainContent').innerHTML = html;
+              attachFormHandlers();
             });
         } else {
           // Muestra errores
