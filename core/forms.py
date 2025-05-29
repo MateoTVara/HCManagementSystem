@@ -26,6 +26,34 @@ class AppointmentRegister(forms.ModelForm):
             }),
         }
 
+class AppointmentEdit(forms.ModelForm):
+    class Meta:
+        model = Appointment
+        fields = ['patient', 'doctor', 'date', 'time', 'reason', 'status']
+        widgets = {
+            'date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control'
+            }),
+            'time': forms.TimeInput(attrs={
+                'type': 'time',
+                'class': 'form-control'
+            }),
+            'patient': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'doctor': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'reason': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'form-control'
+            }),
+            'status': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+        }
+
 class AllergyRegister(forms.ModelForm):
     class Meta:
         model = Allergy

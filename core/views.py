@@ -219,6 +219,40 @@ def allergy_register(request):
 
     return render(request, 'allergies/allergy_register.html', {'form': form})
 
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
+def appointment_edit(request, pk):
+    appointment = Appointment.objects.get(pk=pk)
+
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = AppointmentEdit(request.POST, instance=appointment)
+        if form.is_valid():
+            appointment = form.save()
+            data = {
+                'success': True,
+                'appointment': {
+                    'id': appointment.id,
+                    'date': appointment.date,
+                    'time': appointment.time,
+                    'patient': str(appointment.patient),
+                    'doctor': str(appointment.doctor),
+                    'status': appointment.status,
+                }
+            }
+            return JsonResponse(data)
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+    # caso normal (no AJAX)
+    if request.method == 'POST':
+        form = AppointmentEdit(request.POST, instance=appointment)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = AppointmentEdit(instance=appointment)
+
+    return render(request, 'appointments/appointment_edit.html', {'form': form, 'appointment': appointment})
+    
 
 def allergy_list_partial(request):
     allergies = Allergy.objects.all()

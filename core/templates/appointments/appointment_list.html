@@ -51,9 +51,9 @@
                     <td> {{ appointment.get_status_display }} </td>
                     <td class="text-end">
                         <div class="d-inline-flex gap-2">
-                            <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                            <button id="btnEditAppointment" type="button" class="btn btn-outline-success" data-url="{% url 'appointment_edit' %}">
                                 <i class="bi bi-pencil"></i>
-                            </a>
+                            </button>
                             <form method="post" action="{% url 'appointment_remove' appointment.id %}" class="d-inline">
                                 {% csrf_token %}
                                 <button type="submit" 
