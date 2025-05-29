@@ -165,7 +165,7 @@ function attachEditAppointmentFormHandler() {
           document.body.classList.remove('modal-open');
           document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
           // Recarga la lista de citas (puedes refinar esto según tu UX)
-          fetch(window.location.href, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+          fetch('/appointment/list/', {headers: {'X-Requested-With': 'XMLHttpRequest'}})
             .then(r => r.text())
             .then(html => {
               document.getElementById('mainContent').innerHTML = html;
