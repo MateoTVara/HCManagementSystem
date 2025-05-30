@@ -172,40 +172,42 @@ class PatientEdit(forms.ModelForm):
             }),
         }
 
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.allergies = Allergy.objects.all()
-            for allergy in self.allergies:
-                self.fields[f'allergy_{allergy.id}'] = forms.BooleanField(
-                    required=False,
-                    label=allergy.name,
-                    initial=self.instance.allergies.filter(allergy=allergy).exists() if self.instance else False
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.allergies = Allergy.objects.all()
+        for allergy in self.allergies:
+            self.fields[f'allergy_{allergy.id}'] = forms.BooleanField(
+                required=False,
+                label=allergy.name,
+                initial=self.instance.allergies.filter(id=allergy.id).exists() if self.instance.pk else False
+            )
+            self.fields[f'severity_{allergy.id}'] = forms.ChoiceField(
+                choices=PatientAllergy.SEVERITY_CHOICES,
+                required=False,
+                label="Severidad",
+                initial=PatientAllergy.objects.filter(patient=self.instance, allergy=allergy).first().severity if self.instance.pk and PatientAllergy.objects.filter(patient=self.instance, allergy=allergy).exists() else ''
+            )
+            self.fields[f'reactions_{allergy.id}'] = forms.CharField(
+                widget=forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+                required=False,
+                label="Reacciones",
+                initial=PatientAllergy.objects.filter(patient=self.instance, allergy=allergy).first().patient_reactions if self.instance.pk and PatientAllergy.objects.filter(patient=self.instance, allergy=allergy).exists() else ''
+            )
+
+    def save(self, commit=True):
+        patient = super().save(commit)
+        selected_allergy_ids = []
+        for allergy in Allergy.objects.all():
+            if self.cleaned_data.get(f'allergy_{allergy.id}'):
+                selected_allergy_ids.append(allergy.id)
+                PatientAllergy.objects.update_or_create(
+                    patient=patient,
+                    allergy=allergy,
+                    defaults={
+                        'severity': self.cleaned_data.get(f'severity_{allergy.id}', ''),
+                        'patient_reactions': self.cleaned_data.get(f'reactions_{allergy.id}', '')
+                    }
                 )
-                self.fields[f'severity_{allergy.id}'] = forms.ChoiceField(
-                    choices=PatientAllergy.SEVERITY_CHOICES,
-                    required=False,
-                    label="Severidad",
-                    initial=PatientAllergy.objects.filter(patient=self.instance, allergy=allergy).first().severity if self.instance.pk and PatientAllergy.objects.filter(patient=self.instance, allergy=allergy).exists() else ''
-                )
-                self.fields[f'reactions_{allergy.id}'] = forms.CharField(
-                    widget=forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
-                    required=False,
-                    label="Reacciones",
-                    initial=PatientAllergy.objects.filter(patient=self.instance, allergy=allergy).first().patient_reactions if self.instance.pk and PatientAllergy.objects.filter(patient=self.instance, allergy=allergy).exists() else ''
-                )
-                
-        def save(self, commit=True):
-            patient = super().save(commit)
-            # Borra las relaciones antiguas
-            PatientAllergy.objects.filter(patient=patient).delete()
-            for allergy in Allergy.objects.all():
-                if self.cleaned_data.get(f'allergy_{allergy.id}'):
-                    PatientAllergy.objects.update_or_create(
-                        patient=patient,
-                        allergy=allergy,
-                        defaults={
-                            'severity': self.cleaned_data[f'severity_{allergy.id}'],
-                            'patient_reactions': self.cleaned_data[f'reactions_{allergy.id}']
-                        }
-                    )
-            return patient
+        # Elimina solo las relaciones que ya no están seleccionadas
+        PatientAllergy.objects.filter(patient=patient).exclude(allergy_id__in=selected_allergy_ids).delete()
+        return patient
