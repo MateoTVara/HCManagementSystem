@@ -162,11 +162,13 @@ def patient_register(request):
             
             for allergy in allergies:
                 if form.cleaned_data.get(f'allergy_{allergy.id}'):
-                    PatientAllergy.objects.create(
+                    PatientAllergy.objects.update_or_create(
                         patient=patient,
                         allergy=allergy,
-                        severity=form.cleaned_data[f'severity_{allergy.id}'],
-                        patient_reactions=form.cleaned_data[f'reactions_{allergy.id}']
+                        defaults={
+                            'severity': form.cleaned_data[f'severity_{allergy.id}'],
+                            'patient_reactions': form.cleaned_data[f'reactions_{allergy.id}']
+                        }
                     )
             
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
