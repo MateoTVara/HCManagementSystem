@@ -94,7 +94,7 @@ document.addEventListener('click', function(e) {
     })
     .then(r => r.text())
     .then(html => {
-      showModal(html);
+      showAllergyModal(html);
     });
   }
 
@@ -172,9 +172,17 @@ function showModal(contentHtml) {
       .then(data => {
         if (data.success) {
           modal.hide();
-          document.body.classList.remove('modal-open');
-          document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-          refreshAllergyList();
+          // Espera a que el modal hijo termine de ocultarse antes de limpiar
+          modalDiv.addEventListener('hidden.bs.modal', function handler() {
+            modalDiv.remove();
+            // Solo elimina overlays si ya no hay más modales abiertos
+            if (!document.querySelector('.modal.show')) {
+              document.body.classList.remove('modal-open');
+              document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            }
+            refreshAllergyList();
+            modalDiv.removeEventListener('hidden.bs.modal', handler);
+          });
         } else {
           const errHtml = Object.values(data.errors).flat().join('<br>');
           modalDiv.querySelector('.modal-body').insertAdjacentHTML('afterbegin',
@@ -273,6 +281,73 @@ function refreshAllergyList() {
     initHandlers();
   })
   .catch(() => console.error('No se pudo recargar lista de alergias'));
+}
+
+function showAllergyModal(contentHtml) {
+  let existingModal = document.getElementById('ajaxModalAllergy');
+  if (existingModal) existingModal.remove();
+
+  const modalDiv = document.createElement('div');
+  modalDiv.id = 'ajaxModalAllergy';
+  modalDiv.className = 'modal fade';
+  modalDiv.tabIndex = -1;
+  modalDiv.innerHTML = `
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        ${contentHtml}
+      </div>
+    </div>
+  </div>
+ `;
+  document.body.appendChild(modalDiv);
+
+  let modal = new bootstrap.Modal(modalDiv);
+  modal.show();
+
+  const form = modalDiv.querySelector('form');
+  if (form) {
+    form.id = 'addAllergyForm';
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCookie('csrftoken')
+        }
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          modal.hide();
+          modalDiv.addEventListener('hidden.bs.modal', function handler() {
+            modalDiv.remove();
+            // Re-muestra el modal padre si existe
+            const parentModal = document.getElementById('ajaxModal');
+            if (parentModal) {
+              // Bootstrap 5: vuelve a mostrar el modal padre
+              bootstrap.Modal.getOrCreateInstance(parentModal).show();
+            }
+            refreshAllergyList();
+            modalDiv.removeEventListener('hidden.bs.modal', handler);
+          });
+        } else {
+          const errHtml = Object.values(data.errors).flat().join('<br>');
+          modalDiv.querySelector('.modal-body').insertAdjacentHTML('afterbegin',
+            `<div class="alert alert-danger">${errHtml}</div>`);
+        }
+      })
+      .catch(() => {
+        console.error('Error de red al guardar alergia');
+      });
+    });
+  }
 }
 
 function initHandlers() {
