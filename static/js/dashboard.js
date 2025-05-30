@@ -112,6 +112,20 @@ document.addEventListener('click', function(e) {
       attachEditAppointmentFormHandler();
     });
   }
+
+  const btnEditPatient = e.target.closest('.btnEditPatient');
+  if (btnEditPatient) {
+    e.preventDefault();
+    const url = btnEditPatient.getAttribute('data-url');
+    fetch(url, {
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    })
+    .then(r => r.text())
+    .then(html => {
+      showModal(html, 'Editar Paciente');
+      attachEditPatientFormHandler();
+    });
+  }
 });
 
 // Función para mostrar el modal, acepta título opcional
@@ -173,6 +187,42 @@ function attachEditAppointmentFormHandler() {
             });
         } else {
           // Muestra errores
+          const errHtml = Object.values(data.errors).flat().join('<br>');
+          modalDiv.querySelector('.modal-body').insertAdjacentHTML('afterbegin',
+            `<div class="alert alert-danger">${errHtml}</div>`);
+        }
+      });
+    });
+  }
+}
+
+function attachEditPatientFormHandler() {
+  const modalDiv = document.getElementById('ajaxModal');
+  const form = modalDiv?.querySelector('form');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCookie('csrftoken')
+        }
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          bootstrap.Modal.getOrCreateInstance(modalDiv).hide();
+          document.body.classList.remove('modal-open');
+          document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+          fetch('/patients/list/', {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+            .then(r => r.text())
+            .then(html => {
+              document.getElementById('mainContent').innerHTML = html;
+              attachFormHandlers();
+            });
+        } else {
           const errHtml = Object.values(data.errors).flat().join('<br>');
           modalDiv.querySelector('.modal-body').insertAdjacentHTML('afterbegin',
             `<div class="alert alert-danger">${errHtml}</div>`);

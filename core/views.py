@@ -89,6 +89,45 @@ def appointment_remove(request, pk):
     return redirect('appointment_list')
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
+def appointment_edit(request, pk):
+    appointment = Appointment.objects.get(pk=pk)
+
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = AppointmentEdit(request.POST, instance=appointment)
+        if form.is_valid():
+            appointment = form.save()
+            data = {
+                'success': True,
+                'appointment': {
+                    'id': appointment.id,
+                    'date': appointment.date,
+                    'time': appointment.time,
+                    'patient': str(appointment.patient),
+                    'doctor': str(appointment.doctor),
+                    'status': appointment.status,
+                }
+            }
+            return JsonResponse(data)
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+    # AJAX GET: solo el formulario para el modal
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = AppointmentEdit(instance=appointment)
+        return render(request, 'appointments/appointment_edit.html', {'form': form, 'appointment': appointment})
+
+    # caso normal (no AJAX)
+    if request.method == 'POST':
+        form = AppointmentEdit(request.POST, instance=appointment)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = AppointmentEdit(instance=appointment)
+
+    return render(request, 'appointments/appointment_edit.html', {'form': form, 'appointment': appointment})
+
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_calendar(request):
     today = date.today()
     current_year = today.year
@@ -168,6 +207,70 @@ def patient_remove(request, pk):
         patient.delete()
     return redirect('patient_list')
 
+
+def patient_edit(request, pk):
+    patient = Patient.objects.get(pk=pk)
+    allergies = Allergy.objects.all()
+    severity_choices = PatientAllergy.SEVERITY_CHOICES
+    # IDs de alergias del paciente
+    patient_allergy_ids = list(patient.allergies.values_list('id', flat=True))
+    # Diccionarios para severidad y reacciones
+    allergy_severity = {pa.allergy_id: pa.severity for pa in PatientAllergy.objects.filter(patient=patient)}
+    allergy_reactions = {pa.allergy_id: pa.patient_reactions for pa in PatientAllergy.objects.filter(patient=patient)}
+
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = PatientEdit(request.POST, instance=patient)
+        if form.is_valid():
+            patient = form.save()
+            data = {
+                'success': True,
+                'patient': {
+                    'id': patient.id,
+                    'dni': patient.dni,
+                    'first_name': patient.first_name,
+                    'last_name': patient.last_name,
+                    'date_of_birth': patient.date_of_birth.isoformat(),
+                    'gender': patient.gender,
+                    'blood_type': patient.blood_type,
+                    'phone': patient.phone,
+                    'address': patient.address,
+                    'email': patient.email,
+                }
+            }
+            return JsonResponse(data)
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = PatientEdit(instance=patient)
+        return render(request, 'patients/patient_edit.html', {
+            'form': form,
+            'patient': patient,
+            'allergies': allergies,
+            'severity_choices': severity_choices,
+            'patient_allergy_ids': patient_allergy_ids,
+            'allergy_severity': allergy_severity,
+            'allergy_reactions': allergy_reactions,
+        })
+
+    if request.method == 'POST':
+        form = PatientEdit(request.POST, instance=patient)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = PatientEdit(instance=patient)
+
+    return render(request, 'patients/patient_edit.html', {
+        'form': form,
+        'patient': patient,
+        'allergies': allergies,
+        'severity_choices': severity_choices,
+        'patient_allergy_ids': patient_allergy_ids,
+        'allergy_severity': allergy_severity,
+        'allergy_reactions': allergy_reactions,
+    })
+
 @role_required(['ADMIN', 'MANAGEMENT','ATTENDANT'])
 def doctor_list(request):
     query = request.GET.get('q', '')
@@ -219,45 +322,6 @@ def allergy_register(request):
 
     return render(request, 'allergies/allergy_register.html', {'form': form})
 
-@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
-def appointment_edit(request, pk):
-    appointment = Appointment.objects.get(pk=pk)
-
-    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        form = AppointmentEdit(request.POST, instance=appointment)
-        if form.is_valid():
-            appointment = form.save()
-            data = {
-                'success': True,
-                'appointment': {
-                    'id': appointment.id,
-                    'date': appointment.date,
-                    'time': appointment.time,
-                    'patient': str(appointment.patient),
-                    'doctor': str(appointment.doctor),
-                    'status': appointment.status,
-                }
-            }
-            return JsonResponse(data)
-        else:
-            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
-
-    # AJAX GET: solo el formulario para el modal
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        form = AppointmentEdit(instance=appointment)
-        return render(request, 'appointments/appointment_edit.html', {'form': form, 'appointment': appointment})
-
-    # caso normal (no AJAX)
-    if request.method == 'POST':
-        form = AppointmentEdit(request.POST, instance=appointment)
-        if form.is_valid():
-            form.save()
-            return redirect('dashboard')
-    else:
-        form = AppointmentEdit(instance=appointment)
-
-    return render(request, 'appointments/appointment_edit.html', {'form': form, 'appointment': appointment})
-    
 
 def allergy_list_partial(request):
     allergies = Allergy.objects.all()

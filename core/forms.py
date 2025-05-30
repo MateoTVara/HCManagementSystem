@@ -131,3 +131,81 @@ class PatientRegister(forms.ModelForm):
                     }
                 )
         return patient
+    
+class PatientEdit(forms.ModelForm):
+    class Meta:
+        model = Patient
+        fields = ['dni', 'first_name', 'last_name', 'date_of_birth', 'gender'
+                  , 'blood_type', 'phone', 'address', 'email', 'allergies']
+        widgets = {
+            'dni' : forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'first_name': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'last_name': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'date_of_birth': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control'
+            }),
+            'gender': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'blood_type': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'phone': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'address': forms.Textarea(attrs={
+                'rows': 2,
+                'class': 'form-control'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control'
+            }),
+            'allergies': forms.CheckboxSelectMultiple(attrs={
+                'class': 'form-check-input'
+            }),
+        }
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.allergies = Allergy.objects.all()
+            for allergy in self.allergies:
+                self.fields[f'allergy_{allergy.id}'] = forms.BooleanField(
+                    required=False,
+                    label=allergy.name,
+                    initial=self.instance.allergies.filter(allergy=allergy).exists() if self.instance else False
+                )
+                self.fields[f'severity_{allergy.id}'] = forms.ChoiceField(
+                    choices=PatientAllergy.SEVERITY_CHOICES,
+                    required=False,
+                    label="Severidad",
+                    initial=PatientAllergy.objects.filter(patient=self.instance, allergy=allergy).first().severity if self.instance.pk and PatientAllergy.objects.filter(patient=self.instance, allergy=allergy).exists() else ''
+                )
+                self.fields[f'reactions_{allergy.id}'] = forms.CharField(
+                    widget=forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
+                    required=False,
+                    label="Reacciones",
+                    initial=PatientAllergy.objects.filter(patient=self.instance, allergy=allergy).first().patient_reactions if self.instance.pk and PatientAllergy.objects.filter(patient=self.instance, allergy=allergy).exists() else ''
+                )
+                
+        def save(self, commit=True):
+            patient = super().save(commit)
+            # Borra las relaciones antiguas
+            PatientAllergy.objects.filter(patient=patient).delete()
+            for allergy in Allergy.objects.all():
+                if self.cleaned_data.get(f'allergy_{allergy.id}'):
+                    PatientAllergy.objects.update_or_create(
+                        patient=patient,
+                        allergy=allergy,
+                        defaults={
+                            'severity': self.cleaned_data[f'severity_{allergy.id}'],
+                            'patient_reactions': self.cleaned_data[f'reactions_{allergy.id}']
+                        }
+                    )
+            return patient
