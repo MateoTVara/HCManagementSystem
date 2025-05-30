@@ -129,7 +129,7 @@ document.addEventListener('click', function(e) {
 });
 
 // Función para mostrar el modal, acepta título opcional
-function showModal(contentHtml, title = 'Nueva Alergía') {
+function showModal(contentHtml) {
   let existingModal = document.getElementById('ajaxModal');
   if (existingModal) existingModal.remove();
 
@@ -141,7 +141,6 @@ function showModal(contentHtml, title = 'Nueva Alergía') {
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">${title}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
@@ -154,9 +153,41 @@ function showModal(contentHtml, title = 'Nueva Alergía') {
 
   let modal = new bootstrap.Modal(modalDiv);
   modal.show();
+
+  const form = modalDiv.querySelector('form');
+  if (form) {
+    form.id = 'addAllergyForm';
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCookie('csrftoken')
+        }
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          modal.hide();
+          document.body.classList.remove('modal-open');
+          document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+          refreshAllergyList();
+        } else {
+          const errHtml = Object.values(data.errors).flat().join('<br>');
+          modalDiv.querySelector('.modal-body').insertAdjacentHTML('afterbegin',
+            `<div class="alert alert-danger">${errHtml}</div>`);
+        }
+      })
+      .catch(() => {
+        console.error('Error de red al guardar alergia');
+      });
+    });
+  }
 }
 
-// Handler para el formulario de edición de cita
 function attachEditAppointmentFormHandler() {
   const modalDiv = document.getElementById('ajaxModal');
   const form = modalDiv?.querySelector('form');
@@ -230,6 +261,18 @@ function attachEditPatientFormHandler() {
       });
     });
   }
+}
+
+function refreshAllergyList() {
+  fetch('/allergies/partial_list/', {
+    headers: {'X-Requested-With': 'XMLHttpRequest'}
+  })
+  .then(r => r.text())
+  .then(html => {
+    document.getElementById('allergyList').innerHTML = html;
+    initHandlers();
+  })
+  .catch(() => console.error('No se pudo recargar lista de alergias'));
 }
 
 function initHandlers() {
