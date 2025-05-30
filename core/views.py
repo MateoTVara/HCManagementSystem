@@ -332,3 +332,18 @@ def allergy_list_partial(request):
         'allergies': allergies,
         'severity_choices': severity_choices
     })
+
+def allergy_list_partial_patient(request, patient_id):
+    allergies = Allergy.objects.all()
+    severity_choices = PatientAllergy.SEVERITY_CHOICES
+    patient = Patient.objects.get(pk=patient_id)
+    patient_allergy_ids = list(patient.allergies.values_list('id', flat=True))
+    allergy_severity = {pa.allergy_id: pa.severity for pa in PatientAllergy.objects.filter(patient=patient)}
+    allergy_reactions = {pa.allergy_id: pa.patient_reactions for pa in PatientAllergy.objects.filter(patient=patient)}
+    return render(request, 'allergies/partials/allergy_list.html', {
+        'allergies': allergies,
+        'severity_choices': severity_choices,
+        'patient_allergy_ids': patient_allergy_ids,
+        'allergy_severity': allergy_severity,
+        'allergy_reactions': allergy_reactions,
+    })

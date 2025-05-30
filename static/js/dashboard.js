@@ -328,13 +328,26 @@ function showAllergyModal(contentHtml) {
           modal.hide();
           modalDiv.addEventListener('hidden.bs.modal', function handler() {
             modalDiv.remove();
-            // Re-muestra el modal padre si existe
-            const parentModal = document.getElementById('ajaxModal');
-            if (parentModal) {
-              // Bootstrap 5: vuelve a mostrar el modal padre
-              bootstrap.Modal.getOrCreateInstance(parentModal).show();
+            // Detecta si estás en edición de paciente
+            const patientEditForm = document.querySelector('form[action*="patients/edit"]');
+            if (patientEditForm) {
+              // Obtén el patient_id del action
+              const match = patientEditForm.getAttribute('action').match(/patients\/edit\/(\d+)\//);
+              if (match) {
+                const patientId = match[1];
+                fetch(`/allergies/partial_list/${patientId}/`, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+                  .then(r => r.text())
+                  .then(html => {
+                    const allergyList = document.getElementById('allergyList');
+                    if (allergyList) {
+                      allergyList.innerHTML = html;
+                    }
+                  });
+              }
+            } else {
+              // Si es registro, solo refresca la lista de alergias
+              refreshAllergyList();
             }
-            refreshAllergyList();
             modalDiv.removeEventListener('hidden.bs.modal', handler);
           });
         } else {
