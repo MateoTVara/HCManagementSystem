@@ -34,4 +34,5 @@ urlpatterns = [
     path('doctors/remove/<int:pk>/', views.doctor_remove, name='doctor_remove'),
     path('allergy/register/', views.allergy_register, name='allergy_register'),
     path('allergies/partial_list/', views.allergy_list_partial, name='allergy_list_partial'),
+    path('export/patients/excel/', views.export_patients_excel, name='export_patients_excel'),
 ]
