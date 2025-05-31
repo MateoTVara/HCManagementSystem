@@ -23,18 +23,22 @@ urlpatterns = [
     path('', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
+
     path('appointment/register/', views.appointment_register, name='appointment_register'),
     path('appointment/list/', views.appointment_list, name='appointment_list'),
     path('appointment/remove/<int:pk>/', views.appointment_remove, name='appointment_remove'),
     path('appointment/calendar/', views.appointment_calendar, name='appointment_calendar'),
     path('appointment/edit/<int:pk>/', views.appointment_edit, name='appointment_edit'),
-    path('patients/list/', views.patient_list, name='patient_list'),
-    path('patients/register/', views.patient_register, name='patient_register'),
-    path('patients/remove/<int:pk>/', views.patient_remove, name='patient_remove'),
-    path('patients/edit/<int:pk>/', views.patient_edit, name='patient_edit'),
-    path('doctors/list/', views.doctor_list, name='doctor_list'),
-    path('doctors/remove/<int:pk>/', views.doctor_remove, name='doctor_remove'),
+
+    path('patient/list/', views.patient_list, name='patient_list'),
+    path('patient/register/', views.patient_register, name='patient_register'),
+    path('patient/remove/<int:pk>/', views.patient_remove, name='patient_remove'),
+    path('patient/edit/<int:pk>/', views.patient_edit, name='patient_edit'),
+
+    path('doctor/list/', views.doctor_list, name='doctor_list'),
+    path('doctor/remove/<int:pk>/', views.doctor_remove, name='doctor_remove'),
+
     path('allergy/register/', views.allergy_register, name='allergy_register'),
-    path('allergies/partial_list/', views.allergy_list_partial, name='allergy_list_partial'),
-    path('allergies/partial_list/<int:patient_id>/', views.allergy_list_partial_patient, name='allergy_list_partial_patient'),
+    path('allergy/partial_list/', views.allergy_list_partial, name='allergy_list_partial'),
+    path('allergy/partial_list/<int:patient_id>/', views.allergy_list_partial_patient, name='allergy_list_partial_patient'),
 ]

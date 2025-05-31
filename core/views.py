@@ -330,7 +330,10 @@ def allergy_list_partial(request):
     severity_choices = PatientAllergy.SEVERITY_CHOICES
     return render(request, 'allergies/partials/allergy_list.html', {
         'allergies': allergies,
-        'severity_choices': severity_choices
+        'severity_choices': severity_choices,
+        'patient_allergy_ids': None,
+        'allergy_severity': None,
+        'allergy_reactions': None
     })
 
 def allergy_list_partial_patient(request, patient_id):

@@ -58,6 +58,15 @@ class AllergyRegister(forms.ModelForm):
     class Meta:
         model = Allergy
         fields = ['name', 'common_reactions']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'common_reactions': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'form-control'
+            }),
+        }
 
 class PatientRegister(forms.ModelForm):
     class Meta:
