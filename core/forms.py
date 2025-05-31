@@ -1,5 +1,5 @@
 from django import forms
-from .models import Appointment, Patient, PatientAllergy, Allergy
+from .models import Appointment, Patient, PatientAllergy, Allergy, Doctor, User
 
 class AppointmentRegister(forms.ModelForm):
     class Meta:
@@ -29,27 +29,28 @@ class AppointmentRegister(forms.ModelForm):
 class AppointmentEdit(forms.ModelForm):
     class Meta:
         model = Appointment
-        fields = ['patient', 'doctor', 'date', 'time', 'reason', 'status']
+        fields = ['patient', 'doctor', 'date', 'time', 'reason', 'status'
+                  ]
         widgets = {
-            'date': forms.DateInput(attrs={
+            'date' : forms.DateInput(attrs={
                 'type': 'date',
                 'class': 'form-control'
             }),
-            'time': forms.TimeInput(attrs={
+            'time' : forms.TimeInput(attrs={
                 'type': 'time',
                 'class': 'form-control'
             }),
-            'patient': forms.Select(attrs={
+            'patient' : forms.Select(attrs={
                 'class': 'form-select'
             }),
-            'doctor': forms.Select(attrs={
+            'doctor' : forms.Select(attrs={
                 'class': 'form-select'
             }),
-            'reason': forms.Textarea(attrs={
+            'reason' : forms.Textarea(attrs={
                 'rows': 3,
                 'class': 'form-control'
             }),
-            'status': forms.Select(attrs={
+            'status' : forms.Select(attrs={
                 'class': 'form-select'
             }),
         }
@@ -217,6 +218,39 @@ class PatientEdit(forms.ModelForm):
                         'patient_reactions': self.cleaned_data.get(f'reactions_{allergy.id}', '')
                     }
                 )
-        # Elimina solo las relaciones que ya no están seleccionadas
         PatientAllergy.objects.filter(patient=patient).exclude(allergy_id__in=selected_allergy_ids).delete()
         return patient
+
+class DoctorUserEdit(forms.ModelForm):
+    # Campos del usuario
+    first_name = forms.CharField(label="Nombre", max_length=150)
+    last_name = forms.CharField(label="Apellido", max_length=150)
+    email = forms.EmailField(label="Correo electrónico")
+
+    class Meta:
+        model = Doctor
+        fields = ['specialty', 'dni', 'first_name', 'last_name', 'email']
+        widgets = {
+            'specialty': forms.Select(attrs={'class': 'form-select'}),
+            'dni': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance')
+        initial = kwargs.setdefault('initial', {})
+        if instance:
+            initial['first_name'] = instance.user.first_name
+            initial['last_name'] = instance.user.last_name
+            initial['email'] = instance.user.email
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        doctor = super().save(commit=False)
+        user = doctor.user
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        user.email = self.cleaned_data['email']
+        if commit:
+            user.save()
+            doctor.save()
+        return doctor

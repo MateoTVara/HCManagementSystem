@@ -37,6 +37,7 @@ urlpatterns = [
 
     path('doctor/list/', views.doctor_list, name='doctor_list'),
     path('doctor/remove/<int:pk>/', views.doctor_remove, name='doctor_remove'),
+    path('doctor/edit/<int:pk>/', views.doctor_edit, name='doctor_edit'),
 
     path('allergy/register/', views.allergy_register, name='allergy_register'),
     path('allergy/partial_list/', views.allergy_list_partial, name='allergy_list_partial'),

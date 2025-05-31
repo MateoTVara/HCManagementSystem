@@ -266,6 +266,42 @@ function attachEditPatientFormHandler() {
     }
 }
 
+function attachEditDoctorFormHandler() {
+    const modalDiv = document.getElementById('ajaxModal');
+    const form = modalDiv?.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    bootstrap.Modal.getOrCreateInstance(modalDiv).hide();
+                    document.body.classList.remove('modal-open');
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    fetch('/doctor/list/', {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+                    .then(r => r.text())
+                    .then(html => {
+                        document.getElementById('mainContent').innerHTML = html;
+                        attachFormHandlers();
+                    });
+                } else {
+                    const errHtml = Object.values(data.errors).flat().join('<br>');
+                    modalDiv.querySelector('.modal-body').insertAdjacentHTML('afterbegin',
+                        `<div class="alert alert-danger">${errHtml}</div>`);
+                }
+            });
+        });
+    }
+}
+
 function attachFormHandlers() {
     document.querySelectorAll('form').forEach(form => {
         if (form.id === 'addAllergyForm') return;
@@ -347,6 +383,20 @@ document.addEventListener('click', function(e) {
         .then(html => {
             showModal(html, 'Editar Paciente');
             attachEditPatientFormHandler();
+        });
+    }
+
+    const btnEditDoctor = e.target.closest('.btnEditDoctor');
+    if (btnEditDoctor) {
+        e.preventDefault();
+        const url = btnEditDoctor.getAttribute('data-url');
+        fetch(url, {
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.text())
+        .then(html => {
+            showModal(html, 'Editar Médico');
+            attachEditDoctorFormHandler();
         });
     }
 });

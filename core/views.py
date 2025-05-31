@@ -32,14 +32,17 @@ def login_view(request):
     
     return render(request, 'login.html', {'next': next_url})
 
+
 def logout_view(request):
     logout(request)
     return redirect('login')
 
+
 class DashboardView(View):
     def get(self, request):
         return render(request, 'dashboard.html')
-    
+
+
 def role_required(allowed_roles):
     def decorator(view_func):
         @wraps(view_func)
@@ -49,6 +52,7 @@ def role_required(allowed_roles):
             return view_func(request, *args, **kwargs)
         return _wrapped_view
     return decorator
+
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_register(request):
@@ -68,6 +72,7 @@ def appointment_register(request):
     
     return render(request, template, {'form': form})
 
+
 def appointment_list(request):
     query = request.GET.get('q', '')
     appointments = Appointment.objects.all()
@@ -82,11 +87,13 @@ def appointment_list(request):
             
     return render(request, 'appointments/appointment_list.html', {'appointments': appointments})
 
+
 def appointment_remove(request, pk):
     if request.method == 'POST':
         appointment = Appointment.objects.get(pk=pk)
         appointment.delete()
     return redirect('appointment_list')
+
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_edit(request, pk):
@@ -127,6 +134,7 @@ def appointment_edit(request, pk):
 
     return render(request, 'appointments/appointment_edit.html', {'form': form, 'appointment': appointment})
 
+
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_calendar(request):
     today = date.today()
@@ -150,6 +158,7 @@ def appointment_calendar(request):
         'current_month_num': today.month,
         'weekday_headers': ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     })
+
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR'])
 def patient_register(request):
@@ -188,6 +197,7 @@ def patient_register(request):
         'severity_choices': PatientAllergy.SEVERITY_CHOICES
     })
 
+
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def patient_list(request):
     query = request.GET.get('q', '')
@@ -201,6 +211,7 @@ def patient_list(request):
         )
     
     return render(request, 'patients/patient_list.html', {'patients': patients})
+
 
 @role_required(['ADMIN', 'MANAGEMENT'])
 def patient_remove(request, pk):
@@ -273,6 +284,7 @@ def patient_edit(request, pk):
         'allergy_reactions': allergy_reactions,
     })
 
+
 @role_required(['ADMIN', 'MANAGEMENT','ATTENDANT'])
 def doctor_list(request):
     query = request.GET.get('q', '')
@@ -290,12 +302,51 @@ def doctor_list(request):
         'search_query': query
     })
 
+
 @role_required(['ADMIN', 'MANAGEMENT'])
 def doctor_remove(request, pk):
     if request.method == 'POST':
         doctor = Doctor.objects.get(pk=pk)
         doctor.delete()
     return redirect('doctor_list')
+
+
+def doctor_edit(request, pk):
+    doctor = Doctor.objects.get(pk=pk)
+
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = DoctorUserEdit(request.POST, instance=doctor)
+        if form.is_valid():
+            doctor = form.save()
+            data = {
+                'success': True,
+                'doctor': {
+                    'id': doctor.id,
+                    'first_name': doctor.user.first_name,
+                    'last_name': doctor.user.last_name,
+                    'email': doctor.user.email,
+                    'specialty': doctor.specialty,
+                    'dni': doctor.dni,
+                }
+            }
+            return JsonResponse(data)
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = DoctorUserEdit(instance=doctor)
+        return render(request, 'doctors/doctor_edit.html', {'form': form, 'doctor': doctor})
+
+    if request.method == 'POST':
+        form = DoctorUserEdit(request.POST, instance=doctor)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = DoctorUserEdit(instance=doctor)
+
+    return render(request, 'doctors/doctor_edit.html', {'form': form, 'doctor': doctor})
+
 
 def allergy_register(request):
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -335,6 +386,7 @@ def allergy_list_partial(request):
         'allergy_severity': None,
         'allergy_reactions': None
     })
+
 
 def allergy_list_partial_patient(request, patient_id):
     allergies = Allergy.objects.all()
