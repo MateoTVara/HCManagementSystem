@@ -51,9 +51,9 @@
                     <td> {{ appointment.get_status_display }} </td>
                     <td class="text-end">
                         <div class="d-inline-flex gap-2">
-                            <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                            <button type="button" class="btn btn-sm btn-outline-primary btnEditAppointment" data-url="{% url 'appointment_edit' appointment.id %}">
                                 <i class="bi bi-pencil"></i>
-                            </a>
+                            </button>
                             <form method="post" action="{% url 'appointment_remove' appointment.id %}" class="d-inline">
                                 {% csrf_token %}
                                 <button type="submit" 
@@ -77,19 +77,3 @@
         </table>
     </div>
 </div>
-
-<script>
-document.getElementById('search-form')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const query = document.querySelector('input[name="q"]').value;
-    const url = `{% url 'appointment_list' %}?q=${encodeURIComponent(query)}`;  <!-- Corregido doctor_list → appointment_list -->
-    
-    fetch(url, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(response => response.text())
-    .then(html => {
-        document.getElementById('mainContent').innerHTML = html;
-    });
-});
-</script>

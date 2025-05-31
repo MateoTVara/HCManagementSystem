@@ -1,0 +1,162 @@
+<!-- patient_edit.html -->
+{% load custom_tags %}
+<div class="h-100 p-4 bg-white rounded-3 shadow-sm">
+    <div class="border-bottom border-primary border-3 pb-2 mb-4">
+        <h3 class="text-primary mb-0">
+            <i class="bi bi-calendar-plus me-2"></i>Editar Paciente
+        </h3>
+    </div>
+    <form method="post" action="{% url 'patient_edit' patient.id %}">
+        {% csrf_token %}
+        <div class="row g-3">
+            <!-- Primera fila -->
+            <div class="col-md-4">
+                <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.first_name.label }}</label>
+                {{ form.first_name }}
+            </div>
+            <div class="col-md-4">
+                <label for="{{ form.last_name.id_for_label }}" class="form-label">{{ form.last_name.label }}</label>
+                {{ form.last_name }}
+            </div>
+            <div class="col-md-4">
+                <label for="{{ form.dni.id_for_label }}" class="form-label">{{ form.dni.label }}</label>
+                {{ form.dni }}
+            </div>
+
+            <!-- Segunda fila -->
+            <div class="col-md-6">
+                <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">{{ form.date_of_birth.label }}</label>
+                {{ form.date_of_birth }}
+            </div>
+            <div class="col-md-3">
+                <label for="{{ form.gender.id_for_label }}" class="form-label">{{ form.gender.label }}</label>
+                {{ form.gender }}
+            </div>
+            <div class="col-md-3">
+                <label for="{{ form.blood_type.id_for_label }}" class="form-label">{{ form.blood_type.label }}</label>
+                {{ form.blood_type }}
+            </div>
+
+            <!-- Tercera fila -->
+            <div class="col-md-6">
+                <label for="{{ form.phone.id_for_label }}" class="form-label">{{ form.phone.label }}</label>
+                {{ form.phone }}
+            </div>
+            <div class="col-md-6">
+                <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                {{ form.email }}
+            </div>
+
+            <!-- Cuarta fila -->
+            <div class="col-12">
+                <label for="{{ form.address.id_for_label }}" class="form-label">{{ form.address.label }}</label>
+                {{ form.address }}
+            </div>
+
+            <!-- Quinta fila: Sección de alergias -->
+            <div class="col-12">
+                <label class="form-label">Alergias</label>
+                <div class="mb-3 d-flex align-items-center gap-2">
+                    <input type="text" 
+                        class="form-control"
+                        placeholder="Buscar alergias..." 
+                        id="allergySearch"
+                        style="max-width: 300px;">
+                    <button id="btnAddAllergy" type="button" class="btn btn-outline-success" data-url="{% url 'allergy_register' %}">
+                        <i class="bi bi-plus-circle"></i> Nueva Alergia
+                    </button>
+                </div>
+                <div class="border p-3 rounded bg-light">
+                    <div class="row g-3" id="allergyList">
+                        {% for allergy in allergies %}
+                        <div class="col-md-4 col-sm-6 allergy-item">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <div class="form-check">
+                                        <input type="checkbox"
+                                               name="allergy_{{ allergy.id }}"
+                                               id="allergy_{{ allergy.id }}"
+                                               class="form-check-input"
+                                               {% if patient_allergy_ids and allergy.id in patient_allergy_ids %}checked{% endif %}>
+                                        <label class="form-check-label" for="allergy_{{ allergy.id }}">
+                                            {{ allergy.name }}
+                                        </label>
+                                    </div>
+                                    <div class="mt-2">
+                                        <select name="severity_{{ allergy.id }}" class="form-select">
+                                            {% for value, label in severity_choices %}
+                                            <option value="{{ value }}"
+                                                {% if allergy_severity|get_item:allergy.id == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="mt-2">
+                                        <textarea name="reactions_{{ allergy.id }}"
+                                                  rows="2"
+                                                  class="form-control"
+                                                  placeholder="Reacciones del paciente...">{{ allergy_reactions|get_item:allergy.id }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div id="noResults" class="text-muted text-center d-none">
+                        No se encontraron alergias
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary px-5">
+                <i class="bi bi-save me-1"></i> Guardar
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('allergySearch');
+    const allergyItems = document.querySelectorAll('.allergy-item');
+    const noResults = document.getElementById('noResults');
+
+    searchInput.addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        let visibleItems = 0;
+
+        allergyItems.forEach(item => {
+            const allergyName = item.querySelector('.form-check-label').textContent.toLowerCase();
+            const matches = allergyName.includes(searchTerm);
+            item.style.display = matches ? 'block' : 'none';
+            if(matches) visibleItems++;
+        });
+
+        noResults.classList.toggle('d-none', visibleItems > 0);
+    });
+});
+</script>
+
+<style>
+#allergySearch {
+    max-width: 300px;
+    margin-bottom: 1rem;
+}
+
+.allergy-item .card {
+    transition: transform 0.2s;
+    border: 1px solid #dee2e6;
+}
+
+.allergy-item .form-check-input {
+    margin-top: 0;
+}
+
+#allergyList {
+    max-height: calc(2 * 160px);
+    overflow-y: auto;
+    min-height: unset;
+}
+</style>

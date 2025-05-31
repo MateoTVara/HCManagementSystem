@@ -34,14 +34,17 @@ def login_view(request):
     
     return render(request, 'login.html', {'next': next_url})
 
+
 def logout_view(request):
     logout(request)
     return redirect('login')
 
+
 class DashboardView(View):
     def get(self, request):
         return render(request, 'dashboard.html')
-    
+
+
 def role_required(allowed_roles):
     def decorator(view_func):
         @wraps(view_func)
@@ -51,6 +54,7 @@ def role_required(allowed_roles):
             return view_func(request, *args, **kwargs)
         return _wrapped_view
     return decorator
+
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_register(request):
@@ -70,6 +74,7 @@ def appointment_register(request):
     
     return render(request, template, {'form': form})
 
+
 def appointment_list(request):
     query = request.GET.get('q', '')
     appointments = Appointment.objects.all()
@@ -84,11 +89,51 @@ def appointment_list(request):
             
     return render(request, 'appointments/appointment_list.html', {'appointments': appointments})
 
+
 def appointment_remove(request, pk):
     if request.method == 'POST':
         appointment = Appointment.objects.get(pk=pk)
         appointment.delete()
     return redirect('appointment_list')
+
+
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
+def appointment_edit(request, pk):
+    appointment = Appointment.objects.get(pk=pk)
+
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = AppointmentEdit(request.POST, instance=appointment)
+        if form.is_valid():
+            appointment = form.save()
+            data = {
+                'success': True,
+                'appointment': {
+                    'id': appointment.id,
+                    'date': appointment.date,
+                    'time': appointment.time,
+                    'patient': str(appointment.patient),
+                    'doctor': str(appointment.doctor),
+                    'status': appointment.status,
+                }
+            }
+            return JsonResponse(data)
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = AppointmentEdit(instance=appointment)
+        return render(request, 'appointments/appointment_edit.html', {'form': form, 'appointment': appointment})
+
+    if request.method == 'POST':
+        form = AppointmentEdit(request.POST, instance=appointment)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = AppointmentEdit(instance=appointment)
+
+    return render(request, 'appointments/appointment_edit.html', {'form': form, 'appointment': appointment})
+
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_calendar(request):
@@ -114,6 +159,7 @@ def appointment_calendar(request):
         'weekday_headers': ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     })
 
+
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR'])
 def patient_register(request):
     allergies = Allergy.objects.all()
@@ -125,11 +171,13 @@ def patient_register(request):
             
             for allergy in allergies:
                 if form.cleaned_data.get(f'allergy_{allergy.id}'):
-                    PatientAllergy.objects.create(
+                    PatientAllergy.objects.update_or_create(
                         patient=patient,
                         allergy=allergy,
-                        severity=form.cleaned_data[f'severity_{allergy.id}'],
-                        patient_reactions=form.cleaned_data[f'reactions_{allergy.id}']
+                        defaults={
+                            'severity': form.cleaned_data[f'severity_{allergy.id}'],
+                            'patient_reactions': form.cleaned_data[f'reactions_{allergy.id}']
+                        }
                     )
             
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -149,6 +197,7 @@ def patient_register(request):
         'severity_choices': PatientAllergy.SEVERITY_CHOICES
     })
 
+
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def patient_list(request):
     query = request.GET.get('q', '')
@@ -163,12 +212,76 @@ def patient_list(request):
     
     return render(request, 'patients/patient_list.html', {'patients': patients})
 
+
 @role_required(['ADMIN', 'MANAGEMENT'])
 def patient_remove(request, pk):
     if request.method == 'POST':
         patient = Patient.objects.get(pk=pk)
         patient.delete()
     return redirect('patient_list')
+
+
+def patient_edit(request, pk):
+    patient = Patient.objects.get(pk=pk)
+    allergies = Allergy.objects.all()
+    severity_choices = PatientAllergy.SEVERITY_CHOICES
+    patient_allergy_ids = list(patient.allergies.values_list('id', flat=True))
+    allergy_severity = {pa.allergy_id: pa.severity for pa in PatientAllergy.objects.filter(patient=patient)}
+    allergy_reactions = {pa.allergy_id: pa.patient_reactions for pa in PatientAllergy.objects.filter(patient=patient)}
+
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = PatientEdit(request.POST, instance=patient)
+        if form.is_valid():
+            patient = form.save()
+            data = {
+                'success': True,
+                'patient': {
+                    'id': patient.id,
+                    'dni': patient.dni,
+                    'first_name': patient.first_name,
+                    'last_name': patient.last_name,
+                    'date_of_birth': patient.date_of_birth.isoformat(),
+                    'gender': patient.gender,
+                    'blood_type': patient.blood_type,
+                    'phone': patient.phone,
+                    'address': patient.address,
+                    'email': patient.email,
+                }
+            }
+            return JsonResponse(data)
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = PatientEdit(instance=patient)
+        return render(request, 'patients/patient_edit.html', {
+            'form': form,
+            'patient': patient,
+            'allergies': allergies,
+            'severity_choices': severity_choices,
+            'patient_allergy_ids': patient_allergy_ids,
+            'allergy_severity': allergy_severity,
+            'allergy_reactions': allergy_reactions,
+        })
+
+    if request.method == 'POST':
+        form = PatientEdit(request.POST, instance=patient)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = PatientEdit(instance=patient)
+
+    return render(request, 'patients/patient_edit.html', {
+        'form': form,
+        'patient': patient,
+        'allergies': allergies,
+        'severity_choices': severity_choices,
+        'patient_allergy_ids': patient_allergy_ids,
+        'allergy_severity': allergy_severity,
+        'allergy_reactions': allergy_reactions,
+    })
+
 
 @role_required(['ADMIN', 'MANAGEMENT','ATTENDANT'])
 def doctor_list(request):
@@ -179,7 +292,7 @@ def doctor_list(request):
         doctors = doctors.filter(
             Q(user__first_name__icontains=query) |
             Q(user__last_name__icontains=query) |
-            Q(specialty__icontains=query)  # Cambio clave aquí
+            Q(specialty__icontains=query)
         )
     
     return render(request, 'doctors/doctor_list.html', {
@@ -187,12 +300,51 @@ def doctor_list(request):
         'search_query': query
     })
 
+
 @role_required(['ADMIN', 'MANAGEMENT'])
 def doctor_remove(request, pk):
     if request.method == 'POST':
         doctor = Doctor.objects.get(pk=pk)
         doctor.delete()
     return redirect('doctor_list')
+
+
+def doctor_edit(request, pk):
+    doctor = Doctor.objects.get(pk=pk)
+
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = DoctorUserEdit(request.POST, instance=doctor)
+        if form.is_valid():
+            doctor = form.save()
+            data = {
+                'success': True,
+                'doctor': {
+                    'id': doctor.id,
+                    'first_name': doctor.user.first_name,
+                    'last_name': doctor.user.last_name,
+                    'email': doctor.user.email,
+                    'specialty': doctor.specialty,
+                    'dni': doctor.dni,
+                }
+            }
+            return JsonResponse(data)
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = DoctorUserEdit(instance=doctor)
+        return render(request, 'doctors/doctor_edit.html', {'form': form, 'doctor': doctor})
+
+    if request.method == 'POST':
+        form = DoctorUserEdit(request.POST, instance=doctor)
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = DoctorUserEdit(instance=doctor)
+
+    return render(request, 'doctors/doctor_edit.html', {'form': form, 'doctor': doctor})
+
 
 def allergy_register(request):
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -210,7 +362,6 @@ def allergy_register(request):
         else:
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
-    # caso normal (no AJAX)
     if request.method == 'POST':
         form = AllergyRegister(request.POST)
         if form.is_valid():
@@ -246,3 +397,19 @@ def export_patients_excel(request):
         resp['Content-Disposition'] = 'attachment; filename="pacientes.xlsx"'
         return resp
     return HttpResponse("Error generando el archivo", status=500)
+
+
+def allergy_list_partial_patient(request, patient_id):
+    allergies = Allergy.objects.all()
+    severity_choices = PatientAllergy.SEVERITY_CHOICES
+    patient = Patient.objects.get(pk=patient_id)
+    patient_allergy_ids = list(patient.allergies.values_list('id', flat=True))
+    allergy_severity = {pa.allergy_id: pa.severity for pa in PatientAllergy.objects.filter(patient=patient)}
+    allergy_reactions = {pa.allergy_id: pa.patient_reactions for pa in PatientAllergy.objects.filter(patient=patient)}
+    return render(request, 'allergies/partials/allergy_list.html', {
+        'allergies': allergies,
+        'severity_choices': severity_choices,
+        'patient_allergy_ids': patient_allergy_ids,
+        'allergy_severity': allergy_severity,
+        'allergy_reactions': allergy_reactions,
+    })

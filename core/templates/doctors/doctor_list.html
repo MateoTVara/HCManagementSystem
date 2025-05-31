@@ -50,7 +50,7 @@
                     </td>
                     <td class="text-end">
                         <div class="d-inline-flex gap-2">
-                            <a href="#" class="btn btn-sm btn-outline-primary" title="Editar">
+                            <a href="{% url 'doctor_edit' doctor.id %}" class="btn btn-sm btn-outline-primary btnEditDoctor" data-url="{% url 'doctor_edit' doctor.id %}" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
                             <form method="post" action="{% url 'doctor_remove' doctor.id %}" class="d-inline">
