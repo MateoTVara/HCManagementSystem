@@ -118,12 +118,10 @@ def appointment_edit(request, pk):
         else:
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
-    # AJAX GET: solo el formulario para el modal
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         form = AppointmentEdit(instance=appointment)
         return render(request, 'appointments/appointment_edit.html', {'form': form, 'appointment': appointment})
 
-    # caso normal (no AJAX)
     if request.method == 'POST':
         form = AppointmentEdit(request.POST, instance=appointment)
         if form.is_valid():
@@ -225,9 +223,7 @@ def patient_edit(request, pk):
     patient = Patient.objects.get(pk=pk)
     allergies = Allergy.objects.all()
     severity_choices = PatientAllergy.SEVERITY_CHOICES
-    # IDs de alergias del paciente
     patient_allergy_ids = list(patient.allergies.values_list('id', flat=True))
-    # Diccionarios para severidad y reacciones
     allergy_severity = {pa.allergy_id: pa.severity for pa in PatientAllergy.objects.filter(patient=patient)}
     allergy_reactions = {pa.allergy_id: pa.patient_reactions for pa in PatientAllergy.objects.filter(patient=patient)}
 
@@ -294,7 +290,7 @@ def doctor_list(request):
         doctors = doctors.filter(
             Q(user__first_name__icontains=query) |
             Q(user__last_name__icontains=query) |
-            Q(specialty__icontains=query)  # Cambio clave aquí
+            Q(specialty__icontains=query)
         )
     
     return render(request, 'doctors/doctor_list.html', {
@@ -364,7 +360,6 @@ def allergy_register(request):
         else:
             return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
-    # caso normal (no AJAX)
     if request.method == 'POST':
         form = AllergyRegister(request.POST)
         if form.is_valid():

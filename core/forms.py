@@ -222,7 +222,6 @@ class PatientEdit(forms.ModelForm):
         return patient
 
 class DoctorUserEdit(forms.ModelForm):
-    # Campos del usuario
     username = forms.CharField(label="Usuario", max_length=150)
     first_name = forms.CharField(label="Nombre", max_length=150)
     last_name = forms.CharField(label="Apellido", max_length=150)

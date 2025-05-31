@@ -48,7 +48,7 @@
                     <td>{{ patient.dni }}</td>
                     <td class="text-end">
                         <div class="d-inline-flex gap-2">
-                            <button type="button" class="btn btn-outline-success btnEditPatient" data-url="{% url 'patient_edit' patient.id %}">
+                            <button type="button" class="btn btn-sm btn-outline-primary btnEditPatient" data-url="{% url 'patient_edit' patient.id %}">
                                 <i class="bi bi-pencil"></i>
                             </button>
                             <form method="post" action="{% url 'patient_remove' patient.id %}" class="d-inline">

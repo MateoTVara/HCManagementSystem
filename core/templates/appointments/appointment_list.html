@@ -51,7 +51,7 @@
                     <td> {{ appointment.get_status_display }} </td>
                     <td class="text-end">
                         <div class="d-inline-flex gap-2">
-                            <button type="button" class="btn btn-outline-success btnEditAppointment" data-url="{% url 'appointment_edit' appointment.id %}">
+                            <button type="button" class="btn btn-sm btn-outline-primary btnEditAppointment" data-url="{% url 'appointment_edit' appointment.id %}">
                                 <i class="bi bi-pencil"></i>
                             </button>
                             <form method="post" action="{% url 'appointment_remove' appointment.id %}" class="d-inline">
