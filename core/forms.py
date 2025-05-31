@@ -223,13 +223,20 @@ class PatientEdit(forms.ModelForm):
 
 class DoctorUserEdit(forms.ModelForm):
     # Campos del usuario
+    username = forms.CharField(label="Usuario", max_length=150)
     first_name = forms.CharField(label="Nombre", max_length=150)
     last_name = forms.CharField(label="Apellido", max_length=150)
     email = forms.EmailField(label="Correo electrónico")
+    password = forms.CharField(
+        label="Nueva contraseña",
+        widget=forms.PasswordInput(render_value=False),
+        required=False,
+        help_text="Déjalo en blanco si no deseas cambiar la contraseña."
+    )
 
     class Meta:
         model = Doctor
-        fields = ['specialty', 'dni', 'first_name', 'last_name', 'email']
+        fields = ['specialty', 'dni', 'username', 'first_name', 'last_name', 'email', 'password']
         widgets = {
             'specialty': forms.Select(attrs={'class': 'form-select'}),
             'dni': forms.TextInput(attrs={'class': 'form-control'}),
@@ -239,6 +246,7 @@ class DoctorUserEdit(forms.ModelForm):
         instance = kwargs.get('instance')
         initial = kwargs.setdefault('initial', {})
         if instance:
+            initial['username'] = instance.user.username
             initial['first_name'] = instance.user.first_name
             initial['last_name'] = instance.user.last_name
             initial['email'] = instance.user.email
@@ -247,9 +255,13 @@ class DoctorUserEdit(forms.ModelForm):
     def save(self, commit=True):
         doctor = super().save(commit=False)
         user = doctor.user
+        user.username = self.cleaned_data['username']
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
         user.email = self.cleaned_data['email']
+        password = self.cleaned_data.get('password')
+        if password:
+            user.set_password(password)
         if commit:
             user.save()
             doctor.save()
