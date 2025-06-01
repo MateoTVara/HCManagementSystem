@@ -1,0 +1,21 @@
+<div class="card">
+    <div class="card-header">
+        Detalle de Médico
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">{{ doctor.user.first_name }} {{ doctor.user.last_name }}</h5>
+        <p class="card-text">
+            DNI: {{ doctor.dni }}<br>
+            Especialidad: {{ doctor.get_specialty_display }}<br>
+            Nombre de usuario: {{ doctor.user.username }}<br>
+            Correo electrónico: {{ doctor.user.email }}<br>
+            Última sesión: {{ doctor.user.last_login }}<br>
+            Fecha de registro: {{ doctor.user.date_joined }}<br>
+        </p>
+        <label for="select-example">Ejemplo de Select:</label>
+        <select id="select-example" class="form-select">
+            <option value="1">Opción 1</option>
+            <option value="2">Opción 2</option>
+        </select>
+    </div>
+</div>

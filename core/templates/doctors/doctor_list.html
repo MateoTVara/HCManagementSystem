@@ -40,8 +40,11 @@
                 {% for doctor in doctors %}
                 <tr>
                     <td>
-                        <strong>Dr(a). {{ doctor.user.get_full_name }}</strong>
-                        <div class="text-muted small">{{ doctor.user.get_role_display }}</div>
+                        <a href="{% url 'doctor_detail' doctor.id %}"
+                                data-ajax
+                                class="text-decoration-underline cursor-pointer">
+                            Dr(a). {{ doctor.user.get_full_name }}
+                        </a>
                     </td>
                     <td>{{ doctor.get_specialty_display }}</td>
                     <td>

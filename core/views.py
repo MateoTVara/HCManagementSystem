@@ -6,7 +6,7 @@ from django.db.models import Q, Count
 from datetime import date
 import calendar
 from django.views.generic import View
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_not_required, login_required
 import requests
@@ -283,6 +283,18 @@ def patient_edit(request, pk):
     })
 
 
+def patient_detail(request, pk):
+    patient = get_object_or_404(Patient, pk=pk)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Solo el fragmento para AJAX
+        return render(request, 'patients/patient_detail.html', {'patient': patient})
+    # Si NO es AJAX, renderiza el dashboard y pasa el fragmento como variable
+    return render(request, 'dashboard.html', {
+        'fragment': 'patients/patient_detail.html',
+        'patient': patient
+    })
+
+
 @role_required(['ADMIN', 'MANAGEMENT','ATTENDANT'])
 def doctor_list(request):
     query = request.GET.get('q', '')
@@ -359,6 +371,18 @@ def doctor_edit(request, pk):
         form = DoctorUserEdit(instance=doctor)
 
     return render(request, 'doctors/doctor_edit.html', {'form': form, 'doctor': doctor})
+
+
+def doctor_detail(request, pk):
+    doctor = get_object_or_404(Doctor, pk=pk)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Solo el fragmento para AJAX
+        return render(request, 'doctors/doctor_detail.html', {'doctor': doctor})
+    # Si NO es AJAX, renderiza el dashboard y pasa el fragmento como variable
+    return render(request, 'dashboard.html', {
+        'fragment': 'doctors/doctor_detail.html',
+        'doctor': doctor
+    })
 
 
 def allergy_register(request):

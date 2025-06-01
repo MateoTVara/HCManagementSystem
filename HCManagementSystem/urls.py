@@ -37,12 +37,14 @@ urlpatterns = [
     path('patient/register/', views.patient_register, name='patient_register'),  # Registrar paciente
     path('patient/remove/<int:pk>/', views.patient_remove, name='patient_remove'),  # Eliminar paciente
     path('patient/edit/<int:pk>/', views.patient_edit, name='patient_edit'),  # Editar paciente
+    path('patient/detail/<int:pk>/', views.patient_detail, name='patient_detail'),  # Detalle de paciente
 
     # Rutas para la gestión de doctores
     path('doctor/list/', views.doctor_list, name='doctor_list'),  # Listar doctores
     path('doctor/remove/<int:pk>/', views.doctor_remove, name='doctor_remove'),  # Eliminar doctor
     path('doctor/edit/<int:pk>/', views.doctor_edit, name='doctor_edit'),  # Editar doctor
     path('doctor/register/', views.doctor_register, name='doctor_register'),  # Registrar doctor
+    path('doctor/detail/<int:pk>/', views.doctor_detail, name='doctor_detail'),  # Detalle de doctor
 
     # Rutas para la gestión de alergias
     path('allergy/register/', views.allergy_register, name='allergy_register'),  # Registrar alergia

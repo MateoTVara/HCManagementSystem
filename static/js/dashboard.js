@@ -330,10 +330,12 @@ document.getElementById('sidebarToggle')?.addEventListener('click', () => {
     document.getElementById('sidebar').classList.toggle('sidebar-collapsed');
 });
 
-document.querySelectorAll('[data-ajax]').forEach(link => {
-    link.addEventListener('click', function(e) {
+document.addEventListener('click', function(e) {
+    const link = e.target.closest('a[data-ajax]');
+    if (link) {
         e.preventDefault();
-        fetch(this.href, {
+        console.log('Interceptado AJAX', link.href);
+        fetch(link.href, {
             headers: {'X-Requested-With': 'XMLHttpRequest'}
         })
         .then(response => response.text())
@@ -341,7 +343,8 @@ document.querySelectorAll('[data-ajax]').forEach(link => {
             document.getElementById('mainContent').innerHTML = html;
             attachFormHandlers();
         });
-    });
+        return false;
+    }
 });
 
 document.addEventListener('click', function(e) {

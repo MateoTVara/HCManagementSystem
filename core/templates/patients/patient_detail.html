@@ -1,0 +1,24 @@
+<div class="card">
+    <div class="card-header">
+        Detalle de Paciente
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">{{ patient.first_name }} {{ patient.last_name }}</h5>
+        <p class="card-text">
+            DNI: {{ patient.dni }}<br>
+            Fecha de nacimiento: {{ patient.date_of_birth|date:"d/m/Y" }}<br>
+            Sexo: {{ patient.get_gender_display }}<br>
+            Edad: {{ patient.date_of_birth|timesince }}<br>
+            Dirección: {{ patient.address }}<br>
+            Teléfono: {{ patient.phone }}<br>
+            Correo electrónico: {{ patient.email }}<br>
+            Fecha de registro: {{ patient.created_at|date:"d/m/Y H:i" }}<br>
+            Última actualización: {{ patient.updated_at|date:"d/m/Y H:i" }}<br>
+        </p>
+        <label for="select-example">Ejemplo de Select:</label>
+        <select id="select-example" class="form-select">
+            <option value="1">Opción 1</option>
+            <option value="2">Opción 2</option>
+        </select>
+    </div>
+</div>

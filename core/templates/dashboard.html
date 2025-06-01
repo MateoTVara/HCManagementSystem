@@ -144,23 +144,26 @@
 
         <!-- Contenido Principal -->
         <div class="flex-grow-1 p-4" id="mainContent">
-            <!-- Acá se carga el contenido de AJAX -->
-            <div class="alert alert-success mb-4" role="alert">
-                Bienvenido{% if request.user.first_name %} {{ request.user.first_name }}{% endif %}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %} 
-                {% if request.user.role %}
-                    {% if request.user.role == 'ADMIN' %}
-                        (Administrador)
-                    {% elif request.user.role == 'MANAGEMENT' %}
-                        (Gerencia)
-                    {% elif request.user.role == 'DOCTOR' %}
-                        (Médico)
-                    {% elif request.user.role == 'ATTENDANT' %}
-                        (Recepcionista)
-                    {% else %}
-                        ({{ request.user.role }})
+            {% if fragment %}
+                {% include fragment %}
+            {% else %}
+                <div class="alert alert-success mb-4" role="alert">
+                    Bienvenido{% if request.user.first_name %} {{ request.user.first_name }}{% endif %}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %} 
+                    {% if request.user.role %}
+                        {% if request.user.role == 'ADMIN' %}
+                            (Administrador)
+                        {% elif request.user.role == 'MANAGEMENT' %}
+                            (Gerencia)
+                        {% elif request.user.role == 'DOCTOR' %}
+                            (Médico)
+                        {% elif request.user.role == 'ATTENDANT' %}
+                            (Recepcionista)
+                        {% else %}
+                            ({{ request.user.role }})
+                        {% endif %}
                     {% endif %}
-                {% endif %}
-            </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 
