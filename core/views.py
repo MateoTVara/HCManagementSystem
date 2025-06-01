@@ -297,13 +297,18 @@ def patient_edit(request, pk):
 
 def patient_detail(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
+    appointments = patient.appointment_set.select_related('doctor__user').order_by('-date', '-time')
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         # Solo el fragmento para AJAX
-        return render(request, 'patients/patient_detail.html', {'patient': patient})
+        return render(request, 'patients/patient_detail.html', {
+            'patient': patient,
+            'appointments': appointments,
+        })
     # Si NO es AJAX, renderiza el dashboard y pasa el fragmento como variable
     return render(request, 'dashboard.html', {
         'fragment': 'patients/patient_detail.html',
-        'patient': patient
+        'patient': patient,
+        'appointments': appointments
     })
 
 

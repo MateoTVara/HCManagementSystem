@@ -29,7 +29,7 @@
             <div class="p-3">
                 <h5 class="text-primary">Menú</h5>
                 <ul class="nav flex-column">
-                    
+
                     <!-- Citas Submenu -->
                     {% if request.user.role in 'ADMIN,MANAGEMENT,DOCTOR,ATTENDANT' %}
                     <li class="nav-item">
@@ -38,7 +38,7 @@
                             data-bs-target="#citasSubmenu"
                             role="button">
                             <div>
-                                <i class="bi bi-calendar me-2"></i>
+                                <i class="bi bi-calendar-check me-2"></i>
                                 Citas
                             </div>
                             <i class="bi bi-chevron-right"></i>
@@ -52,7 +52,7 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'appointment_list' %}" data-ajax>
-                                    <i class="bi bi-calendar-plus me-2"></i>
+                                    <i class="bi bi-calendar-check me-2"></i>
                                     Listado
                                 </a>
                             </li>
@@ -83,7 +83,7 @@
                             {% if request.user.role in 'ADMIN,MANAGEMENT,DOCTOR' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'patient_register' %}" data-ajax>
-                                    <i class="bi bi-person-lines-fill me-2"></i>
+                                    <i class="bi bi-person-plus me-2"></i>
                                     Nuevo Paciente
                                 </a>
                             </li>
@@ -91,7 +91,7 @@
                             {% if request.user.role in 'ADMIN,MANAGEMENT,DOCTOR,ATTENDANT' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'patient_list' %}" data-ajax>
-                                    <i class="bi bi-list-ul me-2"></i>
+                                    <i class="bi bi-people me-2"></i>
                                     Listado de Pacientes
                                 </a>
                             </li>
@@ -108,7 +108,7 @@
                             data-bs-target="#medicosSubmenu"
                             role="button">
                             <div>
-                                <i class="bi bi-calendar me-2"></i>
+                                <i class="bi bi-person-badge me-2"></i>
                                 Médicos
                             </div>
                             <i class="bi bi-chevron-right"></i>
@@ -117,7 +117,7 @@
                             {% if request.user.role in 'ADMIN,MANAGEMENT,ATTENDANT' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'doctor_list' %}" data-ajax>
-                                    <i class="bi bi-list-ul me-2"></i>
+                                    <i class="bi bi-person-badge me-2"></i>
                                     Listado de Médicos
                                 </a>
                             </li>
@@ -125,7 +125,7 @@
                             {% if request.user.role in 'ADMIN,MANAGEMENT' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'doctor_register' %}" data-ajax>
-                                    <i class="bi bi-list-ul me-2"></i>
+                                    <i class="bi bi-person-plus me-2"></i>
                                     Nuevo Médico
                                 </a>
                             </li>
@@ -133,10 +133,10 @@
                         </ul>
                     </li>
                     {% endif %}
-                    
+
                     <!-- Reportes Submenu -->
-                    <a href="{% url 'export_patients_excel' %}" class="btn btn-success">
-                        <i class="bi bi-file-earmark-excel"></i> Exportar Pacientes a Excel
+                    <a href="{% url 'export_patients_excel' %}" class="btn btn-success mt-3">
+                        <i class="bi bi-file-earmark-arrow-down"></i> Exportar Pacientes a Excel
                     </a>
                 </ul>
             </div>

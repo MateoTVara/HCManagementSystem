@@ -222,13 +222,13 @@ class PatientEdit(forms.ModelForm):
         return patient
 
 class DoctorUserEdit(forms.ModelForm):
-    username = forms.CharField(label="Usuario", max_length=150)
-    first_name = forms.CharField(label="Nombre", max_length=150)
-    last_name = forms.CharField(label="Apellido", max_length=150)
-    email = forms.EmailField(label="Correo electrónico")
+    username = forms.CharField(label="Usuario", max_length=150, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    first_name = forms.CharField(label="Nombre", max_length=150, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(label="Apellido", max_length=150, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(label="Correo electrónico", widget=forms.EmailInput(attrs={'class': 'form-control'}))
     password = forms.CharField(
         label="Nueva contraseña",
-        widget=forms.PasswordInput(render_value=False),
+        widget=forms.PasswordInput(render_value=False, attrs={'class': 'form-control'}),
         required=False,
         help_text="Déjalo en blanco si no deseas cambiar la contraseña."
     )
@@ -267,13 +267,13 @@ class DoctorUserEdit(forms.ModelForm):
         return doctor
 
 class DoctorUserRegister(forms.ModelForm):
-    username = forms.CharField(label="Usuario", max_length=150)
-    first_name = forms.CharField(label="Nombre", max_length=150)
-    last_name = forms.CharField(label="Apellido", max_length=150)
-    email = forms.EmailField(label="Correo electrónico")
+    username = forms.CharField(label="Usuario", max_length=150, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    first_name = forms.CharField(label="Nombre", max_length=150, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(label="Apellido", max_length=150, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(label="Correo electrónico", widget=forms.EmailInput(attrs={'class': 'form-control'}))
     password = forms.CharField(
         label="Contraseña",
-        widget=forms.PasswordInput(render_value=False),
+        widget=forms.PasswordInput(render_value=False, attrs={'class': 'form-control'}),
         required=True,
         help_text="Debe contener al menos 8 caracteres."
     )
@@ -282,7 +282,7 @@ class DoctorUserRegister(forms.ModelForm):
         model = Doctor
         fields = ['specialty', 'dni', 'username', 'first_name', 'last_name', 'email', 'password']
         widgets = {
-            'specialty': forms.Select(attrs={'class': 'form-select'}),
+            'specialty': forms.Select(attrs={'class': 'form-control'}),
             'dni': forms.TextInput(attrs={'class': 'form-control'}),
         }
 

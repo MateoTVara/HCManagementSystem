@@ -30,6 +30,7 @@
         <table class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
+                    <th>Rev.</th>
                     <th>Médico</th>
                     <th>Paciente</th>
                     <th>Fecha y Hora</th>
@@ -40,20 +41,18 @@
             <tbody>
                 {% for appointment in appointments %}
                 <tr>
-                    <td>
-                        <a href="{% url 'appointment_detail' appointment.id %}"
-                           data-ajax
-                           class="text-decoration-underline cursor-pointer">
-                            Dr(a). {{ appointment.doctor.user.get_full_name }}
+                    <td class="text-center">
+                        <a href="{% url 'appointment_detail' appointment.id %}" 
+                        data-ajax   
+                        class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center"
+                           title="Ver detalles">
+                            <i class="bi bi-eye"></i>
                         </a>
                     </td>
                     <td>
-                        <a href="{% url 'appointment_detail' appointment.id %}"
-                           data-ajax
-                           class="text-decoration-underline cursor-pointer">
-                            {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}
-                        </a>
+                        <strong>Dr(a). {{ appointment.doctor.user.get_full_name }}</strong>
                     </td>
+                    <td>{{ appointment.patient.first_name}} {{ appointment.patient.last_name}}</td>
                     <td>
                         <div>{{ appointment.date|date:"d/m/Y" }}</div>
                         <div>{{ appointment.time }}</div>
