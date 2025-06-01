@@ -2,10 +2,13 @@
 <div class="h-100 p-4 bg-white rounded-3 shadow-sm">
     <div class="border-bottom border-primary border-3 pb-2 mb-4">
         <div class="row align-items-center">
-            <div class="col-md-6">
+            <div class="col-md-6 d-flex align-items-center gap-2">
                 <h3 class="text-primary mb-0">
                     <i class="bi bi-heart-pulse me-2"></i>Listado de Médicos
                 </h3>
+                <a href="{% url 'export_doctors_excel' %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-file-earmark-arrow-down"></i> Exportar Doctores
+                </a>
             </div>
             <div class="col-md-6 mt-3 mt-md-0">
                 <form method="get" action="{% url 'doctor_list' %}" class="d-flex" id="search-form">
