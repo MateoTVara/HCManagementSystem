@@ -122,6 +122,14 @@
                                 </a>
                             </li>
                             {% endif%}
+                            {% if request.user.role in 'ADMIN,MANAGEMENT' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'doctor_register' %}" data-ajax>
+                                    <i class="bi bi-list-ul me-2"></i>
+                                    Nuevo Médico
+                                </a>
+                            </li>
+                            {% endif%}
                         </ul>
                     </li>
                     {% endif %}

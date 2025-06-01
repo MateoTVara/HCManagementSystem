@@ -309,6 +309,21 @@ def doctor_remove(request, pk):
     return redirect('doctor_list')
 
 
+@role_required(['ADMIN', 'MANAGEMENT'])
+def doctor_register(request):
+    if request.method == 'POST':
+        form = DoctorUserRegister(request.POST)
+        if form.is_valid():
+            form.save()
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return render(request, 'doctors/doctor_register.html', {'form': DoctorUserRegister()})
+            return redirect('doctor_list')
+    else:
+        form = DoctorUserRegister()
+    template = 'doctors/doctor_register.html' if request.headers.get('X-Requested-With') == 'XMLHttpRequest' else None
+    return render(request, template, {'form': form})
+
+
 def doctor_edit(request, pk):
     doctor = Doctor.objects.get(pk=pk)
 

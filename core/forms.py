@@ -265,3 +265,42 @@ class DoctorUserEdit(forms.ModelForm):
             user.save()
             doctor.save()
         return doctor
+
+class DoctorUserRegister(forms.ModelForm):
+    username = forms.CharField(label="Usuario", max_length=150)
+    first_name = forms.CharField(label="Nombre", max_length=150)
+    last_name = forms.CharField(label="Apellido", max_length=150)
+    email = forms.EmailField(label="Correo electrónico")
+    password = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(render_value=False),
+        required=True,
+        help_text="Debe contener al menos 8 caracteres."
+    )
+
+    class Meta:
+        model = Doctor
+        fields = ['specialty', 'dni', 'username', 'first_name', 'last_name', 'email', 'password']
+        widgets = {
+            'specialty': forms.Select(attrs={'class': 'form-select'}),
+            'dni': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+    def save(self, commit=True):
+        # Crear usuario
+        user = User(
+            username=self.cleaned_data['username'],
+            first_name=self.cleaned_data['first_name'],
+            last_name=self.cleaned_data['last_name'],
+            email=self.cleaned_data['email'],
+            role='DOCTOR'
+        )
+        user.set_password(self.cleaned_data['password'])
+        if commit:
+            user.save()
+        # Crear doctor
+        doctor = super().save(commit=False)
+        doctor.user = user
+        if commit:
+            doctor.save()
+        return doctor

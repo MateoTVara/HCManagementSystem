@@ -42,6 +42,7 @@ urlpatterns = [
     path('doctor/list/', views.doctor_list, name='doctor_list'),  # Listar doctores
     path('doctor/remove/<int:pk>/', views.doctor_remove, name='doctor_remove'),  # Eliminar doctor
     path('doctor/edit/<int:pk>/', views.doctor_edit, name='doctor_edit'),  # Editar doctor
+    path('doctor/register/', views.doctor_register, name='doctor_register'),  # Registrar doctor
 
     # Rutas para la gestión de alergias
     path('allergy/register/', views.allergy_register, name='allergy_register'),  # Registrar alergia
