@@ -1,0 +1,16 @@
+<div class="card">
+    <div class="card-header">
+        Detalle de Cita
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">
+    {{ appointment.patient.first_name }} {{ appointment.patient.last_name }} con Dr(a). {{ appointment.doctor.user.get_full_name }}
+        </h5>
+        <p class="card-text">
+            Fecha: {{ appointment.date|date:"d/m/Y" }}<br>
+            Hora: {{ appointment.time }}<br>
+            Estado: {{ appointment.get_status_display }}<br>
+            Motivo: {{ appointment.reason }}<br>
+        </p>
+    </div>
+</div>

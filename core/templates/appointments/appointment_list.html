@@ -41,9 +41,19 @@
                 {% for appointment in appointments %}
                 <tr>
                     <td>
-                        <strong>Dr(a). {{ appointment.doctor.user.get_full_name }}</strong>
+                        <a href="{% url 'appointment_detail' appointment.id %}"
+                           data-ajax
+                           class="text-decoration-underline cursor-pointer">
+                            Dr(a). {{ appointment.doctor.user.get_full_name }}
+                        </a>
                     </td>
-                    <td>{{ appointment.patient.first_name}} {{ appointment.patient.last_name}}</td>
+                    <td>
+                        <a href="{% url 'appointment_detail' appointment.id %}"
+                           data-ajax
+                           class="text-decoration-underline cursor-pointer">
+                            {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}
+                        </a>
+                    </td>
                     <td>
                         <div>{{ appointment.date|date:"d/m/Y" }}</div>
                         <div>{{ appointment.time }}</div>

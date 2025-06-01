@@ -31,6 +31,7 @@ urlpatterns = [
     path('appointment/remove/<int:pk>/', views.appointment_remove, name='appointment_remove'),  # Eliminar cita
     path('appointment/calendar/', views.appointment_calendar, name='appointment_calendar'),  # Calendario de citas
     path('appointment/edit/<int:pk>/', views.appointment_edit, name='appointment_edit'),  # Editar cita
+    path('appointment/detail/<int:pk>/', views.appointment_detail, name='appointment_detail'),  # Detalle de cita
 
     # Rutas para la gestión de pacientes
     path('patient/list/', views.patient_list, name='patient_list'),  # Listar pacientes

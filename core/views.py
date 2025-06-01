@@ -135,6 +135,18 @@ def appointment_edit(request, pk):
     return render(request, 'appointments/appointment_edit.html', {'form': form, 'appointment': appointment})
 
 
+def appointment_detail(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Solo el fragmento para AJAX
+        return render(request, 'appointments/appointment_detail.html', {'appointment': appointment})
+    # Si NO es AJAX, renderiza el dashboard y pasa el fragmento como variable
+    return render(request, 'dashboard.html', {
+        'fragment': 'appointments/appointment_detail.html',
+        'appointment': appointment
+    })
+
+
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_calendar(request):
     today = date.today()
