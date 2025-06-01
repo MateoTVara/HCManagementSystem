@@ -108,6 +108,28 @@
                     </div>
                 </div>
             </div>
+            <!-- Nueva sección: Contacto de emergencia -->
+            <div class="col-12 mt-4">
+                <h5 class="mb-3 text-primary"><i class="bi bi-person-lines-fill me-2"></i>Contacto de Emergencia</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="{{ form.emergency_full_name.id_for_label }}" class="form-label">{{ form.emergency_full_name.label }}</label>
+                        {{ form.emergency_full_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.emergency_relationship.id_for_label }}" class="form-label">{{ form.emergency_relationship.label }}</label>
+                        {{ form.emergency_relationship }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.emergency_phone.id_for_label }}" class="form-label">{{ form.emergency_phone.label }}</label>
+                        {{ form.emergency_phone }}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.emergency_address.id_for_label }}" class="form-label">{{ form.emergency_address.label }}</label>
+                        {{ form.emergency_address }}
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="mt-4">
             <button type="submit" class="btn btn-primary px-5">

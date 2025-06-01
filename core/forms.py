@@ -1,5 +1,5 @@
 from django import forms
-from .models import Appointment, Patient, PatientAllergy, Allergy, Doctor, User
+from .models import Appointment, EmergencyContact, Patient, PatientAllergy, Allergy, Doctor, User
 
 class AppointmentRegister(forms.ModelForm):
     class Meta:
@@ -70,6 +70,23 @@ class AllergyRegister(forms.ModelForm):
         }
 
 class PatientRegister(forms.ModelForm):
+    emergency_full_name = forms.CharField(
+        label="Nombre completo del contacto de emergencia", 
+        max_length=200, required=True, 
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emergency_relationship = forms.CharField(
+        label="Parentesco", max_length=100, 
+        required=True, 
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emergency_phone = forms.CharField(
+        label="Teléfono de emergencia", 
+        max_length=20, required=True, 
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emergency_address = forms.CharField(
+        label="Dirección de emergencia", 
+        widget=forms.Textarea(attrs={'rows': 1, 'class': 'form-control'}), 
+        required=True)
+
     class Meta:
         model = Patient
         fields = ['dni', 'first_name', 'last_name', 'date_of_birth', 'gender', 'blood_type',
@@ -130,6 +147,13 @@ class PatientRegister(forms.ModelForm):
     
     def save(self, commit=True):
         patient = super().save(commit)
+        EmergencyContact.objects.create(
+            patient=patient,
+            full_name=self.cleaned_data['emergency_full_name'],
+            relationship=self.cleaned_data['emergency_relationship'],
+            phone=self.cleaned_data['emergency_phone'],
+            address=self.cleaned_data['emergency_address'],
+        )
         for allergy in Allergy.objects.all():
             if self.cleaned_data.get(f'allergy_{allergy.id}'):
                 PatientAllergy.objects.update_or_create(
@@ -143,6 +167,23 @@ class PatientRegister(forms.ModelForm):
         return patient
     
 class PatientEdit(forms.ModelForm):
+    emergency_full_name = forms.CharField(
+        label="Nombre completo del contacto de emergencia", 
+        max_length=200, required=True, 
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emergency_relationship = forms.CharField(
+        label="Parentesco", max_length=100, 
+        required=True, 
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emergency_phone = forms.CharField(
+        label="Teléfono de emergencia", 
+        max_length=20, required=True, 
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
+    emergency_address = forms.CharField(
+        label="Dirección de emergencia", 
+        widget=forms.Textarea(attrs={'rows': 1, 'class': 'form-control'}), 
+        required=True)
+    
     class Meta:
         model = Patient
         fields = ['dni', 'first_name', 'last_name', 'date_of_birth', 'gender'
@@ -185,6 +226,12 @@ class PatientEdit(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.allergies = Allergy.objects.all()
+        if self.instance.pk and self.instance.emergencycontact_set.exists():
+            contact = self.instance.emergencycontact_set.first()
+            self.fields['emergency_full_name'].initial = contact.full_name
+            self.fields['emergency_relationship'].initial = contact.relationship
+            self.fields['emergency_phone'].initial = contact.phone
+            self.fields['emergency_address'].initial = contact.address
         for allergy in self.allergies:
             self.fields[f'allergy_{allergy.id}'] = forms.BooleanField(
                 required=False,
@@ -206,6 +253,15 @@ class PatientEdit(forms.ModelForm):
 
     def save(self, commit=True):
         patient = super().save(commit)
+        EmergencyContact.objects.update_or_create(
+            patient=patient,
+            defaults={
+                'full_name': self.cleaned_data['emergency_full_name'],
+                'relationship': self.cleaned_data['emergency_relationship'],
+                'phone': self.cleaned_data['emergency_phone'],
+                'address': self.cleaned_data['emergency_address'],
+            }
+        )
         selected_allergy_ids = []
         for allergy in Allergy.objects.all():
             if self.cleaned_data.get(f'allergy_{allergy.id}'):

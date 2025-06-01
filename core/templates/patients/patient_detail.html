@@ -35,6 +35,19 @@
                 {% else %}
                     <div class="text-muted">No se registraron alergias para este paciente.</div>
                 {% endif %}
+                <h6 class="mt-4">Contacto de Emergencia:</h6>
+                {% if patient.emergencycontact_set.exists %}
+                    {% with contact=patient.emergencycontact_set.first %}
+                        <ul>
+                            <li><strong>Nombre:</strong> {{ contact.full_name }}</li>
+                            <li><strong>Parentesco:</strong> {{ contact.relationship }}</li>
+                            <li><strong>Teléfono:</strong> {{ contact.phone }}</li>
+                            <li><strong>Dirección:</strong> {{ contact.address }}</li>
+                        </ul>
+                    {% endwith %}
+                {% else %}
+                    <div class="text-muted">No se registró contacto de emergencia.</div>
+                {% endif %}
             </div>
         </div>
         <!-- Tabla de citas debajo de ambas columnas -->
