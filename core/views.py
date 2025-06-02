@@ -62,17 +62,28 @@ def appointment_register(request):
     if request.method == 'POST':
         form = AppointmentRegister(request.POST)
         if form.is_valid():
-            form.save()
+            appointment = form.save(commit=False)
+            patient = appointment.patient
+            doctor = appointment.doctor
+
+            # Buscar historial médico activo
+            medical_record = patient.get_active_medical_record()
+            if not medical_record:
+                medical_record = MedicalRecord.objects.create(
+                    patient=patient,
+                    attending_doctor=doctor,
+                    status='ACTIVE'
+                )
+            appointment.medical_record = medical_record
+            appointment.save()
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return render(request, 'appointments/appointment_register.html', {'form': AppointmentRegister()})
             return redirect('dashboard')
-        else:
-            pass
+        # Si el form no es válido, sigue abajo
     else:
         form = AppointmentRegister()
 
     template = 'appointments/appointment_register.html' if request.headers.get('X-Requested-With') == 'XMLHttpRequest' else None
-    
     return render(request, template, {'form': form})
 
 

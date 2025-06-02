@@ -119,6 +119,9 @@ class Patient(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name} {self.dni}"
     
+    def get_active_medical_record(self):
+        return self.medicalrecord_set.filter(status='ACTIVE').first()
+    
     class Meta:
         verbose_name = "Paciente"
         verbose_name_plural = "Pacientes"
