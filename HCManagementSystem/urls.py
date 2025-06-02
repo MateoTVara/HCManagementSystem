@@ -58,4 +58,8 @@ urlpatterns = [
     path('export/patients/excel/', views.export_patients_excel, name='export_patients_excel'),
     path('export/doctors/excel/', views.export_doctors_excel, name='export_doctors_excel'),
     path('export/appointments/excel/', views.export_appointments_excel, name='export_appointments_excel'),
+
+    # Consultas de doctor
+    path('consultation/list/', views.consultation_list, name='consultation_list'),
+    path('consultation/start/<int:pk>/', views.consultation_start, name='consultation_start'),
 ]

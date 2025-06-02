@@ -1,0 +1,53 @@
+<!-- filepath: c:\Users\Mateo Torres\OneDrive\Documentos\Django\UTP\Ciclo 07\Curso Integrador\HCManagementSystem\core\templates\consultations\consultation_list.html -->
+<div class="h-100 p-4 bg-white rounded-3 shadow-sm">
+    <h3 class="mb-4 text-primary"><i class="bi bi-clipboard2-pulse me-2"></i>Mis Consultas Agendadas</h3>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Paciente</th>
+                    <th>DNI</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                    <th>Motivo</th>
+                    <th class="text-end">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appt in appointments %}
+                <tr>
+                    <td>{{ appt.patient.first_name }} {{ appt.patient.last_name }}</td>
+                    <td>{{ appt.patient.dni }}</td>
+                    <td>{{ appt.date|date:"d/m/Y" }}</td>
+                    <td>{{ appt.time|time:"h:i A" }}</td>
+                    <td>{{ appt.reason|truncatechars:40 }}</td>
+                    <td class="text-end">
+                        {% if next_appointment and appt.id == next_appointment.id %}
+                            <a href="{% url 'consultation_start' appt.id %}" data-ajax class="btn btn-success">
+                                <i class="bi bi-play-circle"></i> Iniciar Consulta
+                            </a>
+                        {% else %}
+                            <span class="text-muted small">
+                                {% with appt_datetime=appt.date|stringformat:"s"|add:" "|add:appt.time|stringformat:"s" %}
+                                    {% comment %} Mostrar tiempo restante {% endcomment %}
+                                    {% if appt.time_until.total_seconds > 0 %}
+                                        Disponible en {{ appt.time_until }}
+                                    {% else %}
+                                        Esperando turno
+                                    {% endif %}
+                                {% endwith %}
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        No tienes consultas agendadas.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

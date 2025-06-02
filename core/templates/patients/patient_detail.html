@@ -69,7 +69,7 @@
                         {% for appt in appointments %}
                         <tr>
                             <td>{{ appt.date|date:"d/m/Y" }}</td>
-                            <td>{{ appt.time }}</td>
+                            <td>{{ appt.time|time:"h:i A" }}</td>
                             <td>Dr(a). {{ appt.doctor.user.get_full_name }}</td>
                             <td>{{ appt.get_status_display }}</td>
                             <td>{{ appt.reason|truncatechars:40 }}</td>

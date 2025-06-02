@@ -1,0 +1,11 @@
+<!-- filepath: c:\Users\Mateo Torres\OneDrive\Documentos\Django\UTP\Ciclo 07\Curso Integrador\HCManagementSystem\core\templates\consultations\consultation_window.html -->
+<div class="card">
+    <div class="card-header">
+        Consulta con {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}
+    </div>
+    <div class="card-body">
+        <p>Motivo: {{ appointment.reason }}</p>
+        <p>Fecha: {{ appointment.date|date:"d/m/Y" }} Hora: {{ appointment.time }}</p>
+        <div class="alert alert-info">Ventana de consulta en desarrollo.</div>
+    </div>
+</div>

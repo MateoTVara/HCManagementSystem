@@ -1,9 +1,10 @@
 from functools import wraps
 from django.http import HttpResponseForbidden, JsonResponse
+from django.utils import timezone
 from core.models import *
 from .forms import *
 from django.db.models import Q, Count
-from datetime import date
+from datetime import date, datetime, timedelta
 import calendar
 from django.views.generic import View
 from django.shortcuts import get_object_or_404, render, redirect
@@ -106,6 +107,7 @@ def appointment_remove(request, pk):
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_edit(request, pk):
     appointment = Appointment.objects.get(pk=pk)
+    print("DEBUG fecha de la cita:", appointment.date, type(appointment.date)) 
 
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         form = AppointmentEdit(request.POST, instance=appointment)
@@ -545,3 +547,71 @@ def export_appointments_excel(request):
         resp['Content-Disposition'] = 'attachment; filename="citas.xlsx"'
         return resp
     return HttpResponse("Error generando el archivo", status=500)
+
+
+@role_required(['DOCTOR'])
+def consultation_list(request):
+    doctor = request.user.doctor_profile
+    now = timezone.localtime()
+
+    # Actualiza automáticamente citas "Programada" a "No presentado" si han pasado 15 minutos
+    fifteen_minutes_ago = now - timedelta(minutes=15)
+    expired_appointments = Appointment.objects.filter(
+        doctor=doctor,
+        status='P',
+        date__lte=now.date()
+    )
+    for appt in expired_appointments:
+        appt_datetime = datetime.combine(appt.date, appt.time)
+        appt_datetime = timezone.make_aware(appt_datetime, timezone.get_current_timezone())
+        appt.time_until = appt_datetime - now
+        print(f"Ahora: {now}, Cita: {appt_datetime}, Estado: {appt.status}, Limite: {appt_datetime + timedelta(minutes=15)}")
+        if now > appt_datetime + timedelta(minutes=15):
+            appt.status = 'N'
+            appt.save(update_fields=['status'])
+
+    appointments = Appointment.objects.filter(
+        doctor=doctor,
+        date__gte=now.date(),
+        status= 'P'
+    ).order_by('date', 'time')
+
+    # Encuentra la cita más próxima futura o de hoy y hora >= ahora
+    next_appointment = None
+    for appt in appointments:
+        appt_datetime = datetime.combine(appt.date, appt.time)
+        appt_datetime = timezone.make_aware(appt_datetime)
+        if appt_datetime.date() == now.date() and appt.status == 'P':
+            if appt_datetime.time() <= now.time():
+                next_appointment = appt
+                break
+            elif appt_datetime.time() > now.time():
+                next_appointment = appt
+                break
+        elif appt_datetime > now and appt.status == 'P':
+            next_appointment = appt
+            break
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'consultations/consultation_list.html', {
+            'appointments': appointments,
+            'next_appointment': next_appointment,
+            'now': now,
+        })
+    return render(request, 'dashboard.html', {
+        'fragment': 'consultations/consultation_list.html',
+        'appointments': appointments,
+        'next_appointment': next_appointment,
+        'now': now,
+    })
+
+
+@role_required(['DOCTOR'])
+def consultation_start(request, pk):
+    appointment = get_object_or_404(Appointment, pk=pk, doctor=request.user.doctor_profile)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'consultations/consultation_window.html', {'appointment': appointment})
+    return render(request, 'dashboard.html', {
+        'fragment': 'consultations/consultation_window.html',
+        'appointment': appointment
+    })

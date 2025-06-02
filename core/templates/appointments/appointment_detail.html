@@ -8,7 +8,7 @@
         </h5>
         <p class="card-text">
             Fecha: {{ appointment.date|date:"d/m/Y" }}<br>
-            Hora: {{ appointment.time }}<br>
+            Hora: {{ appointment.time|time:"h:i A" }}<br>
             Estado: {{ appointment.get_status_display }}<br>
             Motivo: {{ appointment.reason }}<br>
         </p>

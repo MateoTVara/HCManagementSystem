@@ -1,5 +1,6 @@
 from django import forms
 from .models import Appointment, EmergencyContact, Patient, PatientAllergy, Allergy, Doctor, User
+from django.core.exceptions import ValidationError
 
 class AppointmentRegister(forms.ModelForm):
     class Meta:
@@ -12,7 +13,8 @@ class AppointmentRegister(forms.ModelForm):
             }),
             'time': forms.TimeInput(attrs={
                 'type': 'time',
-                'class': 'form-control'
+                'class': 'form-control',
+                'step': 900
             }),
             'patient': forms.Select(attrs={
                 'class': 'form-select'
@@ -25,6 +27,12 @@ class AppointmentRegister(forms.ModelForm):
                 'class': 'form-control'
             }),
         }
+    
+    def clean_time(self):
+        value = self.cleaned_data['time']
+        if value.minute % 15 != 0 or value.second != 0 or value.microsecond != 0:
+            raise ValidationError("La hora debe estar en intervalos de 15 minutos (:00, :15, :30, :45).")
+        return value
 
 class AppointmentEdit(forms.ModelForm):
     class Meta:
@@ -32,13 +40,14 @@ class AppointmentEdit(forms.ModelForm):
         fields = ['patient', 'doctor', 'date', 'time', 'reason', 'status'
                   ]
         widgets = {
-            'date' : forms.DateInput(attrs={
-                'type': 'date',
-                'class': 'form-control'
-            }),
+            'date': forms.DateInput(
+                attrs={'type': 'date', 'class': 'form-control'},
+                format='%Y-%m-%d'
+            ),
             'time' : forms.TimeInput(attrs={
                 'type': 'time',
-                'class': 'form-control'
+                'class': 'form-control',
+                'step': 900
             }),
             'patient' : forms.Select(attrs={
                 'class': 'form-select'
@@ -201,7 +210,8 @@ class PatientEdit(forms.ModelForm):
             'date_of_birth': forms.DateInput(attrs={
                 'type': 'date',
                 'class': 'form-control'
-            }),
+            },
+            format='%Y-%m-%d'),
             'gender': forms.Select(attrs={
                 'class': 'form-select'
             }),

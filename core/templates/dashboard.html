@@ -129,6 +129,14 @@
                         </ul>
                     </li>
                     {% endif %}
+                    {% if request.user.role == 'DOCTOR' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'consultation_list' %}" data-ajax>
+                            <i class="bi bi-clipboard2-pulse me-2"></i>
+                            Mis Consultas
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

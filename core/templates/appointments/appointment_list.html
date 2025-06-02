@@ -58,7 +58,7 @@
                     <td>{{ appointment.patient.first_name}} {{ appointment.patient.last_name}}</td>
                     <td>
                         <div>{{ appointment.date|date:"d/m/Y" }}</div>
-                        <div>{{ appointment.time }}</div>
+                        <div>{{ appointment.time|time:"h:i A" }}</div>
                     </td>
                     <td> {{ appointment.get_status_display }} </td>
                     <td class="text-end">
