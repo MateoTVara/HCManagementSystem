@@ -37,26 +37,8 @@
                     {% endif %}
                 </div>
             </div>
-            <!-- Segunda fila: Usuario, Email, Especialidad -->
-            <div class="col-md-4">
-                <div class="mb-2">
-                    <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
-                    {{ form.username }}
-                    {% if form.username.errors %}
-                        <div class="text-danger small">{{ form.username.errors|striptags }}</div>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="mb-2">
-                    <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
-                    {{ form.email }}
-                    {% if form.email.errors %}
-                        <div class="text-danger small">{{ form.email.errors|striptags }}</div>
-                    {% endif %}
-                </div>
-            </div>
-            <div class="col-md-4">
+            <!-- Segunda fila: Especialidad, email -->
+             <div class="col-md-6">
                 <div class="mb-2">
                     <label for="{{ form.specialty.id_for_label }}" class="form-label">{{ form.specialty.label }}</label>
                     {{ form.specialty }}
@@ -65,7 +47,35 @@
                     {% endif %}
                 </div>
             </div>
-            <!-- Tercera fila: Contraseña -->
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="text-danger small">{{ form.email.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <!-- Tercera fila: Contraseña, género -->
+             <div class="col-md-6">
+                <div class="mb-2">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="text-danger small">{{ form.username.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <label for="{{ form.gender.id_for_label }}" class="form-label">{{form.gender.label }}</label>
+                    {{ form.gender }}
+                    {% if form.gender.errors %}
+                        <div class="text-danger small">{{ form.gender.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            </div>    
+            <!-- Cuarta Fila: Contraseña -->
             <div class="col-md-6">
                 <div class="mb-2">
                     <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>

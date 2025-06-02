@@ -379,6 +379,7 @@ def doctor_edit(request, pk):
                     'email': doctor.user.email,
                     'specialty': doctor.specialty,
                     'dni': doctor.dni,
+                    'gender': doctor.gender,
                 }
             }
             return JsonResponse(data)

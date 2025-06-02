@@ -7,14 +7,15 @@ from .models import (
     Admission, Allergy, PatientAllergy
 )
 
+@admin.register(User)
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'is_staff')
     list_filter = ('role', 'is_staff')
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('first_name', 'last_name', 'email', 'role')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
+        ('Información personal', {'fields': ('first_name', 'last_name', 'email', 'role')}),
+        ('Permisos', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('Fechas importantes', {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
         (None, {
@@ -25,9 +26,9 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Doctor)
 class DoctorAdmin(admin.ModelAdmin):
-    list_display = ('user', 'specialty')
-    list_filter = ('specialty',)
-    search_fields = ('user__first_name', 'user__last_name')
+    list_display = ('user', 'specialty', 'dni', 'gender')
+    list_filter = ('specialty', 'gender')
+    search_fields = ('user__first_name', 'user__last_name', 'dni')
 
 @admin.register(Allergy)
 class AllergyAdmin(admin.ModelAdmin):
@@ -36,9 +37,9 @@ class AllergyAdmin(admin.ModelAdmin):
 
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'date_of_birth', 'gender', 'blood_type')
+    list_display = ('full_name', 'dni', 'date_of_birth', 'gender', 'blood_type', 'phone', 'email')
     list_filter = ('gender', 'blood_type')
-    search_fields = ('first_name', 'last_name')
+    search_fields = ('first_name', 'last_name', 'dni')
     ordering = ('last_name', 'first_name')
     
     def full_name(self, obj):
@@ -47,7 +48,7 @@ class PatientAdmin(admin.ModelAdmin):
 
 @admin.register(PatientAllergy)
 class PatientAllergyAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'allergy', 'severity', 'patient_reactions')
+    list_display = ('patient', 'allergy', 'severity', 'patient_reactions', 'date_registered')
     list_filter = ('severity',)
     search_fields = ('patient__first_name', 'patient__last_name', 'allergy__name')
 
@@ -60,8 +61,8 @@ class AppointmentAdmin(admin.ModelAdmin):
 
 @admin.register(MedicalRecord)
 class MedicalRecordAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'diagnosis_short', 'attending_doctor', 'created_at')
-    list_filter = ('attending_doctor__specialty', 'created_at')
+    list_display = ('patient', 'diagnosis_short', 'attending_doctor', 'created_at', 'status')
+    list_filter = ('attending_doctor__specialty', 'created_at', 'status')
     search_fields = ('patient__first_name', 'patient__last_name', 'diagnosis')
     
     def diagnosis_short(self, obj):
@@ -70,25 +71,16 @@ class MedicalRecordAdmin(admin.ModelAdmin):
 
 @admin.register(Medication)
 class MedicationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'dosage_form', 'strength', 'quantity_in_stock', 'expiration_status')
+    list_display = ('name', 'dosage_form', 'strength', 'quantity_in_stock', 'manufacturer')
     list_filter = ('dosage_form', 'manufacturer')
     search_fields = ('name', 'generic_name')
     readonly_fields = ('quantity_in_stock',)
-    
-    def expiration_status(self, obj):
-        from django.utils import timezone
-        if obj.expiration_date < timezone.now().date():
-            return "Expirado"
-        elif (obj.expiration_date - timezone.now().date()).days < 30:
-            return "Próximo a expirar"
-        return "Válido"
-    expiration_status.short_description = 'Estado'
 
 @admin.register(Prescription)
 class PrescriptionAdmin(admin.ModelAdmin):
-    list_display = ('medical_record', 'medication', 'duration')
+    list_display = ('appointment', 'medication', 'dosage', 'frequency', 'duration')
     list_filter = ('medication__dosage_form',)
-    raw_id_fields = ('medical_record',)
+    raw_id_fields = ('appointment',)
 
 @admin.register(EmergencyContact)
 class EmergencyContactAdmin(admin.ModelAdmin):
@@ -103,5 +95,3 @@ class AdmissionAdmin(admin.ModelAdmin):
     def discharge_status(self, obj):
         return "Alta dada" if obj.discharge_date else "Hospitalizado"
     discharge_status.short_description = 'Estado'
-
-admin.site.register(User, CustomUserAdmin)

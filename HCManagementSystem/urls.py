@@ -20,6 +20,8 @@ from django.urls import path
 from core import views
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
+
     # Rutas de autenticación
     path('', views.login_view, name='login'),  # Vista de inicio de sesión
     path('logout/', views.logout_view, name='logout'),  # Vista de cierre de sesión

@@ -291,10 +291,11 @@ class DoctorUserEdit(forms.ModelForm):
 
     class Meta:
         model = Doctor
-        fields = ['specialty', 'dni', 'username', 'first_name', 'last_name', 'email', 'password']
+        fields = ['specialty', 'dni', 'username', 'first_name', 'last_name', 'email', 'password', 'gender']
         widgets = {
             'specialty': forms.Select(attrs={'class': 'form-select'}),
             'dni': forms.TextInput(attrs={'class': 'form-control'}),
+            'gender': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -336,10 +337,11 @@ class DoctorUserRegister(forms.ModelForm):
 
     class Meta:
         model = Doctor
-        fields = ['specialty', 'dni', 'username', 'first_name', 'last_name', 'email', 'password']
+        fields = ['specialty', 'dni', 'username', 'first_name', 'last_name', 'email', 'password', 'gender']
         widgets = {
             'specialty': forms.Select(attrs={'class': 'form-control'}),
             'dni': forms.TextInput(attrs={'class': 'form-control'}),
+            'gender': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def save(self, commit=True):

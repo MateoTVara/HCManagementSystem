@@ -6,6 +6,7 @@
         <h5 class="card-title">{{ doctor.user.first_name }} {{ doctor.user.last_name }}</h5>
         <p class="card-text">
             DNI: {{ doctor.dni }}<br>
+            Género: {{ doctor.get_gender_display }}<br>
             Especialidad: {{ doctor.get_specialty_display }}<br>
             Nombre de usuario: {{ doctor.user.username }}<br>
             Correo electrónico: {{ doctor.user.email }}<br>

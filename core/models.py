@@ -49,6 +49,11 @@ class Doctor(models.Model):
         ('PEDIATRICS', 'Pediatría'),
         ('OTHER', 'Otra Especialidad'),
     ]
+
+    GENDER_CHOICES = [
+        ('M', 'Masculino'),
+        ('F', 'Femenino'),
+    ]
     
     user = models.OneToOneField(
         User,
@@ -64,6 +69,7 @@ class Doctor(models.Model):
     )
 
     dni = models.CharField(max_length=8, unique=True, verbose_name="DNI")
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, verbose_name="Género")
     
     def __str__(self):
         return f"Dr(a). {self.user.get_full_name()} ({self.get_specialty_display()})"
@@ -146,6 +152,34 @@ class PatientAllergy(models.Model):
     def __str__(self):
         return f"{self.patient} - {self.allergy} ({self.severity})"
 
+class MedicalRecord(models.Model):
+    STATUS_CHOICES = [
+        ('ACTIVE', 'Activo'),
+        ('CLOSED', 'Cerrado'),
+        ('CHRONIC', 'Crónico'),
+    ]
+
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name="Paciente")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación")
+    diagnosis = models.TextField(verbose_name="Diagnóstico")
+    treatment = models.TextField(verbose_name="Tratamiento")
+    attending_doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, null=True, verbose_name="Médico tratante")
+    additional_notes = models.TextField(blank=True, verbose_name="Notas adicionales")
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='ACTIVE',
+        verbose_name="Estado del caso"
+    )
+    
+    def __str__(self):
+        return f"Registro de {self.patient} - {self.created_at.date()}"
+    
+    class Meta:
+        verbose_name = "Historial Médico"
+        verbose_name_plural = "Historiales Médicos"
+        ordering = ['-created_at']
+
 class Appointment(models.Model):
     patient = models.ForeignKey(
         Patient, 
@@ -156,6 +190,14 @@ class Appointment(models.Model):
         Doctor, 
         on_delete=models.CASCADE,
         verbose_name="Médico",
+    )
+    medical_record = models.ForeignKey(
+        MedicalRecord,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='appointments',
+        verbose_name="Caso médico asociado"
     )
     date = models.DateField(verbose_name="Fecha")
     time = models.TimeField(verbose_name="Hora")
@@ -198,22 +240,6 @@ class Appointment(models.Model):
             ),
         ]
 
-class MedicalRecord(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name="Paciente")
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación")
-    diagnosis = models.TextField(verbose_name="Diagnóstico")
-    treatment = models.TextField(verbose_name="Tratamiento")
-    attending_doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, null=True, verbose_name="Médico tratante")
-    additional_notes = models.TextField(blank=True, verbose_name="Notas adicionales")
-    
-    def __str__(self):
-        return f"Registro de {self.patient} - {self.created_at.date()}"
-    
-    class Meta:
-        verbose_name = "Historial Médico"
-        verbose_name_plural = "Historiales Médicos"
-        ordering = ['-created_at']
-
 class Medication(models.Model):
     DOSAGE_FORM_CHOICES = [
         ('TAB', 'Tableta'),
@@ -229,8 +255,6 @@ class Medication(models.Model):
     dosage_form = models.CharField(max_length=5, choices=DOSAGE_FORM_CHOICES, verbose_name="Forma Farmacéutica")
     strength = models.CharField(max_length=50, verbose_name="Concentración")
     quantity_in_stock = models.IntegerField(validators=[MinValueValidator(0)], verbose_name="Cantidad en Inventario")
-    expiration_date = models.DateField(verbose_name="Fecha de Caducidad")
-    reorder_level = models.IntegerField(default=10, verbose_name="Nivel de Reorden")
     
     def __str__(self):
         return f"{self.name} ({self.strength} - {self.get_dosage_form_display()})"
@@ -246,8 +270,12 @@ class Prescription(models.Model):
         ('C', 'Completada'),
         ('D', 'Cancelada'),
     ]
-    
-    medical_record = models.ForeignKey(MedicalRecord, on_delete=models.CASCADE, verbose_name="Historial Médico")
+    appointment = models.ForeignKey(
+        Appointment,
+        on_delete=models.CASCADE,
+        related_name='prescriptions',
+        verbose_name="Cita asociada"
+    )
     medication = models.ForeignKey(Medication, on_delete=models.CASCADE, verbose_name="Medicamento")
     dosage = models.CharField(max_length=100, verbose_name="Dosis")
     frequency = models.CharField(max_length=100, verbose_name="Frecuencia")
