@@ -1,11 +1,26 @@
 <!-- filepath: c:\Users\Mateo Torres\OneDrive\Documentos\Django\UTP\Ciclo 07\Curso Integrador\HCManagementSystem\core\templates\consultations\consultation_window.html -->
 <div class="card">
     <div class="card-header">
-        Consulta con {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}
+        Consulta con {{ appointment.patient.first_name }} {{ appointment.patient.last_name }} 
+        - {{ appointment.patient.dni}} - {{appointment.patient.get_gender_display}}
     </div>
     <div class="card-body">
-        <p>Motivo: {{ appointment.reason }}</p>
-        <p>Fecha: {{ appointment.date|date:"d/m/Y" }} Hora: {{ appointment.time }}</p>
         <div class="alert alert-info">Ventana de consulta en desarrollo.</div>
+        <h5 class="mb-3">Datos de la Cita</h5>
+        <ul class="list-group mb-3">
+            <li class="list-group-item"><strong>Fecha:</strong> {{ appointment.date|date:"d/m/Y" }}</li>
+            <li class="list-group-item"><strong>Hora:</strong> {{ appointment.time|time:"H:i" }}</li>
+            <li class="list-group-item"><strong>Motivo:</strong> {{ appointment.reason }}</li>
+            <li class="list-group-item"><strong>Estado:</strong> {{ appointment.get_status_display }}</li>
+        </ul>
+        <!-- Notas de la consulta -->
+        <form method="post" id="consultationNotesForm">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="notes" class="form-label">Notas de la consulta</label>
+                <textarea class="form-control" id="notes" name="notes" rows="5">{{ appointment.notes }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Finalizar Consulta</button>
+        </form>
     </div>
 </div>

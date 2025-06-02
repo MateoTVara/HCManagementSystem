@@ -619,10 +619,26 @@ def consultation_list(request):
 
 @role_required(['DOCTOR'])
 def consultation_start(request, pk):
-    appointment = get_object_or_404(Appointment, pk=pk, doctor=request.user.doctor_profile)
+    appointment = get_object_or_404(Appointment, pk=pk)
+    medications = Medication.objects.all()
+
+    if request.method == 'POST':
+        # Guardar notas y marcar como completada
+        notes = request.POST.get('notes', '')
+        appointment.notes = notes
+        appointment.status = 'C'  # Completada
+        appointment.save(update_fields=['notes', 'status'])
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True})
+        return redirect('consultation_list')
+
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return render(request, 'consultations/consultation_window.html', {'appointment': appointment})
+        return render(request, 'consultations/consultation_window.html', {
+            'appointment': appointment,
+            'medications': medications,
+        })
     return render(request, 'dashboard.html', {
         'fragment': 'consultations/consultation_window.html',
-        'appointment': appointment
+        'appointment': appointment,
+        'medications': medications,
     })
