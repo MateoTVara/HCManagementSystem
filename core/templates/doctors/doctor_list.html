@@ -59,6 +59,7 @@
                             <a href="{% url 'doctor_edit' doctor.id %}" class="btn btn-sm btn-outline-primary btnEditDoctor" data-url="{% url 'doctor_edit' doctor.id %}" title="Editar">
                                 <i class="bi bi-pencil"></i>
                             </a>
+                            {% if request.user.role in 'ADMIN,MANAGEMENT' %}
                             <form method="post" action="{% url 'doctor_remove' doctor.id %}" class="d-inline">
                                 {% csrf_token %}
                                 <button type="submit" 
@@ -68,6 +69,7 @@
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
+                            {% if request.user.role in 'ADMIN,MANAGEMENT' %}
                         </div>
                     </td>
                 </tr>

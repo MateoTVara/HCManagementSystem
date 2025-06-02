@@ -58,6 +58,7 @@
                             <button type="button" class="btn btn-sm btn-outline-primary btnEditPatient" data-url="{% url 'patient_edit' patient.id %}">
                                 <i class="bi bi-pencil"></i>
                             </button>
+                            {% if request.user.role in 'ADMIN,MANAGEMENT' %}
                             <form method="post" action="{% url 'patient_remove' patient.id %}" class="d-inline">
                                 {% csrf_token %}
                                 <button type="submit" 
@@ -67,6 +68,7 @@
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </form>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>

@@ -75,9 +75,14 @@ def appointment_register(request):
     return render(request, template, {'form': form})
 
 
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_list(request):
     query = request.GET.get('q', '')
     appointments = Appointment.objects.all()
+
+    #Validación para doctores
+    if hasattr(request.user, 'doctor_profile'):
+        appointments = appointments.filter(doctor=request.user.doctor_profile)
     
     if query:
         appointments = appointments.filter(
@@ -90,6 +95,7 @@ def appointment_list(request):
     return render(request, 'appointments/appointment_list.html', {'appointments': appointments})
 
 
+@role_required(['ADMIN', 'MANAGEMENT', 'ATTENDANT'])
 def appointment_remove(request, pk):
     if request.method == 'POST':
         appointment = Appointment.objects.get(pk=pk)
@@ -135,6 +141,7 @@ def appointment_edit(request, pk):
     return render(request, 'appointments/appointment_edit.html', {'form': form, 'appointment': appointment})
 
 
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_detail(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -172,7 +179,7 @@ def appointment_calendar(request):
     })
 
 
-@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR'])
+@role_required(['ADMIN', 'MANAGEMENT', 'ATTENDANT'])
 def patient_register(request):
     allergies = Allergy.objects.all()
     
@@ -233,6 +240,7 @@ def patient_remove(request, pk):
     return redirect('patient_list')
 
 
+@role_required(['ADMIN', 'MANAGEMENT', 'ATTENDANT'])
 def patient_edit(request, pk):
     patient = Patient.objects.get(pk=pk)
     allergies = Allergy.objects.all()
@@ -295,6 +303,7 @@ def patient_edit(request, pk):
     })
 
 
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def patient_detail(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
     appointments = patient.appointment_set.select_related('doctor__user').order_by('-date', '-time')
@@ -312,7 +321,7 @@ def patient_detail(request, pk):
     })
 
 
-@role_required(['ADMIN', 'MANAGEMENT','ATTENDANT'])
+@role_required(['ADMIN', 'MANAGEMENT', 'ATTENDANT'])
 def doctor_list(request):
     query = request.GET.get('q', '')
     doctors = Doctor.objects.select_related('user').all()
@@ -353,6 +362,7 @@ def doctor_register(request):
     return render(request, template, {'form': form})
 
 
+@role_required(['ADMIN', 'MANAGEMENT'])
 def doctor_edit(request, pk):
     doctor = Doctor.objects.get(pk=pk)
 
@@ -390,6 +400,7 @@ def doctor_edit(request, pk):
     return render(request, 'doctors/doctor_edit.html', {'form': form, 'doctor': doctor})
 
 
+@role_required(['ADMIN', 'MANAGEMENT'])
 def doctor_detail(request, pk):
     doctor = get_object_or_404(Doctor, pk=pk)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -402,6 +413,7 @@ def doctor_detail(request, pk):
     })
 
 
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def allergy_register(request):
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         form = AllergyRegister(request.POST)
@@ -429,6 +441,7 @@ def allergy_register(request):
     return render(request, 'allergies/allergy_register.html', {'form': form})
 
 
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def allergy_list_partial(request):
     allergies = Allergy.objects.all()
     severity_choices = PatientAllergy.SEVERITY_CHOICES
@@ -438,6 +451,7 @@ def allergy_list_partial(request):
     })
 
 
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def allergy_list_partial_patient(request, patient_id):
     allergies = Allergy.objects.all()
     severity_choices = PatientAllergy.SEVERITY_CHOICES
@@ -454,6 +468,7 @@ def allergy_list_partial_patient(request, patient_id):
     })
 
 
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def export_patients_excel(request):
     patients = Patient.objects.values(
         'dni', 'first_name', 'last_name', 'date_of_birth', 'gender', 'blood_type',
@@ -474,6 +489,7 @@ def export_patients_excel(request):
     return HttpResponse("Error generando el archivo", status=500)
 
 
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def export_doctors_excel(request):
     doctors = Doctor.objects.select_related('user').values(
         'dni',
@@ -500,6 +516,7 @@ def export_doctors_excel(request):
     return HttpResponse("Error generando el archivo", status=500)
 
 
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def export_appointments_excel(request):
     appointments = Appointment.objects.select_related('patient', 'doctor__user').values(
         'date', 'time', 'status', 'reason',

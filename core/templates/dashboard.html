@@ -80,7 +80,7 @@
                             <i class="bi bi-chevron-right"></i>
                         </div>
                         <ul class="nav flex-column ms-3 collapse" id="pacientesSubmenu">
-                            {% if request.user.role in 'ADMIN,MANAGEMENT,DOCTOR' %}
+                            {% if request.user.role in 'ADMIN,MANAGEMENT,ATTENDANT' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'patient_register' %}" data-ajax>
                                     <i class="bi bi-person-plus me-2"></i>
@@ -88,20 +88,18 @@
                                 </a>
                             </li>
                             {% endif %}
-                            {% if request.user.role in 'ADMIN,MANAGEMENT,DOCTOR,ATTENDANT' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'patient_list' %}" data-ajax>
                                     <i class="bi bi-people me-2"></i>
                                     Listado de Pacientes
                                 </a>
                             </li>
-                            {% endif %}
                         </ul>
                     </li>
                     {% endif %}
 
                     <!-- Médicos Submenu -->
-                    {% if request.user.role in 'ADMIN,MANAGEMENT,DOCTOR,ATTENDANT' %}
+                    {% if request.user.role in 'ADMIN,MANAGEMENT,ATTENDANT' %}
                     <li class="nav-item">
                         <div class="nav-link py-2 cursor-pointer d-flex justify-content-between align-items-center" 
                             data-bs-toggle="collapse" 
@@ -114,22 +112,18 @@
                             <i class="bi bi-chevron-right"></i>
                         </div>
                         <ul class="nav flex-column ms-3 collapse" id="medicosSubmenu">
-                            {% if request.user.role in 'ADMIN,MANAGEMENT,ATTENDANT' %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'doctor_list' %}" data-ajax>
-                                    <i class="bi bi-person-badge me-2"></i>
-                                    Listado de Médicos
-                                </a>
-                            </li>
-                            {% endif%}
                             {% if request.user.role in 'ADMIN,MANAGEMENT' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'doctor_register' %}" data-ajax>
-                                    <i class="bi bi-person-plus me-2"></i>
                                     Nuevo Médico
                                 </a>
                             </li>
-                            {% endif%}
+                            {% endif %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'doctor_list' %}" data-ajax>
+                                    Listado de Médicos
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     {% endif %}
