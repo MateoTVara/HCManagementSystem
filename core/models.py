@@ -14,7 +14,7 @@ class User(AbstractUser):
         max_length=20,
         choices=ROLE_CHOICES,
         verbose_name="Rol",
-        default='ATTENDANT'
+        default='ADMIN'
     )
     
     groups = models.ManyToManyField(
@@ -161,8 +161,6 @@ class MedicalRecord(models.Model):
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name="Paciente")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación")
-    diagnosis = models.TextField(verbose_name="Diagnóstico")
-    treatment = models.TextField(verbose_name="Tratamiento")
     attending_doctor = models.ForeignKey(Doctor, on_delete=models.SET_NULL, null=True, verbose_name="Médico tratante")
     additional_notes = models.TextField(blank=True, verbose_name="Notas adicionales")
     status = models.CharField(
@@ -198,6 +196,14 @@ class Appointment(models.Model):
         blank=True,
         related_name='appointments',
         verbose_name="Caso médico asociado"
+    )
+    diagnosis = models.TextField(
+        verbose_name="Diagnóstico",
+        blank=True
+    )
+    treatment = models.TextField(
+        verbose_name="Tratamiento",
+        blank=True
     )
     date = models.DateField(verbose_name="Fecha")
     time = models.TimeField(verbose_name="Hora")
@@ -283,7 +289,7 @@ class Prescription(models.Model):
     instructions = models.TextField(blank=True, verbose_name="Instrucciones Especiales")
      
     def __str__(self):
-        return f"Receta de {self.medication} para {self.medical_record.patient}"
+        return f"Receta de {self.medication} para {self.appointment.patient}"
     
     class Meta:
         verbose_name = "Receta Médica"
@@ -316,3 +322,52 @@ class Admission(models.Model):
         verbose_name = "Ingreso"
         verbose_name_plural = "Ingresos"
         ordering = ['-admission_date']
+
+class MedicalExam(models.Model):
+    EXAM_TYPE_CHOICES = [
+        ('BLOOD_TEST', 'Análisis de Sangre'),
+        ('URINE_TEST', 'Análisis de Orina'),
+        ('X_RAY', 'Radiografía'),
+        ('MRI', 'Resonancia Magnética'),
+        ('CT_SCAN', 'Tomografía Computarizada'),
+        ('ULTRASOUND', 'Ultrasonido'),
+        ('ECG', 'Electrocardiograma'),
+        ('EEG', 'Electroencefalograma'),
+        ('ENDOSCOPY', 'Endoscopia'),
+        ('STOOL_TEST', 'Examen de Heces'),
+        ('THROAT_SWAB', 'Cultivo de Garganta'),
+        ('ALLERGY_TEST', 'Prueba de Alergia'),
+        ('BIOPSY', 'Biopsia'),
+        ('BONE_DENSITY', 'Densitometría Ósea'),
+        ('MAMMOGRAM', 'Mamografía'),
+        ('COLONOSCOPY', 'Colonoscopia'),
+        ('ECHOCARDIOGRAM', 'Ecocardiograma'),
+        ('PULMONARY_FUNCTION', 'Prueba de Función Pulmonar'),
+        ('OTHER', 'Otro'),
+    ]
+    medical_record = models.ForeignKey(
+        MedicalRecord,
+        on_delete=models.CASCADE,
+        related_name='medical_exams',
+        verbose_name="Historial Médico"
+    )
+    exam_type = models.CharField(
+        max_length=20,
+        choices=EXAM_TYPE_CHOICES,
+        verbose_name="Tipo de Examen"
+    )
+    # result = models.TextField(verbose_name="Resultado")
+    # notes = models.TextField(blank=True, verbose_name="Observaciones")
+    # date_taken = models.DateField(verbose_name="Fecha de realización")
+    # date_received = models.DateField(
+    #     null=True,
+    #     blank=True,
+    #     verbose_name="Fecha de recepción de resultados"
+    # )
+    
+    class Meta:
+        verbose_name = "Examen Médico"
+        verbose_name_plural = "Exámenes Médicos"
+
+    def __str__(self):
+        return f"{self.exam_type}"

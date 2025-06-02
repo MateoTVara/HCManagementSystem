@@ -4,7 +4,8 @@ from .models import (
     User, Doctor, Patient, Appointment,
     MedicalRecord, Medication,
     Prescription, EmergencyContact,
-    Admission, Allergy, PatientAllergy
+    Admission, Allergy, PatientAllergy,
+    MedicalExam
 )
 
 @admin.register(User)
@@ -54,20 +55,24 @@ class PatientAllergyAdmin(admin.ModelAdmin):
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'doctor', 'date', 'time', 'status')
+    list_display = ('patient', 'doctor', 'date', 'time', 'status', 'diagnosis_short', 'reason_short')
     list_filter = ('status', 'doctor__specialty')
     date_hierarchy = 'date'
-    search_fields = ('patient__first_name', 'patient__last_name', 'doctor__user__last_name')
+    search_fields = ('patient__first_name', 'patient__last_name', 'doctor__user__last_name', 'diagnosis', 'reason')
+
+    def diagnosis_short(self, obj):
+        return obj.diagnosis[:30] + '...' if obj.diagnosis and len(obj.diagnosis) > 30 else obj.diagnosis
+    diagnosis_short.short_description = 'Diagnóstico'
+
+    def reason_short(self, obj):
+        return obj.reason[:30] + '...' if obj.reason and len(obj.reason) > 30 else obj.reason
+    reason_short.short_description = 'Motivo'
 
 @admin.register(MedicalRecord)
 class MedicalRecordAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'diagnosis_short', 'attending_doctor', 'created_at', 'status')
+    list_display = ('patient', 'attending_doctor', 'created_at', 'status')
     list_filter = ('attending_doctor__specialty', 'created_at', 'status')
-    search_fields = ('patient__first_name', 'patient__last_name', 'diagnosis')
-    
-    def diagnosis_short(self, obj):
-        return obj.diagnosis[:50] + '...' if len(obj.diagnosis) > 50 else obj.diagnosis
-    diagnosis_short.short_description = 'Diagnóstico'
+    search_fields = ('patient__first_name', 'patient__last_name')
 
 @admin.register(Medication)
 class MedicationAdmin(admin.ModelAdmin):
@@ -95,3 +100,9 @@ class AdmissionAdmin(admin.ModelAdmin):
     def discharge_status(self, obj):
         return "Alta dada" if obj.discharge_date else "Hospitalizado"
     discharge_status.short_description = 'Estado'
+
+@admin.register(MedicalExam)
+class MedicalExamAdmin(admin.ModelAdmin):
+    list_display = ('medical_record', 'exam_type')
+    list_filter = ('exam_type',)
+    search_fields = ('medical_record__patient__first_name', 'medical_record__patient__last_name')
