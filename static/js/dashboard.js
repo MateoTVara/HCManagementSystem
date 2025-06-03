@@ -323,8 +323,43 @@ function attachPrescriptionFormHandler() {
                 if(data.success) {
                     msgDiv.innerHTML = '<div class="alert alert-success">Prescripción registrada.</div>';
                     form.reset();
+                    if (data.html) {
+                        document.getElementById('prescriptionList').innerHTML = data.html;
+                    }
                 } else {
                     msgDiv.innerHTML = `<div class="alert alert-danger">${data.error || "Error al registrar prescripción."}</div>`;
+                }
+            });
+        });
+    }
+}
+
+function attachConsultationNotesFormHandler() {
+    const notesForm = document.getElementById('consultationNotesForm');
+    if (notesForm) {
+        notesForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const data = new FormData(form);
+            fetch(form.action, {
+                method: "POST",
+                body: data,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    // Puedes recargar la lista de consultas o mostrar un mensaje
+                    fetch('/consultation/list/', {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+                    .then(r => r.text())
+                    .then(html => {
+                        document.getElementById('mainContent').innerHTML = html;
+                        attachFormHandlers();
+                        attachConsultationNotesFormHandler();
+                    });
                 }
             });
         });
@@ -354,6 +389,7 @@ function attachFormHandlers() {
         });
     });
     attachPrescriptionFormHandler();
+    attachConsultationNotesFormHandler();
     initHandlers();
 }
 
@@ -454,7 +490,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 const msgDiv = document.getElementById('prescriptionMsg');
                 if(data.success) {
-                    msgDiv.innerHTML = '<div class="alert alert-success">Prescripción registrada.</div>';
                     form.reset();
                 } else {
                     msgDiv.innerHTML = `<div class="alert alert-danger">${data.error || "Error al registrar prescripción."}</div>`;

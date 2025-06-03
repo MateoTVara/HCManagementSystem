@@ -14,11 +14,14 @@
             <li class="list-group-item"><strong>Estado:</strong> {{ appointment.get_status_display }}</li>
         </ul>
         <!-- Notas de la consulta -->
-        <form method="post" id="consultationNotesForm" class="mb-4">
+        <form method="post" id="consultationNotesForm" class="mb-4" action="{% url 'consultation_start' appointment.id %}">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="notes" class="form-label">Notas de la consulta</label>
                 <textarea class="form-control" id="notes" name="notes" rows="5">{{ appointment.notes }}</textarea>
+            </div>
+            <div class="card-footer bg-white border-0" style="position: absolute; bottom: 0; left: 0; width: 100%;">
+                <button type="submit" class="btn btn-primary w-100">Finalizar Consulta</button>
             </div>
         </form>
         <!-- Prescripción en una sola línea -->
@@ -56,9 +59,12 @@
             </div>
             <div id="prescriptionMsg" class="mt-2"></div>
         </form>
-    </div>
-    <!-- Botón fijo al pie -->
-    <div class="card-footer bg-white border-0" style="position: absolute; bottom: 0; left: 0; width: 100%;">
-        <button type="submit" form="consultationNotesForm" class="btn btn-primary w-100">Finalizar Consulta</button>
+        <!-- Listado de prescripciones -->
+        <div class="mt-4">
+            <h5 class="mb-2">Prescripciones registradas</h5>
+            <div id="prescriptionList">
+                {% include "consultations/partials/prescription_list.html" with prescriptions=appointment.prescriptions.all %}
+            </div>
+        </div>
     </div>
 </div>

@@ -12,6 +12,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_not_required, login_required
 import requests
 from django.http import HttpResponse
+from django.template.loader import render_to_string
 
 # Create your views here.
 
@@ -667,5 +668,10 @@ def prescription_register(request, appointment_id):
             duration=duration,
             instructions=instructions
         )
-        return JsonResponse({'success': True})
+        # Renderiza el partial actualizado
+        html = render_to_string(
+            "consultations/partials/prescription_list.html",
+            {"prescriptions": appointment.prescriptions.all()}
+        )
+        return JsonResponse({'success': True, 'html': html})
     return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
