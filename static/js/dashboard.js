@@ -340,6 +340,11 @@ function attachConsultationNotesFormHandler() {
             e.preventDefault();
             const form = this;
             const data = new FormData(form);
+
+            // Agrega los datos del caso (MedicalRecord)
+            data.append('mr_status', document.getElementById('mr_status').value);
+            data.append('mr_notes', document.getElementById('mr_notes').value);
+
             fetch(form.action, {
                 method: "POST",
                 body: data,
@@ -351,7 +356,6 @@ function attachConsultationNotesFormHandler() {
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    // Puedes recargar la lista de consultas o mostrar un mensaje
                     fetch('/consultation/list/', {headers: {'X-Requested-With': 'XMLHttpRequest'}})
                     .then(r => r.text())
                     .then(html => {
@@ -359,6 +363,33 @@ function attachConsultationNotesFormHandler() {
                         attachFormHandlers();
                         attachConsultationNotesFormHandler();
                     });
+                }
+            });
+        });
+    }
+}
+
+function attachMedicalRecordFormHandler() {
+    const form = document.getElementById('medicalRecordForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const data = new FormData(form);
+            fetch(form.action, {
+                method: "POST",
+                body: data,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                const msg = document.getElementById('medicalRecordMsg');
+                if (data.success) {
+                    msg.innerHTML = `<span class="text-success">Caso actualizado</span>`;
+                } else {
+                    msg.innerHTML = `<span class="text-danger">${data.error || "Error al actualizar el caso."}</span>`;
                 }
             });
         });

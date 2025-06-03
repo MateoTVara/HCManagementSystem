@@ -49,6 +49,9 @@ urlpatterns = [
     path('doctor/register/', views.doctor_register, name='doctor_register'),  # Registrar doctor
     path('doctor/detail/<int:pk>/', views.doctor_detail, name='doctor_detail'),  # Detalle de doctor
 
+    # Rutas para la gestión de historial médico
+    path('medicalrecord/<int:pk>/update/', views.medicalrecord_update, name='medicalrecord_update'),
+
     # Rutas para la gestión de alergias
     path('allergy/register/', views.allergy_register, name='allergy_register'),  # Registrar alergia
     path('allergy/partial_list/', views.allergy_list_partial, name='allergy_list_partial'),  # Listar alergias (parcial)

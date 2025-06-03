@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_not_required, login_required
 import requests
 from django.http import HttpResponse
 from django.template.loader import render_to_string
+from django.views.decorators.http import require_POST
 
 # Create your views here.
 
@@ -621,18 +622,28 @@ def consultation_list(request):
 @role_required(['DOCTOR'])
 def consultation_start(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
-    medications = Medication.objects.all()
-    exam_type_choices = MedicalExam.EXAM_TYPE_CHOICES
-
     if request.method == 'POST':
-        # Guardar notas y marcar como completada
         notes = request.POST.get('notes', '')
+        mr_status = request.POST.get('mr_status')
+        mr_notes = request.POST.get('mr_notes', '')
+
+        # Actualiza el MedicalRecord
+        medical_record = appointment.medical_record
+        if medical_record:
+            if mr_status in dict(MedicalRecord.STATUS_CHOICES):
+                medical_record.status = mr_status
+            medical_record.additional_notes = mr_notes
+            medical_record.save(update_fields=['status', 'additional_notes'])
+
         appointment.notes = notes
         appointment.status = 'C'  # Completada
         appointment.save(update_fields=['notes', 'status'])
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'success': True})
         return redirect('consultation_list')
+
+    medications = Medication.objects.all()
+    exam_type_choices = MedicalExam.EXAM_TYPE_CHOICES
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render(request, 'consultations/consultation_window.html', {
@@ -696,3 +707,21 @@ def exam_register(request, appointment_id):
         )
         return JsonResponse({'success': True, 'html': html})
     return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
+
+
+@require_POST
+@role_required(['DOCTOR'])
+def medicalrecord_update(request, pk):
+    medical_record = get_object_or_404(MedicalRecord, pk=pk)
+    status = request.POST.get('status')
+    notes = request.POST.get('additional_notes', '')
+    if status not in dict(MedicalRecord.STATUS_CHOICES):
+        return JsonResponse({'success': False, 'error': 'Estado inválido.'}, status=400)
+    medical_record.status = status
+    medical_record.additional_notes = notes
+    medical_record.save(update_fields=['status', 'additional_notes'])
+    return JsonResponse({
+        'success': True,
+        'status_display': medical_record.get_status_display(),
+        'notes': medical_record.additional_notes
+    })

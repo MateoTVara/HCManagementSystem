@@ -6,13 +6,34 @@
     </div>
     <div class="card-body pb-5">
         <div class="alert alert-info">Ventana de consulta en desarrollo.</div>
-        <h5 class="mb-3">Datos de la Cita</h5>
-        <ul class="list-group mb-3">
-            <li class="list-group-item"><strong>Fecha:</strong> {{ appointment.date|date:"d/m/Y" }}</li>
-            <li class="list-group-item"><strong>Hora:</strong> {{ appointment.time|time:"H:i" }}</li>
-            <li class="list-group-item"><strong>Motivo:</strong> {{ appointment.reason }}</li>
-            <li class="list-group-item"><strong>Estado:</strong> {{ appointment.get_status_display }}</li>
-        </ul>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <h5 class="mb-3">Datos de la Cita</h5>
+                <ul class="list-group mb-3">
+                    <li class="list-group-item"><strong>Fecha:</strong> {{ appointment.date|date:"d/m/Y" }}</li>
+                    <li class="list-group-item"><strong>Hora:</strong> {{ appointment.time|time:"H:i" }}</li>
+                    <li class="list-group-item"><strong>Motivo:</strong> {{ appointment.reason }}</li>
+                    <li class="list-group-item"><strong>Estado:</strong> {{ appointment.get_status_display }}</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h5 class="mb-3">Estado del caso</h5>
+                <form id="medicalRecordForm" method="post" action="{% url 'medicalrecord_update' appointment.medical_record.id %}">
+                    {% csrf_token %}
+                    <div class="mb-2">
+                        <select name="status" id="mr_status" class="form-select form-select-sm">
+                            {% for value, label in appointment.medical_record.STATUS_CHOICES %}
+                            <option value="{{ value }}" {% if appointment.medical_record.status == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="mr_notes" class="form-label mb-0">Notas del caso</label>
+                        <textarea name="additional_notes" id="mr_notes" class="form-control form-control-sm" rows="3">{{ appointment.medical_record.additional_notes }}</textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
         <!-- Notas de la consulta -->
         <form method="post" id="consultationNotesForm" class="mb-4" action="{% url 'consultation_start' appointment.id %}">
             {% csrf_token %}
