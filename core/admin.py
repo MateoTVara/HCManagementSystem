@@ -103,6 +103,6 @@ class AdmissionAdmin(admin.ModelAdmin):
 
 @admin.register(MedicalExam)
 class MedicalExamAdmin(admin.ModelAdmin):
-    list_display = ('medical_record', 'exam_type')
+    list_display = ('appointment', 'exam_type')
     list_filter = ('exam_type',)
-    search_fields = ('medical_record__patient__first_name', 'medical_record__patient__last_name')
+    search_fields = ('appointment__patient__first_name', 'appointment__patient__last_name')

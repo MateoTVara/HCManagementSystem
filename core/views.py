@@ -622,6 +622,7 @@ def consultation_list(request):
 def consultation_start(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
     medications = Medication.objects.all()
+    exam_type_choices = MedicalExam.EXAM_TYPE_CHOICES
 
     if request.method == 'POST':
         # Guardar notas y marcar como completada
@@ -637,6 +638,7 @@ def consultation_start(request, pk):
         return render(request, 'consultations/consultation_window.html', {
             'appointment': appointment,
             'medications': medications,
+            'exam_type_choices': exam_type_choices,
         })
     return render(request, 'dashboard.html', {
         'fragment': 'consultations/consultation_window.html',
@@ -672,6 +674,25 @@ def prescription_register(request, appointment_id):
         html = render_to_string(
             "consultations/partials/prescription_list.html",
             {"prescriptions": appointment.prescriptions.all()}
+        )
+        return JsonResponse({'success': True, 'html': html})
+    return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
+
+
+@role_required(['DOCTOR'])
+def exam_register(request, appointment_id):
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        appointment = get_object_or_404(Appointment, pk=appointment_id)
+        exam_type = request.POST.get('exam_type')
+        if not exam_type:
+            return JsonResponse({'success': False, 'error': 'Debe seleccionar un tipo de examen.'}, status=400)
+        MedicalExam.objects.create(
+            appointment=appointment,
+            exam_type=exam_type
+        )
+        html = render_to_string(
+            "consultations/partials/exam_list.html",
+            {"exams": appointment.medical_exams.all()}
         )
         return JsonResponse({'success': True, 'html': html})
     return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)

@@ -321,7 +321,6 @@ function attachPrescriptionFormHandler() {
             .then(data => {
                 const msgDiv = document.getElementById('prescriptionMsg');
                 if(data.success) {
-                    msgDiv.innerHTML = '<div class="alert alert-success">Prescripción registrada.</div>';
                     form.reset();
                     if (data.html) {
                         document.getElementById('prescriptionList').innerHTML = data.html;
@@ -366,9 +365,41 @@ function attachConsultationNotesFormHandler() {
     }
 }
 
+function attachExamFormHandler() {
+    const examForm = document.getElementById('examForm');
+    if (examForm) {
+        examForm.onsubmit = null;
+        examForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const data = new FormData(form);
+            fetch(form.action, {
+                method: "POST",
+                body: data,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                const msgDiv = document.getElementById('examMsg');
+                if(data.success) {
+                    form.reset();
+                    if (data.html) {
+                        document.getElementById('examList').innerHTML = data.html;
+                    }
+                } else {
+                    msgDiv.innerHTML = `<div class="alert alert-danger">${data.error || "Error al registrar examen."}</div>`;
+                }
+            });
+        });
+    }
+}
+
 function attachFormHandlers() {
     document.querySelectorAll('form').forEach(form => {
-        if (form.id === 'addAllergyForm'|| form.id === 'prescriptionForm') return;
+        if (form.id === 'addAllergyForm' || form.id === 'prescriptionForm' || form.id === 'examForm') return;
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             const isSearch = form.method.toLowerCase() === 'get';
@@ -385,6 +416,7 @@ function attachFormHandlers() {
                 document.getElementById('mainContent').innerHTML = html;
                 attachFormHandlers();
                 attachPrescriptionFormHandler();
+                attachExamFormHandler();
             });
         });
     });
@@ -409,6 +441,7 @@ document.addEventListener('click', function(e) {
         .then(html => {
             document.getElementById('mainContent').innerHTML = html;
             attachFormHandlers();
+            attachExamFormHandler();
         });
         return false;
     }

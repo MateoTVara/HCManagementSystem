@@ -63,4 +63,5 @@ urlpatterns = [
     path('consultation/list/', views.consultation_list, name='consultation_list'),
     path('consultation/start/<int:pk>/', views.consultation_start, name='consultation_start'),
     path('consultation/<int:appointment_id>/prescription/register/', views.prescription_register, name='prescription_register'),
+    path('consultation/<int:appointment_id>/exam/register/', views.exam_register, name='exam_register'),
 ]

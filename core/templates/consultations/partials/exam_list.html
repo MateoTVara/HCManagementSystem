@@ -1,0 +1,11 @@
+{% if exams %}
+    <ul class="list-group">
+        {% for exam in exams %}
+        <li class="list-group-item">
+            <strong>{{ exam.get_exam_type_display }}</strong>
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <div class="text-muted">No hay exámenes registrados.</div>
+{% endif %}

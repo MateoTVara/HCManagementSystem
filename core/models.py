@@ -348,11 +348,11 @@ class MedicalExam(models.Model):
         ('PULMONARY_FUNCTION', 'Prueba de Función Pulmonar'),
         ('OTHER', 'Otro'),
     ]
-    medical_record = models.ForeignKey(
-        MedicalRecord,
+    appointment = models.ForeignKey(
+        Appointment,
         on_delete=models.CASCADE,
         related_name='medical_exams',
-        verbose_name="Historial Médico"
+        verbose_name="Cita asociada"
     )
     exam_type = models.CharField(
         max_length=20,

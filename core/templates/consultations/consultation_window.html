@@ -66,5 +66,29 @@
                 {% include "consultations/partials/prescription_list.html" with prescriptions=appointment.prescriptions.all %}
             </div>
         </div>
+        <form id="examForm" method="post" action="{% url 'exam_register' appointment.id %}">
+            {% csrf_token %}
+            <div class="row align-items-end g-2">
+                <div class="col-md-4">
+                    <label for="exam_type" class="form-label mb-0">Tipo de Examen</label>
+                    <select name="exam_type" id="exam_type" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        {% for value, label in exam_type_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-warning">Agregar Examen</button>
+                </div>
+            </div>
+            <div id="examMsg" class="mt-2"></div>
+        </form>
+        <div class="mt-4">
+            <h5 class="mb-2">Exámenes solicitados</h5>
+            <div id="examList">
+                {% include "consultations/partials/exam_list.html" with exams=appointment.medical_exams.all %}
+            </div>
+        </div>
     </div>
 </div>
