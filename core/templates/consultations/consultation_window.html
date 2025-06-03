@@ -1,10 +1,10 @@
-<!-- filepath: c:\Users\Mateo Torres\OneDrive\Documentos\Django\UTP\Ciclo 07\Curso Integrador\HCManagementSystem\core\templates\consultations\consultation_window.html -->
-<div class="card">
+<!-- consultation_window.html -->
+<div class="card" style="min-height: 500px; position: relative;">
     <div class="card-header">
         Consulta con {{ appointment.patient.first_name }} {{ appointment.patient.last_name }} 
         - {{ appointment.patient.dni}} - {{appointment.patient.get_gender_display}}
     </div>
-    <div class="card-body">
+    <div class="card-body pb-5">
         <div class="alert alert-info">Ventana de consulta en desarrollo.</div>
         <h5 class="mb-3">Datos de la Cita</h5>
         <ul class="list-group mb-3">
@@ -14,13 +14,51 @@
             <li class="list-group-item"><strong>Estado:</strong> {{ appointment.get_status_display }}</li>
         </ul>
         <!-- Notas de la consulta -->
-        <form method="post" id="consultationNotesForm">
+        <form method="post" id="consultationNotesForm" class="mb-4">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="notes" class="form-label">Notas de la consulta</label>
                 <textarea class="form-control" id="notes" name="notes" rows="5">{{ appointment.notes }}</textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Finalizar Consulta</button>
         </form>
+        <!-- Prescripción en una sola línea -->
+        <form id="prescriptionForm" method="post" action="{% url 'prescription_register' appointment.id %}">
+            {% csrf_token %}
+            <div class="row align-items-end g-2">
+                <div class="col-md-2">
+                    <label for="medication" class="form-label mb-0">Medicamento</label>
+                    <select name="medication" id="medication" class="form-select" required>
+                        <option value="">Seleccione...</option>
+                        {% for med in medications %}
+                        <option value="{{ med.id }}">{{ med.name }} ({{ med.strength }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="dosage" class="form-label mb-0">Dosis</label>
+                    <input type="text" name="dosage" id="dosage" class="form-control" required placeholder="Ej. 2 tabletas">
+                </div>
+                <div class="col-md-2">
+                    <label for="frequency" class="form-label mb-0">Frecuencia</label>
+                    <input type="text" name="frequency" id="frequency" class="form-control" required placeholder="Ej. Cada 8 horas">
+                </div>
+                <div class="col-md-2">
+                    <label for="duration" class="form-label mb-0">Duración</label>
+                    <input type="text" name="duration" id="duration" class="form-control" required placeholder="Ej. 7 días">
+                </div>
+                <div class="col-md-3">
+                    <label for="instructions" class="form-label mb-0">Instrucciones Específicas</label>
+                    <input type="text" name="instructions" id="instructions" class="form-control" placeholder="Ej. Tomar con alimentos">
+                </div>
+                <div class="col-md-1 d-grid">
+                    <button type="submit" class="btn btn-success">Agregar</button>
+                </div>
+            </div>
+            <div id="prescriptionMsg" class="mt-2"></div>
+        </form>
+    </div>
+    <!-- Botón fijo al pie -->
+    <div class="card-footer bg-white border-0" style="position: absolute; bottom: 0; left: 0; width: 100%;">
+        <button type="submit" form="consultationNotesForm" class="btn btn-primary w-100">Finalizar Consulta</button>
     </div>
 </div>

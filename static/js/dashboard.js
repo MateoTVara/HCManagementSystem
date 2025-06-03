@@ -302,9 +302,38 @@ function attachEditDoctorFormHandler() {
     }
 }
 
+function attachPrescriptionFormHandler() {
+    const prescriptionForm = document.getElementById('prescriptionForm');
+    if (prescriptionForm) {
+        prescriptionForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const data = new FormData(form);
+            fetch(form.action, {
+                method: "POST",
+                body: data,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                const msgDiv = document.getElementById('prescriptionMsg');
+                if(data.success) {
+                    msgDiv.innerHTML = '<div class="alert alert-success">Prescripción registrada.</div>';
+                    form.reset();
+                } else {
+                    msgDiv.innerHTML = `<div class="alert alert-danger">${data.error || "Error al registrar prescripción."}</div>`;
+                }
+            });
+        });
+    }
+}
+
 function attachFormHandlers() {
     document.querySelectorAll('form').forEach(form => {
-        if (form.id === 'addAllergyForm') return;
+        if (form.id === 'addAllergyForm'|| form.id === 'prescriptionForm') return;
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             const isSearch = form.method.toLowerCase() === 'get';
@@ -320,9 +349,11 @@ function attachFormHandlers() {
             .then(html => {
                 document.getElementById('mainContent').innerHTML = html;
                 attachFormHandlers();
+                attachPrescriptionFormHandler();
             });
         });
     });
+    attachPrescriptionFormHandler();
     initHandlers();
 }
 
@@ -405,6 +436,32 @@ document.addEventListener('click', function(e) {
 });
 
 document.addEventListener('DOMContentLoaded', function() {
+    const prescriptionForm = document.getElementById('prescriptionForm');
+    if (prescriptionForm) {
+        prescriptionForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const data = new FormData(form);
+            fetch(form.action, {
+                method: "POST",
+                body: data,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                const msgDiv = document.getElementById('prescriptionMsg');
+                if(data.success) {
+                    msgDiv.innerHTML = '<div class="alert alert-success">Prescripción registrada.</div>';
+                    form.reset();
+                } else {
+                    msgDiv.innerHTML = `<div class="alert alert-danger">${data.error || "Error al registrar prescripción."}</div>`;
+                }
+            });
+        });
+    }
     initHandlers();
     handleSidebar();
 });

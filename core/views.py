@@ -642,3 +642,30 @@ def consultation_start(request, pk):
         'appointment': appointment,
         'medications': medications,
     })
+
+
+@role_required(['DOCTOR'])
+def prescription_register(request, appointment_id):
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        appointment = get_object_or_404(Appointment, pk=appointment_id)
+        med_id = request.POST.get('medication')
+        dosage = request.POST.get('dosage')
+        frequency = request.POST.get('frequency')
+        duration = request.POST.get('duration')
+        instructions = request.POST.get('instructions', '')
+        if not (med_id and dosage and frequency and duration):
+            return JsonResponse({'success': False, 'error': 'Todos los campos son obligatorios.'}, status=400)
+        try:
+            medication = Medication.objects.get(pk=med_id)
+        except Medication.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Medicamento inválido.'}, status=400)
+        Prescription.objects.create(
+            appointment=appointment,
+            medication=medication,
+            dosage=dosage,
+            frequency=frequency,
+            duration=duration,
+            instructions=instructions
+        )
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)

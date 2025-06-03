@@ -62,4 +62,5 @@ urlpatterns = [
     # Consultas de doctor
     path('consultation/list/', views.consultation_list, name='consultation_list'),
     path('consultation/start/<int:pk>/', views.consultation_start, name='consultation_start'),
+    path('consultation/<int:appointment_id>/prescription/register/', views.prescription_register, name='prescription_register'),
 ]
