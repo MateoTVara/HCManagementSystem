@@ -163,9 +163,13 @@ def appointment_detail(request, pk):
         # Solo el fragmento para AJAX
         return render(request, 'appointments/appointment_detail.html', {'appointment': appointment})
     # Si NO es AJAX, renderiza el dashboard y pasa el fragmento como variable
-    return render(request, 'dashboard.html', {
-        'fragment': 'appointments/appointment_detail.html',
-        'appointment': appointment
+    return render(request, 'appointments/appointment_detail.html', {
+        'appointment': appointment,
+        'patient': appointment.patient,
+        'doctor': appointment.doctor,
+        'medical_record': appointment.medical_record,
+        'prescriptions': appointment.prescriptions.all(),
+        'exams': appointment.medical_exams.all(),
     })
 
 

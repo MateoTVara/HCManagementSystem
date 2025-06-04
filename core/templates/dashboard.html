@@ -147,7 +147,18 @@
                 {% include fragment %}
             {% else %}
                 <div class="alert alert-success mb-4" role="alert">
-                    Bienvenido{% if request.user.first_name %} {{ request.user.first_name }}{% endif %}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %} 
+                    {% if request.user.role == 'DOCTOR' %}
+                        {% if request.user.doctor_profile.gender == 'M' %}
+                            Bienvenido
+                        {% elif request.user.doctor_profile.gender == 'F' %}
+                            Bienvenida
+                        {% else %}
+                            Bienvenido/a
+                        {% endif %}
+                    {% else %}
+                        Bienvenido
+                    {% endif %}
+                    {% if request.user.first_name %} {{ request.user.first_name }}{% endif %}{% if request.user.last_name %} {{ request.user.last_name }}{% endif %}
                     {% if request.user.role %}
                         {% if request.user.role == 'ADMIN' %}
                             (Administrador)

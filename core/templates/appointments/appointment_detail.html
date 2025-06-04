@@ -1,16 +1,128 @@
+<!-- appointment_detail.html -->
 <div class="card">
     <div class="card-header">
         Detalle de Cita
     </div>
     <div class="card-body">
-        <h5 class="card-title">
-    {{ appointment.patient.first_name }} {{ appointment.patient.last_name }} con Dr(a). {{ appointment.doctor.user.get_full_name }}
-        </h5>
-        <p class="card-text">
-            Fecha: {{ appointment.date|date:"d/m/Y" }}<br>
-            Hora: {{ appointment.time|time:"h:i A" }}<br>
-            Estado: {{ appointment.get_status_display }}<br>
-            Motivo: {{ appointment.reason }}<br>
-        </p>
+        <div class="row">
+            <!-- Columna izquierda -->
+            <div class="col-md-6">
+                <!-- Datos de la cita -->
+                <h5 class="mb-3">Datos de la Cita</h5>
+                <p>
+                    <strong>Fecha:</strong> {{ appointment.date|date:"d/m/Y" }}<br>
+                    <strong>Hora:</strong> {{ appointment.time|time:"h:i A" }}<br>
+                    <strong>Estado:</strong> {{ appointment.get_status_display }}<br>
+                    <strong>Motivo:</strong> {{ appointment.reason }}<br>
+                    {% if appointment.diagnosis %}
+                    <strong>Diagnóstico:</strong> {{ appointment.diagnosis }}<br>
+                    {% endif %}
+                    {% if appointment.treatment %}
+                    <strong>Tratamiento:</strong> {{ appointment.treatment }}<br>
+                    {% endif %}
+                </p>
+                <div class="mb-4">
+                    <strong>Notas posteriores:</strong>
+                    <div style="border:1px solid #ddd; border-radius:4px; padding:8px; height:90px; overflow-y:auto; background:#f9f9f9;">
+                        {{ appointment.notes|default:"Sin notas" }}
+                    </div>
+                </div>
+                <!-- Médico asignado -->
+                <h5 class="mb-3">Médico Asignado</h5>
+                <p>
+                    <strong>Nombre:</strong> Dr(a). {{ appointment.doctor.user.get_full_name }}<br>
+                    <strong>Especialidad:</strong> {{ appointment.doctor.get_specialty_display }}<br>
+                    <strong>DNI:</strong> {{ appointment.doctor.dni }}<br>
+                    <strong>Email:</strong> {{ appointment.doctor.user.email }}<br>
+                </p>
+            </div>
+            <!-- Columna derecha -->
+            <div class="col-md-6">
+                <!-- Datos del paciente -->
+                <h5 class="mb-3">Datos del Paciente</h5>
+                <p>
+                    <strong>Nombre:</strong> {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}<br>
+                    <strong>DNI:</strong> {{ appointment.patient.dni }}<br>
+                    <strong>Fecha de nacimiento:</strong> {{ appointment.patient.date_of_birth|date:"d/m/Y" }}<br>
+                    <strong>Edad:</strong> {{ appointment.patient.date_of_birth|timesince }}<br>
+                    <strong>Sexo:</strong> {{ appointment.patient.get_gender_display }}<br>
+                    <strong>Teléfono:</strong> {{ appointment.patient.phone|default:"-" }}<br>
+                    <strong>Correo:</strong> {{ appointment.patient.email|default:"-" }}<br>
+                    <strong>Dirección:</strong> {{ appointment.patient.address|default:"-" }}<br>
+                </p>
+                <!-- Historia médica asociada -->
+                <h5 class="mb-3">Historia Médica Asociada</h5>
+                {% if appointment.medical_record %}
+                <p>
+                    <strong>Estado:</strong> {{ appointment.medical_record.get_status_display }}<br>
+                </p>
+                <div class="mb-4">
+                    <strong>Notas del caso:</strong>
+                    <div style="border:1px solid #ddd; border-radius:4px; padding:8px; height:90px; overflow-y:auto; background:#f9f9f9;">
+                        {{ appointment.medical_record.additional_notes|default:"Sin notas" }}
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-muted mb-3">No hay historial médico asociado.</div>
+                {% endif %}
+            </div>
+        </div>
+        <!-- Parte inferior: Prescripciones y Exámenes en 2 columnas (tablas) -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h5 class="mb-3">Prescripciones</h5>
+                {% if appointment.prescriptions.exists %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <th>Medicamento</th>
+                                <th>Dosis</th>
+                                <th>Frecuencia</th>
+                                <th>Duración</th>
+                                <th>Instrucciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in appointment.prescriptions.all %}
+                            <tr>
+                                <td>{{ p.medication.name }}</td>
+                                <td>{{ p.dosage }}</td>
+                                <td>{{ p.frequency }}</td>
+                                <td>{{ p.duration }}</td>
+                                <td>{{ p.instructions|default:"-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-muted mb-3">No hay prescripciones registradas.</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h5 class="mb-3">Exámenes Solicitados</h5>
+                {% if appointment.medical_exams.exists %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <th>Tipo de Examen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exam in appointment.medical_exams.all %}
+                            <tr>
+                                <td>{{ exam.get_exam_type_display }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-muted mb-3">No hay exámenes solicitados.</div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
