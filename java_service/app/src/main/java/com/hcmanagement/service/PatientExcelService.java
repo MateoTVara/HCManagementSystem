@@ -6,7 +6,9 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
+import org.springframework.stereotype.Service;
 
+@Service
 public class PatientExcelService {
 
     public byte[] generatePatientsExcel(List<Map<String, Object>> patients) throws Exception {
