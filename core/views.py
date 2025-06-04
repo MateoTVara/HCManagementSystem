@@ -527,7 +527,7 @@ def export_doctors_excel(request):
             "last_name": d['user__last_name'],
             "email": d['user__email'],
             "specialty": d['specialty'],
-            "gender": d['gender'],
+            "gender": str(d['gender']),
         })
     java_service_url = 'http://localhost:8080/generate/doctors/excel'
     response = requests.post(java_service_url, json=data)

@@ -1,17 +1,28 @@
 package com.hcmanagement.service;
 
-import java.io.ByteArrayOutputStream;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 @Service
 public class DoctorExcelService {
-    
+    private final Cache<Integer, byte[]> reportCache = CacheBuilder.newBuilder()
+        .maximumSize(100)
+        .expireAfterWrite(10, TimeUnit.MINUTES)
+        .build();
+
     public byte[] generateDoctorsExcel(List<Map<String, Object>> doctors) throws Exception {
+        int cacheKey = doctors.hashCode();
+        byte[] cached = reportCache.getIfPresent(cacheKey);
+        if (cached != null) return cached;
+
         Workbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = (XSSFSheet) workbook.createSheet("Doctores");
 
@@ -37,7 +48,9 @@ public class DoctorExcelService {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         workbook.write(bos);
         workbook.close();
-        return bos.toByteArray();
+        byte[] excelBytes = bos.toByteArray();
+        reportCache.put(cacheKey, excelBytes);
+        return excelBytes;
     }
 
 }

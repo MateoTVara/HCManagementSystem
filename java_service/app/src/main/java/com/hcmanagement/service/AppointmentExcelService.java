@@ -1,5 +1,7 @@
 package com.hcmanagement.service;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.*;
@@ -10,11 +12,20 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class AppointmentExcelService {
-    
+    private final Cache<Integer, byte[]> reportCache = CacheBuilder.newBuilder()
+        .maximumSize(100)
+        .expireAfterWrite(10, TimeUnit.MINUTES)
+        .build();
+
     public byte[] generateAppointmentsExcel(List<Map<String, Object>> appointments) throws Exception {
+        int cacheKey = appointments.hashCode();
+        byte[] cached = reportCache.getIfPresent(cacheKey);
+        if (cached != null) return cached;
+
         Workbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = (XSSFSheet) workbook.createSheet("Citas");
 
@@ -107,7 +118,9 @@ public class AppointmentExcelService {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         workbook.write(bos);
         workbook.close();
-        return bos.toByteArray();
+        byte[] excelBytes = bos.toByteArray();
+        reportCache.put(cacheKey, excelBytes);
+        return excelBytes;
     }
 
 }
