@@ -516,7 +516,8 @@ def export_doctors_excel(request):
         'user__first_name',
         'user__last_name',
         'user__email',
-        'specialty'
+        'specialty',
+        'gender'
     )
     data = []
     for d in doctors:
@@ -526,6 +527,7 @@ def export_doctors_excel(request):
             "last_name": d['user__last_name'],
             "email": d['user__email'],
             "specialty": d['specialty'],
+            "gender": d['gender'],
         })
     java_service_url = 'http://localhost:8080/generate/doctors/excel'
     response = requests.post(java_service_url, json=data)
@@ -541,7 +543,8 @@ def export_appointments_excel(request):
     appointments = Appointment.objects.select_related('patient', 'doctor__user').values(
         'date', 'time', 'status', 'reason',
         'patient__first_name', 'patient__last_name', 'patient__dni',
-        'doctor__user__first_name', 'doctor__user__last_name', 'doctor__dni'
+        'doctor__user__first_name', 'doctor__user__last_name', 'doctor__dni',
+        'diagnosis', 'treatment', 'notes'
     )
     data = []
     for a in appointments:
@@ -556,6 +559,9 @@ def export_appointments_excel(request):
             "doctor_first_name": a['doctor__user__first_name'],
             "doctor_last_name": a['doctor__user__last_name'],
             "doctor_dni": a['doctor__dni'],
+            "diagnosis": a['diagnosis'] if a['diagnosis'] else "",
+            "treatment": a['treatment'] if a['treatment'] else "",
+            "notes": a['notes'] if a['notes'] else ""
         })
     java_service_url = 'http://localhost:8080/generate/appointments/excel'
     response = requests.post(java_service_url, json=data)
