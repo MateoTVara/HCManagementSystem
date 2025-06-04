@@ -81,7 +81,6 @@ def appointment_register(request):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return render(request, 'appointments/appointment_register.html', {'form': AppointmentRegister()})
             return redirect('dashboard')
-        # Si el form no es válido, sigue abajo
     else:
         form = AppointmentRegister()
 
@@ -160,9 +159,8 @@ def appointment_edit(request, pk):
 def appointment_detail(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        # Solo el fragmento para AJAX
         return render(request, 'appointments/appointment_detail.html', {'appointment': appointment})
-    # Si NO es AJAX, renderiza el dashboard y pasa el fragmento como variable
+
     return render(request, 'appointments/appointment_detail.html', {
         'appointment': appointment,
         'patient': appointment.patient,
@@ -327,12 +325,11 @@ def patient_detail(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
     appointments = patient.appointment_set.select_related('doctor__user').order_by('-date', '-time')
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        # Solo el fragmento para AJAX
         return render(request, 'patients/patient_detail.html', {
             'patient': patient,
             'appointments': appointments,
         })
-    # Si NO es AJAX, renderiza el dashboard y pasa el fragmento como variable
+
     return render(request, 'dashboard.html', {
         'fragment': 'patients/patient_detail.html',
         'patient': patient,
@@ -424,9 +421,8 @@ def doctor_edit(request, pk):
 def doctor_detail(request, pk):
     doctor = get_object_or_404(Doctor, pk=pk)
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        # Solo el fragmento para AJAX
         return render(request, 'doctors/doctor_detail.html', {'doctor': doctor})
-    # Si NO es AJAX, renderiza el dashboard y pasa el fragmento como variable
+
     return render(request, 'dashboard.html', {
         'fragment': 'doctors/doctor_detail.html',
         'doctor': doctor
@@ -577,7 +573,8 @@ def consultation_list(request):
     doctor = request.user.doctor_profile
     now = timezone.localtime()
 
-    # Actualiza automáticamente citas "Programada" a "No presentado" si han pasado 15 minutos
+    # Al llamar a este método, se verifican las horas del día
+    # y se actualizan las citas que hayan expirado
     fifteen_minutes_ago = now - timedelta(minutes=15)
     expired_appointments = Appointment.objects.filter(
         doctor=doctor,
@@ -646,7 +643,7 @@ def consultation_start(request, pk):
             medical_record.save(update_fields=['status', 'additional_notes'])
 
         appointment.notes = notes
-        appointment.status = 'C'  # Completada
+        appointment.status = 'C'
         appointment.save(update_fields=['notes', 'status'])
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'success': True})
