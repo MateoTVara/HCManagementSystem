@@ -41,6 +41,30 @@
                 <label for="notes" class="form-label">Notas de la consulta</label>
                 <textarea class="form-control" id="notes" name="notes" rows="5">{{ appointment.notes }}</textarea>
             </div>
+            <!-- Diagnosis Checkbox and Textarea -->
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="showDiagnosis"
+                    {% if appointment.diagnosis %}checked{% endif %} />
+                <label class="form-check-label" for="showDiagnosis">
+                    Añadir diagnóstico
+                </label>
+            </div>
+            <div class="mb-3{% if not appointment.diagnosis %} d-none{% endif %}" id="diagnosisContainer">
+                <label for="diagnosis" class="form-label">Diagnóstico</label>
+                <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3">{{ appointment.diagnosis }}</textarea>
+            </div>
+            <!-- Treatment Checkbox and Textarea -->
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="checkbox" id="showTreatment"
+                    {% if appointment.treatment %}checked{% endif %} />
+                <label class="form-check-label" for="showTreatment">
+                    Añadir tratamiento
+                </label>
+            </div>
+            <div class="mb-3{% if not appointment.treatment %} d-none{% endif %}" id="treatmentContainer">
+                <label for="treatment" class="form-label">Tratamiento</label>
+                <textarea class="form-control" id="treatment" name="treatment" rows="3">{{ appointment.treatment }}</textarea>
+            </div>
             <div class="card-footer bg-white border-0" style="position: absolute; bottom: 0; left: 0; width: 100%;">
                 <button type="submit" class="btn btn-primary w-100">Finalizar Consulta</button>
             </div>
@@ -111,5 +135,6 @@
                 {% include "consultations/partials/exam_list.html" with exams=appointment.medical_exams.all %}
             </div>
         </div>
+        <div style="height: 10px;"></div>
     </div>
 </div>

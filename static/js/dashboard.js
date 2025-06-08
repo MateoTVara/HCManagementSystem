@@ -454,6 +454,30 @@ function attachFormHandlers() {
     attachPrescriptionFormHandler();
     attachConsultationNotesFormHandler();
     initHandlers();
+    setupDiagnosisTreatmentToggles();
+}
+
+function setupDiagnosisTreatmentToggles() {
+    const diagnosisCheckbox = document.getElementById('showDiagnosis');
+    const diagnosisContainer = document.getElementById('diagnosisContainer');
+    const treatmentCheckbox = document.getElementById('showTreatment');
+    const treatmentContainer = document.getElementById('treatmentContainer');
+    
+    if (diagnosisCheckbox && diagnosisContainer) {
+        diagnosisCheckbox.onchange = function() {
+            diagnosisContainer.classList.toggle('d-none', !this.checked);
+        };
+        // Sincronizar estado inicial
+        diagnosisContainer.classList.toggle('d-none', !diagnosisCheckbox.checked);
+    }
+
+    if (treatmentCheckbox && treatmentContainer) {
+        treatmentCheckbox.onchange = function() {
+            treatmentContainer.classList.toggle('d-none', !this.checked);
+        };
+        // Sincronizar estado inicial
+        treatmentContainer.classList.toggle('d-none', !treatmentCheckbox.checked);
+    }
 }
 
 document.getElementById('sidebarToggle')?.addEventListener('click', () => {

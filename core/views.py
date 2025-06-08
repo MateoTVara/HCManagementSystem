@@ -646,6 +646,8 @@ def consultation_start(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
     if request.method == 'POST':
         notes = request.POST.get('notes', '')
+        diagnosis = request.POST.get('diagnosis', '')
+        treatment = request.POST.get('treatment', '')
         mr_status = request.POST.get('mr_status')
         mr_notes = request.POST.get('mr_notes', '')
 
@@ -658,8 +660,10 @@ def consultation_start(request, pk):
             medical_record.save(update_fields=['status', 'additional_notes'])
 
         appointment.notes = notes
+        appointment.diagnosis = diagnosis
+        appointment.treatment = treatment
         appointment.status = 'C'
-        appointment.save(update_fields=['notes', 'status'])
+        appointment.save(update_fields=['notes', 'diagnosis', 'treatment', 'status'])
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'success': True})
         return redirect('consultation_list')
