@@ -30,7 +30,7 @@
     </div>
     
     <div class="table-responsive">
-        <table class="table table-hover align-middle">
+        <table class="table table-hover align-middle table-doctors">
             <thead class="table-light">
                 <tr>
                     <th>Médico</th>
@@ -100,3 +100,9 @@ document.getElementById('search-form')?.addEventListener('submit', function(e) {
     });
 });
 </script>
+<style>
+    .table-doctors th:nth-child(1) { width: 30%; }
+    .table-doctors th:nth-child(2) { width: 20%; }
+    .table-doctors th:nth-child(3) { width: 35%; }
+    .table-doctors th:nth-child(4) { width: 15%; }
+</style>

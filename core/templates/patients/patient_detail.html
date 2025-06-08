@@ -1,6 +1,9 @@
 <div class="card">
-    <div class="card-header">
-        Detalle de Paciente
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Detalle de Paciente</span>
+        <a href="{% url 'patient_list' %}" class="text-decoration-none" data-ajax>
+            regresar al listado
+        </a>
     </div>
     <div class="card-body">
         <div class="row">
@@ -50,41 +53,39 @@
                 {% endif %}
             </div>
         </div>
-        <!-- Tabla de citas debajo de ambas columnas -->
-        <h6 class="mt-4">Citas Asociadas:</h6>
-        {% if appointments and appointments.exists %}
+        <!-- Tabla de registros médicos debajo de ambas columnas -->
+        <h6 class="mt-4">Registros Médicos Asociados:</h6>
+        {% if medical_records and medical_records.exists %}
             <div class="table-responsive">
                 <table class="table table-sm table-bordered align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>Médico</th>
+                            <th>Fecha de Creación</th>
+                            <th>Médico Tratante</th>
                             <th>Estado</th>
-                            <th>Motivo</th>
-                            <th>Acciones</th>
+                            <th>Notas</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for appt in appointments %}
+                        {% for mr in medical_records %}
                         <tr>
-                            <td>{{ appt.date|date:"d/m/Y" }}</td>
-                            <td>{{ appt.time|time:"h:i A" }}</td>
-                            <td>Dr(a). {{ appt.doctor.user.get_full_name }}</td>
-                            <td>{{ appt.get_status_display }}</td>
-                            <td>{{ appt.reason|truncatechars:40 }}</td>
+                            <td>{{ mr.created_at|date:"d/m/Y H:i" }}</td>
                             <td>
-                                <a href="{% url 'appointment_detail' appt.id %}" data-ajax class="btn btn-sm btn-outline-primary">
-                                    Ver detalle
-                                </a>
+                                {% if mr.attending_doctor %}
+                                    Dr(a). {{ mr.attending_doctor.user.get_full_name }}
+                                {% else %}
+                                    <span class="text-muted">No asignado</span>
+                                {% endif %}
                             </td>
+                            <td>{{ mr.get_status_display }}</td>
+                            <td>{{ mr.additional_notes|truncatechars:40 }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <div class="text-muted">No hay citas registradas para este paciente.</div>
+            <div class="text-muted">No hay registros médicos para este paciente.</div>
         {% endif %}
     </div>
 </div>

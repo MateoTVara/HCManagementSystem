@@ -3,7 +3,8 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.utils import timezone
 from core.models import *
 from .forms import *
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Value, CharField
+from django.db.models.functions import Concat
 from datetime import date, datetime, timedelta
 import calendar
 from django.views.generic import View
@@ -90,19 +91,26 @@ def appointment_register(request):
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_list(request):
-    query = request.GET.get('q', '')
+    query = request.GET.get('q', '').strip()
     appointments = Appointment.objects.all()
 
-    #Validación para doctores
+    # Doctor filter
     if hasattr(request.user, 'doctor_profile'):
         appointments = appointments.filter(doctor=request.user.doctor_profile)
     
     if query:
-        appointments = appointments.filter(
+        appointments = appointments.annotate(
+            patient_full_name=Concat('patient__first_name', Value(' '), 'patient__last_name', output_field=CharField()),
+            doctor_full_name=Concat('doctor__user__first_name', Value(' '), 'doctor__user__last_name', output_field=CharField())
+        ).filter(
             Q(patient__first_name__icontains=query) | 
             Q(patient__last_name__icontains=query) |
             Q(doctor__user__first_name__icontains=query) |
-            Q(doctor__user__last_name__icontains=query)
+            Q(doctor__user__last_name__icontains=query) |
+            Q(patient__dni__icontains=query) |
+            Q(doctor__dni__icontains=query) |
+            Q(patient_full_name__icontains=query) |
+            Q(doctor_full_name__icontains=query)
         )
             
     return render(request, 'appointments/appointment_list.html', {'appointments': appointments})
@@ -240,10 +248,13 @@ def patient_list(request):
     patients = Patient.objects.all()
     
     if query:
-        patients = patients.filter(
+        patients = patients.annotate(
+            full_name=Concat('first_name', Value(' '), 'last_name', output_field=CharField())
+        ).filter(
             Q(first_name__icontains=query) | 
             Q(last_name__icontains=query) |
-            Q(dni__icontains=query)
+            Q(dni__icontains=query) |
+            Q(full_name__icontains=query)
         )
     
     return render(request, 'patients/patient_list.html', {'patients': patients})
@@ -323,30 +334,34 @@ def patient_edit(request, pk):
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def patient_detail(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
-    appointments = patient.appointment_set.select_related('doctor__user').order_by('-date', '-time')
+    medical_records = patient.medicalrecord_set.select_related('attending_doctor__user').order_by('-created_at')
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render(request, 'patients/patient_detail.html', {
             'patient': patient,
-            'appointments': appointments,
+            'medical_records': medical_records,
         })
 
     return render(request, 'dashboard.html', {
         'fragment': 'patients/patient_detail.html',
         'patient': patient,
-        'appointments': appointments
+        'medical_records': medical_records
     })
 
 
-@role_required(['ADMIN', 'MANAGEMENT', 'ATTENDANT'])
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def doctor_list(request):
     query = request.GET.get('q', '')
     doctors = Doctor.objects.select_related('user').all()
     
     if query:
-        doctors = doctors.filter(
+        doctors = doctors.annotate(
+            full_name=Concat('user__first_name', Value(' '), 'user__last_name', output_field=CharField())
+        ).filter(
             Q(user__first_name__icontains=query) |
             Q(user__last_name__icontains=query) |
-            Q(specialty__icontains=query)
+            Q(specialty__icontains=query) |
+            Q(dni__icontains=query) |
+            Q(full_name__icontains=query)
         )
     
     return render(request, 'doctors/doctor_list.html', {

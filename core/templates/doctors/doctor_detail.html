@@ -1,6 +1,9 @@
 <div class="card">
-    <div class="card-header">
-        Detalle de Médico
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span> Detalle de Médico </span>
+        <a href="{% url 'doctor_list' %}" class="text-decoration-none" data-ajax>
+            Regresar al listado
+        </a>
     </div>
     <div class="card-body">
         <h5 class="card-title">{{ doctor.user.first_name }} {{ doctor.user.last_name }}</h5>
