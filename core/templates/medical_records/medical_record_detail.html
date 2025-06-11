@@ -1,0 +1,72 @@
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Detalle del Historial Médico</span>
+        <a href="{% url 'patient_detail' medical_record.patient.id %}" class="btn btn-link" data-ajax>
+            Volver al paciente
+        </a>
+    </div>
+    <div class="card-body">
+        <h5 class="mb-3">Datos del Paciente</h5>
+        <ul class="list-group mb-4">
+            <li class="list-group-item"><strong>Nombre:</strong> {{ medical_record.patient.first_name }} {{ medical_record.patient.last_name }}</li>
+            <li class="list-group-item"><strong>DNI:</strong> {{ medical_record.patient.dni }}</li>
+            <li class="list-group-item"><strong>Género:</strong> {{ medical_record.patient.get_gender_display }}</li>
+            <li class="list-group-item"><strong>Fecha de nacimiento:</strong> {{ medical_record.patient.date_of_birth|date:"d/m/Y" }}</li>
+            <li class="list-group-item"><strong>Tipo de sangre:</strong> {{ medical_record.patient.blood_type }}</li>
+        </ul>
+        <h5 class="mb-3">Información del Historial Médico</h5>
+        <ul class="list-group mb-4">
+            <li class="list-group-item"><strong>Fecha de creación:</strong> {{ medical_record.created_at|date:"d/m/Y H:i" }}</li>
+            <li class="list-group-item"><strong>Médico tratante:</strong>
+                {% if medical_record.attending_doctor %}
+                    Dr(a). {{ medical_record.attending_doctor.user.get_full_name }}
+                {% else %}
+                    <span class="text-muted">No asignado</span>
+                {% endif %}
+            </li>
+            <li class="list-group-item"><strong>Estado:</strong> {{ medical_record.get_status_display }}</li>
+            <li class="list-group-item"><strong>Notas adicionales:</strong> {{ medical_record.additional_notes|default:"Sin notas" }}</li>
+        </ul>
+        <h5 class="mb-3">Citas Asociadas</h5>
+        {% if medical_record.appointments.exists %}
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Médico</th>
+                            <th>Motivo</th>
+                            <th>Estado</th>
+                            <th>Diagnóstico</th>
+                            <th>Tratamiento</th>
+                            <th>Notas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appt in medical_record.appointments.all %}
+                        <tr>
+                            <td>{{ appt.date|date:"d/m/Y" }}</td>
+                            <td>{{ appt.time|time:"H:i" }}</td>
+                            <td>
+                                {% if appt.doctor %}
+                                    Dr(a). {{ appt.doctor.user.get_full_name }}
+                                {% else %}
+                                    <span class="text-muted">No asignado</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ appt.reason|truncatechars:30 }}</td>
+                            <td>{{ appt.get_status_display }}</td>
+                            <td>{{ appt.diagnosis|truncatechars:30|default:"-" }}</td>
+                            <td>{{ appt.treatment|truncatechars:30|default:"-" }}</td>
+                            <td>{{ appt.notes|truncatechars:30|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>    
+            </div>
+        {% else %}
+            <div class="text-muted">No hay citas asociadas a este historial médico.</div>
+        {% endif %}
+    </div>
+</div>

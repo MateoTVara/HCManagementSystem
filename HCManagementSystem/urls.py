@@ -51,6 +51,7 @@ urlpatterns = [
 
     # Rutas para la gestión de historial médico
     path('medicalrecord/<int:pk>/update/', views.medicalrecord_update, name='medicalrecord_update'),
+    path('medicalrecord/detail/<int:pk>/', views.medicalrecord_detail, name='medicalrecord_detail'),
 
     # Rutas para la gestión de alergias
     path('allergy/register/', views.allergy_register, name='allergy_register'),  # Registrar alergia

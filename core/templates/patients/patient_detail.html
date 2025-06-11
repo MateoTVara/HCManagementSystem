@@ -64,6 +64,7 @@
                             <th>Médico Tratante</th>
                             <th>Estado</th>
                             <th>Notas</th>
+                            <th>Detalle</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,6 +80,11 @@
                             </td>
                             <td>{{ mr.get_status_display }}</td>
                             <td>{{ mr.additional_notes|truncatechars:40 }}</td>
+                            <td>
+                                <a href="{% url 'medicalrecord_detail' mr.id %}" class="btn btn-sm btn-outline-primary" data-ajax>
+                                    Ver detalle
+                                </a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

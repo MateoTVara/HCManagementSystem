@@ -751,3 +751,15 @@ def medicalrecord_update(request, pk):
         'status_display': medical_record.get_status_display(),
         'notes': medical_record.additional_notes
     })
+
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
+def medicalrecord_detail(request, pk):
+    medical_record = get_object_or_404(MedicalRecord, pk=pk)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, 'medical_records/medical_record_detail.html', {
+            'medical_record': medical_record,
+        })
+    return render(request, 'dashboard.html', {
+        'fragment': 'medical_records/medical_record_detail.html',
+        'medical_record': medical_record,
+    })
