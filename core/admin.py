@@ -5,7 +5,7 @@ from .models import (
     MedicalRecord, Medication,
     Prescription, EmergencyContact,
     Admission, Allergy, PatientAllergy,
-    MedicalExam
+    MedicalExam, Diagnosis, Disease
 )
 
 @admin.register(User)
@@ -106,3 +106,15 @@ class MedicalExamAdmin(admin.ModelAdmin):
     list_display = ('appointment', 'exam_type')
     list_filter = ('exam_type',)
     search_fields = ('appointment__patient__first_name', 'appointment__patient__last_name')
+
+@admin.register(Disease)
+class DiseaseAdmin(admin.ModelAdmin):
+    list_display = ('code_4', 'name', 'code_3', 'is_primary', 'is_manifestation')
+    search_fields = ('code_4', 'name', 'code_3')
+    list_filter = ('is_primary', 'is_manifestation')
+
+@admin.register(Diagnosis)
+class DiagnosisAdmin(admin.ModelAdmin):
+    list_display = ('appointment', 'disease', 'author', 'date')
+    search_fields = ('disease__name', 'appointment__patient__first_name', 'appointment__patient__last_name')
+    list_filter = ('disease', 'author', 'date')

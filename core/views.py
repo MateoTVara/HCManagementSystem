@@ -1,7 +1,7 @@
 from functools import wraps
 from django.http import HttpResponseForbidden, JsonResponse
 from django.utils import timezone
-from core.models import *
+from core.models import Appointment, Diagnosis, Disease, MedicalRecord, Medication, MedicalExam, PatientAllergy, Allergy, Patient, Doctor, Prescription
 from .forms import *
 from django.db.models import Q, Count, Value, CharField
 from django.db.models.functions import Concat
@@ -166,8 +166,12 @@ def appointment_edit(request, pk):
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_detail(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
+    diagnoses = appointment.diagnoses.select_related('disease', 'author').all()
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return render(request, 'appointments/appointment_detail.html', {'appointment': appointment})
+        return render(request, 'appointments/appointment_detail.html', {
+            'appointment': appointment,
+            'diagnoses' : diagnoses,
+        })
 
     return render(request, 'appointments/appointment_detail.html', {
         'appointment': appointment,
@@ -176,6 +180,7 @@ def appointment_detail(request, pk):
         'medical_record': appointment.medical_record,
         'prescriptions': appointment.prescriptions.all(),
         'exams': appointment.medical_exams.all(),
+        'diagnoses': diagnoses,
     })
 
 
@@ -646,10 +651,13 @@ def consultation_start(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
     if request.method == 'POST':
         notes = request.POST.get('notes', '')
-        diagnosis = request.POST.get('diagnosis', '')
         treatment = request.POST.get('treatment', '')
         mr_status = request.POST.get('mr_status')
         mr_notes = request.POST.get('mr_notes', '')
+
+        # Diagnóstico: obtener disease_id y notas del diagnóstico
+        disease_id = request.POST.get('disease')
+        diagnosis_notes = request.POST.get('diagnosis_notes', '')
 
         # Actualiza el MedicalRecord
         medical_record = appointment.medical_record
@@ -660,27 +668,41 @@ def consultation_start(request, pk):
             medical_record.save(update_fields=['status', 'additional_notes'])
 
         appointment.notes = notes
-        appointment.diagnosis = diagnosis
         appointment.treatment = treatment
         appointment.status = 'C'
-        appointment.save(update_fields=['notes', 'diagnosis', 'treatment', 'status'])
+        appointment.save(update_fields=['notes', 'treatment', 'status'])
+
+        # Si se seleccionó un diagnóstico, lo registra
+        if disease_id:
+            disease = Disease.objects.filter(pk=disease_id).first()
+            if disease:
+                Diagnosis.objects.create(
+                    appointment=appointment,
+                    disease=disease,
+                    notes=diagnosis_notes,
+                    author=request.user.doctor_profile
+                )
+
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'success': True})
         return redirect('consultation_list')
 
     medications = Medication.objects.all()
     exam_type_choices = MedicalExam.EXAM_TYPE_CHOICES
+    diseases = Disease.objects.all().order_by('name')
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render(request, 'consultations/consultation_window.html', {
             'appointment': appointment,
             'medications': medications,
             'exam_type_choices': exam_type_choices,
+            'diseases': diseases,
         })
     return render(request, 'dashboard.html', {
         'fragment': 'consultations/consultation_window.html',
         'appointment': appointment,
         'medications': medications,
+        'diseases': diseases,
     })
 
 

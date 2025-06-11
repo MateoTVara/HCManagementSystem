@@ -17,13 +17,30 @@
                     <strong>Hora:</strong> {{ appointment.time|time:"h:i A" }}<br>
                     <strong>Estado:</strong> {{ appointment.get_status_display }}<br>
                     <strong>Motivo:</strong> {{ appointment.reason }}<br>
-                    {% if appointment.diagnosis %}
-                    <strong>Diagnóstico:</strong> {{ appointment.diagnosis }}<br>
-                    {% endif %}
-                    {% if appointment.treatment %}
-                    <strong>Tratamiento:</strong> {{ appointment.treatment }}<br>
-                    {% endif %}
                 </p>
+                <!-- Diagnósticos -->
+                <h5 class="mb-3">Diagnósticos</h5>
+                {% if diagnoses %}
+                    <ul class="list-group mb-3">
+                        {% for diag in diagnoses %}
+                        <li class="list-group-item">
+                            <strong>{{ diag.disease.code_4 }} - {{ diag.disease.name }}</strong>
+                            {% if diag.notes %}
+                                <br><em>Notas: {{ diag.notes }}</em>
+                            {% endif %}
+                            <br>
+                            <span class="text-muted small">
+                                Registrado por Dr(a). {{ diag.author.user.get_full_name }} el {{ diag.date|date:"d/m/Y H:i" }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-muted mb-3">No hay diagnósticos registrados.</div>
+                {% endif %}
+                {% if appointment.treatment %}
+                <strong>Tratamiento:</strong> {{ appointment.treatment }}<br>
+                {% endif %}
                 <div class="mb-4">
                     <strong>Notas posteriores:</strong>
                     <div style="border:1px solid #ddd; border-radius:4px; padding:8px; height:90px; overflow-y:auto; background:#f9f9f9;">

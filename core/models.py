@@ -200,10 +200,6 @@ class Appointment(models.Model):
         related_name='appointments',
         verbose_name="Caso médico asociado"
     )
-    diagnosis = models.TextField(
-        verbose_name="Diagnóstico",
-        blank=True
-    )
     treatment = models.TextField(
         verbose_name="Tratamiento",
         blank=True
@@ -248,6 +244,50 @@ class Appointment(models.Model):
                 violation_error_message="El médico ya tiene una cita programada en este horario"
             ),
         ]
+
+class Disease(models.Model):
+    code_3 = models.CharField(max_length=4, verbose_name="Código CIE-10 (general)")
+    code_4 = models.CharField(max_length=8, unique=True, verbose_name="Código CIE-10 (específico)")
+    name = models.CharField(max_length=255, verbose_name="Nombre de la enfermedad")
+    is_primary = models.BooleanField(default=False, verbose_name="Código principal (†)")
+    is_manifestation = models.BooleanField(default=False, verbose_name="Código manifestación (*)")
+
+    def save(self, *args, **kwargs):
+        self.is_primary = '†' in self.code_4
+        self.is_manifestation = '*' in self.code_4
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.code_4} - {self.name}"
+
+class Diagnosis(models.Model):
+    appointment = models.ForeignKey(
+        'Appointment',
+        on_delete=models.CASCADE,
+        related_name='diagnoses',
+        verbose_name="Cita asociada"
+    )
+    disease = models.ForeignKey(
+        Disease,
+        on_delete=models.PROTECT,
+        verbose_name="Enfermedad"
+    )
+    notes = models.TextField(blank=True, verbose_name="Notas adicionales")
+    date = models.DateTimeField(auto_now_add=True, verbose_name="Fecha del diagnóstico")
+    author = models.ForeignKey(
+        'Doctor',
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name="Médico que diagnosticó"
+    )
+
+    def __str__(self):
+        return f"{self.disease} ({self.appointment})"
+
+    class Meta:
+        verbose_name = "Diagnóstico"
+        verbose_name_plural = "Diagnósticos"
+        ordering = ['-date']
 
 class Medication(models.Model):
     DOSAGE_FORM_CHOICES = [

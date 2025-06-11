@@ -57,7 +57,22 @@
                             </td>
                             <td>{{ appt.reason|truncatechars:30 }}</td>
                             <td>{{ appt.get_status_display }}</td>
-                            <td>{{ appt.diagnosis|truncatechars:30|default:"-" }}</td>
+                            <td>
+                                {% if appt.diagnoses.exists %}
+                                    <ul class="mb-0 ps-3">
+                                        {% for diag in appt.diagnoses.all %}
+                                            <li>
+                                                <strong>{{ diag.disease.code_4 }} - {{ diag.disease.name }}</strong>
+                                                {% if diag.notes %}
+                                                    <br><em class="text-muted small">Notas: {{ diag.notes }}</em>
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
                             <td>{{ appt.treatment|truncatechars:30|default:"-" }}</td>
                             <td>{{ appt.notes|truncatechars:30|default:"-" }}</td>
                         </tr>

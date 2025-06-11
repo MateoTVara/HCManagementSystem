@@ -5,7 +5,6 @@
         - {{ appointment.patient.dni}} - {{appointment.patient.get_gender_display}}
     </div>
     <div class="card-body pb-5">
-        <!-- <div class="alert alert-info">Ventana de consulta en desarrollo.</div> -->
         <div class="row mb-3">
             <div class="col-md-6">
                 <h5 class="mb-3">Datos de la Cita</h5>
@@ -34,34 +33,29 @@
                 </form>
             </div>
         </div>
-        <!-- Notas de la consulta -->
+        <!-- Notas de la consulta y diagnóstico -->
         <form method="post" id="consultationNotesForm" class="mb-4" action="{% url 'consultation_start' appointment.id %}">
             {% csrf_token %}
             <div class="mb-3">
                 <label for="notes" class="form-label">Notas de la consulta</label>
                 <textarea class="form-control" id="notes" name="notes" rows="5">{{ appointment.notes }}</textarea>
             </div>
-            <!-- Diagnosis Checkbox and Textarea -->
-            <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="showDiagnosis"
-                    {% if appointment.diagnosis %}checked{% endif %} />
-                <label class="form-check-label" for="showDiagnosis">
-                    Añadir diagnóstico
-                </label>
+            <!-- Diagnóstico -->
+            <div class="mb-3">
+                <label for="disease" class="form-label">Diagnóstico (CIE-10)</label>
+                <select class="form-select" id="disease" name="disease">
+                    <option value="">Seleccione...</option>
+                    {% for disease in diseases %}
+                        <option value="{{ disease.id }}">{{ disease.code_4 }} - {{ disease.name }}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="mb-3{% if not appointment.diagnosis %} d-none{% endif %}" id="diagnosisContainer">
-                <label for="diagnosis" class="form-label">Diagnóstico</label>
-                <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3">{{ appointment.diagnosis }}</textarea>
+            <div class="mb-3">
+                <label for="diagnosis_notes" class="form-label">Notas del diagnóstico</label>
+                <textarea class="form-control" id="diagnosis_notes" name="diagnosis_notes" rows="2"></textarea>
             </div>
-            <!-- Treatment Checkbox and Textarea -->
-            <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="showTreatment"
-                    {% if appointment.treatment %}checked{% endif %} />
-                <label class="form-check-label" for="showTreatment">
-                    Añadir tratamiento
-                </label>
-            </div>
-            <div class="mb-3{% if not appointment.treatment %} d-none{% endif %}" id="treatmentContainer">
+            <!-- Tratamiento -->
+            <div class="mb-3">
                 <label for="treatment" class="form-label">Tratamiento</label>
                 <textarea class="form-control" id="treatment" name="treatment" rows="3">{{ appointment.treatment }}</textarea>
             </div>
