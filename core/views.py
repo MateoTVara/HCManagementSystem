@@ -744,6 +744,16 @@ def prescription_register(request, appointment_id):
     return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
 
 
+@require_POST
+@role_required(['DOCTOR'])
+def prescription_delete(request, pk):
+    pres = get_object_or_404(Prescription, pk=pk)
+    appointment = pres.appointment
+    pres.delete()
+    html = render_to_string("consultations/partials/prescription_list.html", {"prescriptions": appointment.prescriptions.all()})
+    return JsonResponse({'success': True, 'html': html})
+
+
 @role_required(['DOCTOR'])
 def exam_register(request, appointment_id):
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -761,6 +771,16 @@ def exam_register(request, appointment_id):
         )
         return JsonResponse({'success': True, 'html': html})
     return JsonResponse({'success': False, 'error': 'Método no permitido.'}, status=405)
+
+
+@require_POST
+@role_required(['DOCTOR'])
+def exam_delete(request, pk):
+    exam = get_object_or_404(MedicalExam, pk=pk)
+    appointment = exam.appointment
+    exam.delete()
+    html = render_to_string("consultations/partials/exam_list.html", {"exams": appointment.medical_exams.all()})
+    return JsonResponse({'success': True, 'html': html})
 
 
 @require_POST
@@ -804,3 +824,13 @@ def disease_search(request):
             for d in diseases
         ]
     return JsonResponse({'results': results})
+
+
+@require_POST
+@role_required(['DOCTOR'])
+def diagnosis_delete(request, pk):
+    diag = get_object_or_404(Diagnosis, pk=pk)
+    appointment = diag.appointment
+    diag.delete()
+    html = render_to_string("consultations/partials/diagnosis_list.html", {"diagnoses": appointment.diagnoses.all()})
+    return JsonResponse({'success': True, 'diagnosis_html': html})

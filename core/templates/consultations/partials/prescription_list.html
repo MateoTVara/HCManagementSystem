@@ -1,13 +1,16 @@
 {% if prescriptions %}
     <ul class="list-group">
         {% for p in prescriptions %}
-        <li class="list-group-item d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
             <div>
                 <strong>{{ p.medication.name }}</strong> ({{ p.dosage }}, {{ p.frequency }}, {{ p.duration }})
                 {% if p.instructions %}
                     <br><small class="text-muted">{{ p.instructions }}</small>
                 {% endif %}
             </div>
+            <button type="button" class="btn btn-sm btn-danger btn-delete-prescription" data-id="{{ p.id }}">
+                <i class="bi bi-trash"></i>
+            </button>
         </li>
         {% endfor %}
     </ul>

@@ -65,17 +65,7 @@
             <div class="mt-4">
                 <h5 class="mb-2">Diagnósticos registrados</h5>
                 <div id="diagnosisList">
-                    {% for diag in appointment.diagnoses.all %}
-                        <div class="border rounded p-2 mb-2">
-                            <strong>{{ diag.disease.code_4 }}</strong> - {{ diag.disease.name }}
-                            {% if diag.notes %}
-                                <br><small class="text-muted">{{ diag.notes }}</small>
-                            {% endif %}
-                            <br><span class="text-muted">({{ diag.date|date:"d/m/Y H:i" }})</span>
-                        </div>
-                    {% empty %}
-                        <div class="text-muted">No hay diagnósticos registrados.</div>
-                    {% endfor %}
+                    {% include "consultations/partials/diagnosis_list.html" with diagnoses=appointment.diagnoses.all %}
                 </div>
             </div>
             <!-- Tratamiento -->

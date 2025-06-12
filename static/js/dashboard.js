@@ -566,6 +566,60 @@ document.addEventListener('click', function(e) {
     }
 });
 
+document.addEventListener('click', function(e) {
+    // Diagnóstico
+    if (e.target.closest('.btn-delete-diagnosis')) {
+        const btn = e.target.closest('.btn-delete-diagnosis');
+        const id = btn.getAttribute('data-id');
+        if (confirm('¿Eliminar este diagnóstico?')) {
+            fetch(`/consultation/diagnosis/delete/${id}/`, {
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken')}
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.diagnosis_html) {
+                    document.getElementById('diagnosisList').innerHTML = data.diagnosis_html;
+                }
+            });
+        }
+    }
+    // Prescripción
+    if (e.target.closest('.btn-delete-prescription')) {
+        const btn = e.target.closest('.btn-delete-prescription');
+        const id = btn.getAttribute('data-id');
+        if (confirm('¿Eliminar esta prescripción?')) {
+            fetch(`/consultation/prescription/delete/${id}/`, {
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken')}
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.html) {
+                    document.getElementById('prescriptionList').innerHTML = data.html;
+                }
+            });
+        }
+    }
+    // Examen
+    if (e.target.closest('.btn-delete-exam')) {
+        const btn = e.target.closest('.btn-delete-exam');
+        const id = btn.getAttribute('data-id');
+        if (confirm('¿Eliminar este examen?')) {
+            fetch(`/consultation/exam/delete/${id}/`, {
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCookie('csrftoken')}
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.html) {
+                    document.getElementById('examList').innerHTML = data.html;
+                }
+            });
+        }
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function() {
     const prescriptionForm = document.getElementById('prescriptionForm');
     if (prescriptionForm) {

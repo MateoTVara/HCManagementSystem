@@ -68,6 +68,9 @@ urlpatterns = [
     path('consultation/start/<int:pk>/', views.consultation_start, name='consultation_start'),
     path('consultation/<int:appointment_id>/prescription/register/', views.prescription_register, name='prescription_register'),
     path('consultation/<int:appointment_id>/exam/register/', views.exam_register, name='exam_register'),
+    path('consultation/diagnosis/delete/<int:pk>/', views.diagnosis_delete, name='diagnosis_delete'),
+    path('consultation/prescription/delete/<int:pk>/', views.prescription_delete, name='prescription_delete'),
+    path('consultation/exam/delete/<int:pk>/', views.exam_delete, name='exam_delete'),
 
     path('ajax/disease-search/', views.disease_search, name='disease_search'),
 ]
