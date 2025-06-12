@@ -40,38 +40,61 @@
                 <label for="notes" class="form-label">Notas de la consulta</label>
                 <textarea class="form-control" id="notes" name="notes" rows="5">{{ appointment.notes }}</textarea>
             </div>
-            <!-- Diagnóstico -->
-            <div class="mb-3 row align-items-end">
-                <div class="col-md-5">
-                    <label for="disease" class="form-label">Diagnóstico (CIE-10)</label>
-                    <select class="form-select" id="disease" name="disease">
-                        <option value="">Seleccione...</option>
-                    </select>
+            <!-- Agrega esto antes de la sección de diagnóstico y tratamiento -->
+            <div class="mb-3 row">
+                <div class="col-md-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="showDiagnosis">
+                        <label class="form-check-label" for="showDiagnosis">
+                            Diagnóstico
+                        </label>
+                    </div>
                 </div>
-                <div class="col-md-5">
-                    <label for="disease_search" class="form-label">Buscar enfermedad</label>
-                    <input type="text" id="disease_search" class="form-control" placeholder="Ingrese nombre...">
-                </div>
-                <div class="col-md-2 d-grid">
-                    <label class="form-label invisible">Agregar</label>
-                    <button type="button" class="btn btn-success" id="addDiagnosisBtn">Agregar diagnóstico</button>
-                </div>
-            </div>
-            <div id="disease_desc" class="form-text text-muted"></div>
-            <div class="mb-3">
-                <label for="diagnosis_notes" class="form-label">Notas del diagnóstico</label>
-                <textarea class="form-control" id="diagnosis_notes" name="diagnosis_notes" rows="2"></textarea>
-            </div>
-            <div class="mt-4">
-                <h5 class="mb-2">Diagnósticos registrados</h5>
-                <div id="diagnosisList">
-                    {% include "consultations/partials/diagnosis_list.html" with diagnoses=appointment.diagnoses.all %}
+                <div class="col-md-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="showTreatment">
+                        <label class="form-check-label" for="showTreatment">
+                            Tratamiento
+                        </label>
+                    </div>
                 </div>
             </div>
-            <!-- Tratamiento -->
-            <div class="mb-3">
-                <label for="treatment" class="form-label">Tratamiento</label>
-                <textarea class="form-control" id="treatment" name="treatment" rows="3">{{ appointment.treatment }}</textarea>
+            <!-- Diagnóstico (envolver en un div) -->
+            <div id="diagnosisContainer">
+                <div class="mb-3 row align-items-end">
+                    <div class="col-md-5">
+                        <label for="disease" class="form-label">Diagnóstico (CIE-10)</label>
+                        <select class="form-select" id="disease" name="disease">
+                            <option value="">Seleccione...</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="disease_search" class="form-label">Buscar enfermedad</label>
+                        <input type="text" id="disease_search" class="form-control" placeholder="Ingrese nombre...">
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <label class="form-label invisible">Agregar</label>
+                        <button type="button" class="btn btn-success" id="addDiagnosisBtn">Agregar diagnóstico</button>
+                    </div>
+                </div>
+                <div id="disease_desc" class="form-text text-muted"></div>
+                <div class="mb-3">
+                    <label for="diagnosis_notes" class="form-label">Notas del diagnóstico</label>
+                    <textarea class="form-control" id="diagnosis_notes" name="diagnosis_notes" rows="2"></textarea>
+                </div>
+                <div class="mt-4">
+                    <h5 class="mb-2">Diagnósticos registrados</h5>
+                    <div id="diagnosisList">
+                        {% include "consultations/partials/diagnosis_list.html" with diagnoses=appointment.diagnoses.all %}
+                    </div>
+                </div>
+            </div>
+            <!-- Tratamiento (envolver en un div) -->
+            <div id="treatmentContainer">
+                <div class="mb-3">
+                    <label for="treatment" class="form-label">Tratamiento</label>
+                    <textarea class="form-control" id="treatment" name="treatment" rows="3">{{ appointment.treatment }}</textarea>
+                </div>
             </div>
             <div class="card-footer bg-white border-0" style="position: absolute; bottom: 0; left: 0; width: 100%;">
                 <button type="submit" class="btn btn-primary w-100">Finalizar Consulta</button>

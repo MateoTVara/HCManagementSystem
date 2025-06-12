@@ -81,29 +81,31 @@ def consultation_start(request, pk):
             medical_record.additional_notes = mr_notes
             medical_record.save(update_fields=['status', 'additional_notes'])
 
-        appointment.notes = notes
-        appointment.treatment = treatment
-        appointment.status = 'C'
-        appointment.save(update_fields=['notes', 'treatment', 'status'])
-
-        if disease_id:
-            disease = Disease.objects.filter(pk=disease_id).first()
-            if disease:
-                if not Diagnosis.objects.filter(appointment=appointment, disease=disease, author=request.user.doctor_profile).exists():
-                    Diagnosis.objects.create(
-                        appointment=appointment,
-                        disease=disease,
-                        notes=diagnosis_notes,
-                        author=request.user.doctor_profile
-                    )
-
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Si es AJAX (agregar diagnóstico), NO marcar como completada la cita
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' and disease_id:
+            if disease_id:
+                disease = Disease.objects.filter(pk=disease_id).first()
+                if disease:
+                    if not Diagnosis.objects.filter(appointment=appointment, disease=disease, author=request.user.doctor_profile).exists():
+                        Diagnosis.objects.create(
+                            appointment=appointment,
+                            disease=disease,
+                            notes=diagnosis_notes,
+                            author=request.user.doctor_profile
+                        )
             diagnosis_html = render_to_string(
                 "consultations/partials/diagnosis_list.html",
                 {"diagnoses": appointment.diagnoses.all()}
             )
             return JsonResponse({'success': True, 'diagnosis_html': diagnosis_html})
-        return redirect('consultation_list')
+
+        # Si es el submit del formulario principal (finalizar consulta)
+        appointment.notes = notes
+        appointment.treatment = treatment
+        appointment.status = 'C'
+        appointment.save(update_fields=['notes', 'treatment', 'status'])
+
+        return JsonResponse({'success': True})
 
     medications = Medication.objects.all()
     exam_type_choices = MedicalExam.EXAM_TYPE_CHOICES
