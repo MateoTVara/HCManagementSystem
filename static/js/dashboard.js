@@ -455,6 +455,7 @@ function attachFormHandlers() {
     attachConsultationNotesFormHandler();
     initHandlers();
     setupDiagnosisTreatmentToggles();
+    setupDiseaseSearch();
 }
 
 function setupDiagnosisTreatmentToggles() {
@@ -588,6 +589,36 @@ document.addEventListener('DOMContentLoaded', function() {
     initHandlers();
     handleSidebar();
 });
+
+function setupDiseaseSearch() {
+    const searchInput = document.getElementById('disease_search');
+    const select = document.getElementById('disease');
+    let lastQuery = '';
+
+    if (searchInput && select) {
+        searchInput.addEventListener('input', function() {
+            const query = searchInput.value.trim();
+            if (!query) {
+                select.innerHTML = '<option value="">Seleccione...</option>';
+                lastQuery = '';
+                return;
+            }
+            if (query.length < 2 || query === lastQuery) return;
+            lastQuery = query;
+            fetch(`/ajax/disease-search/?q=${encodeURIComponent(query)}`)
+                .then(r => r.json())
+                .then(data => {
+                    select.innerHTML = '<option value="">Seleccione...</option>';
+                    data.results.forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d.id;
+                        opt.textContent = d.text;
+                        select.appendChild(opt);
+                    });
+                });
+        });
+    }
+}
 
 window.addEventListener('resize', handleSidebar);
 handleSidebar();

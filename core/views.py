@@ -785,3 +785,16 @@ def medicalrecord_detail(request, pk):
         'fragment': 'medical_records/medical_record_detail.html',
         'medical_record': medical_record,
     })
+
+def disease_search(request):
+    q = request.GET.get('q', '')
+    results = []
+    if q:
+        diseases = Disease.objects.filter(
+            Q(name__icontains=q) | Q(code_4__icontains=q)
+        ).order_by('name')[:20]
+        results = [
+            {'id': d.id, 'text': f"{d.code_4} - {d.name}"}
+            for d in diseases
+        ]
+    return JsonResponse({'results': results})

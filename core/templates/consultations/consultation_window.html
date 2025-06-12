@@ -41,14 +41,17 @@
                 <textarea class="form-control" id="notes" name="notes" rows="5">{{ appointment.notes }}</textarea>
             </div>
             <!-- Diagnóstico -->
-            <div class="mb-3">
-                <label for="disease" class="form-label">Diagnóstico (CIE-10)</label>
-                <select class="form-select" id="disease" name="disease">
-                    <option value="">Seleccione...</option>
-                    {% for disease in diseases %}
-                        <option value="{{ disease.id }}">{{ disease.code_4 }} - {{ disease.name }}</option>
-                    {% endfor %}
-                </select>
+            <div class="mb-3 row align-items-end">
+                <div class="col-md-8">
+                    <label for="disease" class="form-label">Diagnóstico (CIE-10)</label>
+                    <select class="form-select" id="disease" name="disease">
+                        <option value="">Seleccione...</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="disease_search" class="form-label">Buscar enfermedad</label>
+                    <input type="text" id="disease_search" class="form-control" placeholder="Ingrese nombre...">
+                </div>
             </div>
             <div class="mb-3">
                 <label for="diagnosis_notes" class="form-label">Notas del diagnóstico</label>
