@@ -676,15 +676,21 @@ def consultation_start(request, pk):
         if disease_id:
             disease = Disease.objects.filter(pk=disease_id).first()
             if disease:
-                Diagnosis.objects.create(
-                    appointment=appointment,
-                    disease=disease,
-                    notes=diagnosis_notes,
-                    author=request.user.doctor_profile
-                )
+                # Evita duplicados: solo crea si no existe uno igual para esta cita y enfermedad
+                if not Diagnosis.objects.filter(appointment=appointment, disease=disease, author=request.user.doctor_profile).exists():
+                    Diagnosis.objects.create(
+                        appointment=appointment,
+                        disease=disease,
+                        notes=diagnosis_notes,
+                        author=request.user.doctor_profile
+                    )
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': True})
+            diagnosis_html = render_to_string(
+                "consultations/partials/diagnosis_list.html",
+                {"diagnoses": appointment.diagnoses.all()}
+            )
+            return JsonResponse({'success': True, 'diagnosis_html': diagnosis_html})
         return redirect('consultation_list')
 
     medications = Medication.objects.all()
@@ -794,7 +800,7 @@ def disease_search(request):
             Q(name__icontains=q) | Q(code_4__icontains=q)
         ).order_by('name')[:20]
         results = [
-            {'id': d.id, 'text': f"{d.code_4} - {d.name}"}
+            {'id': d.id, 'text': d.code_4, 'desc': d.name}
             for d in diseases
         ]
     return JsonResponse({'results': results})

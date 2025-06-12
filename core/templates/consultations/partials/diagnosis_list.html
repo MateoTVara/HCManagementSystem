@@ -1,0 +1,11 @@
+{% for diag in diagnoses %}
+    <div class="border rounded p-2 mb-2">
+        <strong>{{ diag.disease.code_4 }}</strong> - {{ diag.disease.name }}
+        {% if diag.notes %}
+            <br><small class="text-muted">{{ diag.notes }}</small>
+        {% endif %}
+        <br><span class="text-muted">({{ diag.date|date:"d/m/Y H:i" }})</span>
+    </div>
+{% empty %}
+    <div class="text-muted">No hay diagnósticos registrados.</div>
+{% endfor %}

@@ -42,20 +42,41 @@
             </div>
             <!-- Diagnóstico -->
             <div class="mb-3 row align-items-end">
-                <div class="col-md-8">
+                <div class="col-md-5">
                     <label for="disease" class="form-label">Diagnóstico (CIE-10)</label>
                     <select class="form-select" id="disease" name="disease">
                         <option value="">Seleccione...</option>
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <label for="disease_search" class="form-label">Buscar enfermedad</label>
                     <input type="text" id="disease_search" class="form-control" placeholder="Ingrese nombre...">
                 </div>
+                <div class="col-md-2 d-grid">
+                    <label class="form-label invisible">Agregar</label>
+                    <button type="button" class="btn btn-success" id="addDiagnosisBtn">Agregar diagnóstico</button>
+                </div>
             </div>
+            <div id="disease_desc" class="form-text text-muted"></div>
             <div class="mb-3">
                 <label for="diagnosis_notes" class="form-label">Notas del diagnóstico</label>
                 <textarea class="form-control" id="diagnosis_notes" name="diagnosis_notes" rows="2"></textarea>
+            </div>
+            <div class="mt-4">
+                <h5 class="mb-2">Diagnósticos registrados</h5>
+                <div id="diagnosisList">
+                    {% for diag in appointment.diagnoses.all %}
+                        <div class="border rounded p-2 mb-2">
+                            <strong>{{ diag.disease.code_4 }}</strong> - {{ diag.disease.name }}
+                            {% if diag.notes %}
+                                <br><small class="text-muted">{{ diag.notes }}</small>
+                            {% endif %}
+                            <br><span class="text-muted">({{ diag.date|date:"d/m/Y H:i" }})</span>
+                        </div>
+                    {% empty %}
+                        <div class="text-muted">No hay diagnósticos registrados.</div>
+                    {% endfor %}
+                </div>
             </div>
             <!-- Tratamiento -->
             <div class="mb-3">

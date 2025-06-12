@@ -430,7 +430,13 @@ function attachExamFormHandler() {
 
 function attachFormHandlers() {
     document.querySelectorAll('form').forEach(form => {
-        if (form.id === 'addAllergyForm' || form.id === 'prescriptionForm' || form.id === 'examForm') return;
+        // Excluye los forms especiales
+        if (
+            form.id === 'addAllergyForm' ||
+            form.id === 'prescriptionForm' ||
+            form.id === 'examForm' ||
+            form.id === 'consultationNotesForm' // <-- agrega esta línea
+        ) return;
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             const isSearch = form.method.toLowerCase() === 'get';
@@ -593,14 +599,18 @@ document.addEventListener('DOMContentLoaded', function() {
 function setupDiseaseSearch() {
     const searchInput = document.getElementById('disease_search');
     const select = document.getElementById('disease');
+    const descDiv = document.getElementById('disease_desc');
     let lastQuery = '';
+    let diseaseDescriptions = {};
 
     if (searchInput && select) {
         searchInput.addEventListener('input', function() {
             const query = searchInput.value.trim();
             if (!query) {
                 select.innerHTML = '<option value="">Seleccione...</option>';
+                descDiv.textContent = '';
                 lastQuery = '';
+                diseaseDescriptions = {};
                 return;
             }
             if (query.length < 2 || query === lastQuery) return;
@@ -609,16 +619,55 @@ function setupDiseaseSearch() {
                 .then(r => r.json())
                 .then(data => {
                     select.innerHTML = '<option value="">Seleccione...</option>';
+                    diseaseDescriptions = {};
                     data.results.forEach(d => {
                         const opt = document.createElement('option');
                         opt.value = d.id;
-                        opt.textContent = d.text;
+                        opt.textContent = `${d.text} - ${d.desc}`; // Código y nombre
                         select.appendChild(opt);
+                        diseaseDescriptions[d.id] = d.desc;
                     });
+                    descDiv.textContent = '';
                 });
+        });
+
+        select.addEventListener('change', function() {
+            const selectedId = select.value;
+            descDiv.textContent = diseaseDescriptions[selectedId] || '';
+        });
+    }
+
+    // Botón para agregar diagnóstico
+    const btn = document.getElementById('addDiagnosisBtn');
+    const form = document.getElementById('consultationNotesForm');
+    if (btn && form) {
+        btn.addEventListener('click', function() {
+            const disease = form.disease.value;
+            const diagnosis_notes = form.diagnosis_notes.value;
+            if (!disease) return alert("Seleccione una enfermedad");
+            const data = new FormData();
+            data.append('disease', disease);
+            data.append('diagnosis_notes', diagnosis_notes);
+
+            fetch(form.action, {
+                method: "POST",
+                body: data,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.diagnosis_html) {
+                    document.getElementById('diagnosisList').innerHTML = data.diagnosis_html;
+                    form.disease.value = "";
+                    form.diagnosis_notes.value = "";
+                    descDiv.textContent = "";
+                }
+            });
         });
     }
 }
-
 window.addEventListener('resize', handleSidebar);
 handleSidebar();
