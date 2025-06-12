@@ -26,16 +26,36 @@ public class PatientExcelService {
         Workbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = (XSSFSheet)workbook.createSheet("Pacientes");
 
+        // Estilo para la cabecera
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFillForegroundColor(IndexedColors.LIGHT_CORNFLOWER_BLUE.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setBorderTop(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
+        Font font = workbook.createFont();
+        font.setBold(true);
+        headerStyle.setFont(font);
+
+        // Crea la fila de encabezados
+        String[] headers = {
+            "DNI", "Nombre", "Apellido", "Fecha de nacimiento", "Género",
+            "Tipo de sangre", "Teléfono", "Dirección", "Correo electrónico"
+        };
         Row header = sheet.createRow(0);
-        header.createCell(0).setCellValue("DNI");
-        header.createCell(1).setCellValue("Nombre");
-        header.createCell(2).setCellValue("Apellido");
-        header.createCell(3).setCellValue("Fecha de nacimiento");
-        header.createCell(4).setCellValue("Género");
-        header.createCell(5).setCellValue("Tipo de sangre");
-        header.createCell(6).setCellValue("Teléfono");
-        header.createCell(7).setCellValue("Dirección");
-        header.createCell(8).setCellValue("Correo electrónico");
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = header.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        // Estilo para las celdas normales con borde
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderTop(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
 
         int rowIdx = 1;
         for (Map<String, Object> patient : patients) {
@@ -49,6 +69,14 @@ public class PatientExcelService {
             row.createCell(6).setCellValue(patient.getOrDefault("phone", "").toString());
             row.createCell(7).setCellValue(patient.getOrDefault("address", "").toString());
             row.createCell(8).setCellValue(patient.getOrDefault("email", "").toString());
+            for (int i = 0; i < headers.length; i++) {
+                row.getCell(i).setCellStyle(cellStyle);
+            }
+        }
+
+        // Ajusta el ancho de las columnas automáticamente
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
         }
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();

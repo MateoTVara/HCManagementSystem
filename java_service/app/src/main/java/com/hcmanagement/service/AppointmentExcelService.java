@@ -32,22 +32,40 @@ public class AppointmentExcelService {
         byte[] cached = reportCache.getIfPresent(cacheKey); // Busca en cache
         if (cached != null) return cached; // Si existe, retorna el archivo cacheado
 
-        Workbook workbook = new XSSFWorkbook(); // Crea un nuevo libro Excel
-        XSSFSheet sheet = (XSSFSheet) workbook.createSheet("Citas"); // Crea una hoja llamada "Citas"
+        // Crea la fila de encabezados con estilo
+        Workbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = (XSSFSheet) workbook.createSheet("Citas");
+
+        // Estilo para la cabecera
+        CellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFillForegroundColor(IndexedColors.LIGHT_CORNFLOWER_BLUE.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setBorderTop(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
+        Font font = workbook.createFont();
+        font.setBold(true);
+        headerStyle.setFont(font);
 
         // Crea la fila de encabezados
         Row header = sheet.createRow(0);
-        header.createCell(0).setCellValue("Fecha");
-        header.createCell(1).setCellValue("Hora");
-        header.createCell(2).setCellValue("Estado");
-        header.createCell(3).setCellValue("Motivo");
-        header.createCell(4).setCellValue("Diagnóstico");
-        header.createCell(5).setCellValue("Tratamiento");
-        header.createCell(6).setCellValue("Notas posteriores");
-        header.createCell(7).setCellValue("Paciente");
-        header.createCell(8).setCellValue("DNI Paciente");
-        header.createCell(9).setCellValue("Doctor");
-        header.createCell(10).setCellValue("DNI Doctor");
+        String[] headers = {
+            "Fecha", "Hora", "Estado", "Motivo", "Tratamiento", "Notas posteriores",
+            "Paciente", "DNI Paciente", "Doctor", "DNI Doctor"
+        };
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = header.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        // Estilo para las celdas normales con borde
+        CellStyle cellStyle = workbook.createCellStyle();
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderTop(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
 
         int rowIdx = 1;
         // Llena la hoja con los datos de las citas
@@ -57,17 +75,25 @@ public class AppointmentExcelService {
             row.createCell(1).setCellValue(appt.getOrDefault("time", "").toString());
             row.createCell(2).setCellValue(appt.getOrDefault("status", "").toString());
             row.createCell(3).setCellValue(appt.getOrDefault("reason", "").toString());
-            row.createCell(4).setCellValue(appt.getOrDefault("diagnosis", "").toString()); 
-            row.createCell(5).setCellValue(appt.getOrDefault("treatment", "").toString()); 
-            row.createCell(6).setCellValue(appt.getOrDefault("notes", "").toString()); 
-            row.createCell(7).setCellValue(
+            row.createCell(4).setCellValue(appt.getOrDefault("treatment", "").toString());
+            row.createCell(5).setCellValue(appt.getOrDefault("notes", "").toString());
+            row.createCell(6).setCellValue(
                 appt.getOrDefault("patient_first_name", "") + " " + appt.getOrDefault("patient_last_name", "")
             );
-            row.createCell(8).setCellValue(appt.getOrDefault("patient_dni", "").toString());
-            row.createCell(9).setCellValue(
+            row.createCell(7).setCellValue(appt.getOrDefault("patient_dni", "").toString());
+            row.createCell(8).setCellValue(
                 appt.getOrDefault("doctor_first_name", "") + " " + appt.getOrDefault("doctor_last_name", "")
             );
-            row.createCell(10).setCellValue(appt.getOrDefault("doctor_dni", "").toString());
+            row.createCell(9).setCellValue(appt.getOrDefault("doctor_dni", "").toString());
+            // Aplica el estilo a cada celda de la fila
+            for (int i = 0; i < headers.length; i++) {
+                row.getCell(i).setCellStyle(cellStyle);
+            }
+        }
+
+        // Ajusta el ancho de las columnas automáticamente
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
         }
 
         // Cuenta la cantidad de citas por estado

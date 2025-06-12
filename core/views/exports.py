@@ -53,28 +53,22 @@ def export_doctors_excel(request):
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def export_appointments_excel(request):
-    appointments = Appointment.objects.select_related('patient', 'doctor__user').values(
-        'date', 'time', 'status', 'reason',
-        'patient__first_name', 'patient__last_name', 'patient__dni',
-        'doctor__user__first_name', 'doctor__user__last_name', 'doctor__dni',
-        'diagnosis', 'treatment', 'notes'
-    )
+    appointments = Appointment.objects.select_related('patient', 'doctor__user')
     data = []
     for a in appointments:
         data.append({
-            "date": a['date'].isoformat() if a['date'] else "",
-            "time": str(a['time']) if a['time'] else "",
-            "status": a['status'],
-            "reason": a['reason'],
-            "patient_first_name": a['patient__first_name'],
-            "patient_last_name": a['patient__last_name'],
-            "patient_dni": a['patient__dni'],
-            "doctor_first_name": a['doctor__user__first_name'],
-            "doctor_last_name": a['doctor__user__last_name'],
-            "doctor_dni": a['doctor__dni'],
-            "diagnosis": a['diagnosis'] if a['diagnosis'] else "",
-            "treatment": a['treatment'] if a['treatment'] else "",
-            "notes": a['notes'] if a['notes'] else ""
+            "date": a.date.isoformat() if a.date else "",
+            "time": str(a.time) if a.time else "",
+            "status": a.status,
+            "reason": a.reason,
+            "patient_first_name": a.patient.first_name,
+            "patient_last_name": a.patient.last_name,
+            "patient_dni": a.patient.dni,
+            "doctor_first_name": a.doctor.user.first_name,
+            "doctor_last_name": a.doctor.user.last_name,
+            "doctor_dni": a.doctor.dni,
+            "treatment": a.treatment if a.treatment else "",
+            "notes": a.notes if a.notes else ""
         })
     java_service_url = 'http://localhost:8080/generate/appointments/excel'
     response = requests.post(java_service_url, json=data)
