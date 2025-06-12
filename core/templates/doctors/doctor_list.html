@@ -85,21 +85,6 @@
     </div>
 </div>
 
-<script>
-document.getElementById('search-form')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    const query = document.querySelector('input[name="q"]').value;
-    const url = `{% url 'doctor_list' %}?q=${encodeURIComponent(query)}`;
-    
-    fetch(url, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(response => response.text())
-    .then(html => {
-        document.getElementById('mainContent').innerHTML = html;
-    });
-});
-</script>
 <style>
     .table-doctors th:nth-child(1) { width: 30%; }
     .table-doctors th:nth-child(2) { width: 20%; }

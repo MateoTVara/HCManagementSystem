@@ -1,65 +1,72 @@
+// Utilidades
 function getCookie(name) {
     let cookie = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
     return cookie ? cookie.pop() : '';
 }
 
+// Sidebar responsive
 function handleSidebar() {
     const sidebar = document.getElementById('sidebar');
     if (!sidebar) return;
-    
     if (window.innerWidth >= 992) {
         sidebar.classList.remove('sidebar-collapsed');
     }
 }
+window.addEventListener('resize', handleSidebar);
 
+// Búsqueda de alergias en tiempo real
 function handleAllergySearch() {
     document.addEventListener('input', function(e) {
-        if(e.target && e.target.id === 'allergySearch') {
+        if (e.target && e.target.id === 'allergySearch') {
             const searchTerm = e.target.value.toLowerCase().trim();
             const container = document.getElementById('allergyList');
-            
-            if(!container) return;
-            
+            if (!container) return;
             const items = container.getElementsByClassName('allergy-item');
             let visibleCount = 0;
-
             Array.from(items).forEach(item => {
                 const label = item.querySelector('.form-check-label').textContent.toLowerCase();
                 const matches = label.includes(searchTerm);
                 item.style.display = matches ? 'block' : 'none';
                 visibleCount += matches ? 1 : 0;
             });
-
             const noResults = document.getElementById('noResults');
-            if(noResults) {
+            if (noResults) {
                 noResults.classList.toggle('d-none', visibleCount > 0);
             }
         }
     });
 }
 
-function initHandlers() {
-    handleAllergySearch();
-}
-
-function refreshAllergyList() {
-    fetch('/allergy/partial_list/', {
+// Recarga lista de alergias por AJAX
+function refreshAllergyList(patientId = null) {
+    let url = '/allergy/partial_list/';
+    if (!patientId) {
+        // Intenta obtener el patientId del DOM si no se pasa explícitamente
+        const allergyListDiv = document.getElementById('allergyList');
+        if (allergyListDiv && allergyListDiv.dataset.patientId) {
+            patientId = allergyListDiv.dataset.patientId;
+        }
+    }
+    if (patientId) {
+        url = `/allergy/partial_list/${patientId}/`;
+    }
+    fetch(url, {
         headers: {'X-Requested-With': 'XMLHttpRequest'}
     })
     .then(r => r.text())
     .then(html => {
         document.getElementById('allergyList').innerHTML = html;
-        initHandlers();
+        handleAllergySearch();
     })
     .catch(() => console.error('No se pudo recargar lista de alergias'));
 }
 
-function showModal(contentHtml) {
-    let existingModal = document.getElementById('ajaxModal');
+// Modal genérico AJAX
+function showModal(contentHtml, modalId = 'ajaxModal') {
+    let existingModal = document.getElementById(modalId);
     if (existingModal) existingModal.remove();
-
     const modalDiv = document.createElement('div');
-    modalDiv.id = 'ajaxModal';
+    modalDiv.id = modalId;
     modalDiv.className = 'modal fade';
     modalDiv.tabIndex = -1;
     modalDiv.innerHTML = `
@@ -75,127 +82,13 @@ function showModal(contentHtml) {
     </div>
     `;
     document.body.appendChild(modalDiv);
-
     let modal = new bootstrap.Modal(modalDiv);
     modal.show();
-
-    const form = modalDiv.querySelector('form');
-    if (form) {
-        form.id = 'addAllergyForm';
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    modal.hide();
-                    modalDiv.addEventListener('hidden.bs.modal', function handler() {
-                        modalDiv.remove();
-                        if (!document.querySelector('.modal.show')) {
-                            document.body.classList.remove('modal-open');
-                            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                        }
-                        refreshAllergyList();
-                        modalDiv.removeEventListener('hidden.bs.modal', handler);
-                    });
-                } else {
-                    const errHtml = Object.values(data.errors).flat().join('<br>');
-                    modalDiv.querySelector('.modal-body').insertAdjacentHTML('afterbegin',
-                        `<div class="alert alert-danger">${errHtml}</div>`);
-                }
-            })
-            .catch(() => {
-                console.error('Error de red al guardar alergia');
-            });
-        });
-    }
+    return modalDiv;
 }
 
-function showAllergyModal(contentHtml) {
-    let existingModal = document.getElementById('ajaxModalAllergy');
-    if (existingModal) existingModal.remove();
-
-    const modalDiv = document.createElement('div');
-    modalDiv.id = 'ajaxModalAllergy';
-    modalDiv.className = 'modal fade';
-    modalDiv.tabIndex = -1;
-    modalDiv.innerHTML = `
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-        <div class="modal-header">
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-        </div>
-        <div class="modal-body">
-            ${contentHtml}
-        </div>
-        </div>
-    </div>
-    `;
-    document.body.appendChild(modalDiv);
-
-    let modal = new bootstrap.Modal(modalDiv);
-    modal.show();
-
-    const form = modalDiv.querySelector('form');
-    if (form) {
-        form.id = 'addAllergyForm';
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    modal.hide();
-                    modalDiv.addEventListener('hidden.bs.modal', function handler() {
-                        modalDiv.remove();
-                        const patientEditForm = document.querySelector('form[action*="patient/edit"]');
-                        if (patientEditForm) {
-                            const match = patientEditForm.getAttribute('action').match(/patient\/edit\/(\d+)\//);
-                            if (match) {
-                                const patientId = match[1];
-                                fetch(`/allergy/partial_list/${patientId}/`, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
-                                .then(r => r.text())
-                                .then(html => {
-                                    const allergyList = document.getElementById('allergyList');
-                                    if (allergyList) allergyList.innerHTML = html;
-                                });
-                            }
-                        } else {
-                            refreshAllergyList();
-                        }
-                        modalDiv.removeEventListener('hidden.bs.modal', handler);
-                    });
-                } else {
-                    const errHtml = Object.values(data.errors).flat().join('<br>');
-                    modalDiv.querySelector('.modal-body').insertAdjacentHTML('afterbegin',
-                        `<div class="alert alert-danger">${errHtml}</div>`);
-                }
-            })
-            .catch(() => {
-                console.error('Error de red al guardar alergia');
-            });
-        });
-    }
-}
-
-function attachEditAppointmentFormHandler() {
-    const modalDiv = document.getElementById('ajaxModal');
+// Handlers para formularios en modales (edición de cita, paciente, doctor)
+function attachEditFormHandler(modalDiv, url, refreshUrl, callback) {
     const form = modalDiv?.querySelector('form');
     if (form) {
         form.addEventListener('submit', function(e) {
@@ -214,11 +107,11 @@ function attachEditAppointmentFormHandler() {
                     bootstrap.Modal.getOrCreateInstance(modalDiv).hide();
                     document.body.classList.remove('modal-open');
                     document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                    fetch('/appointment/list/', {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+                    fetch(refreshUrl, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
                     .then(r => r.text())
                     .then(html => {
                         document.getElementById('mainContent').innerHTML = html;
-                        attachFormHandlers();
+                        if (callback) callback();
                     });
                 } else {
                     const errHtml = Object.values(data.errors).flat().join('<br>');
@@ -230,15 +123,120 @@ function attachEditAppointmentFormHandler() {
     }
 }
 
-function attachEditPatientFormHandler() {
-    const modalDiv = document.getElementById('ajaxModal');
-    const form = modalDiv?.querySelector('form');
-    if (form) {
+// Handler para formularios principales (prescripción, consulta, examen, historial)
+function attachFormHandlers() {
+    // Excluye forms especiales
+    document.querySelectorAll('form').forEach(form => {
+        if (
+            form.id === 'addAllergyForm' ||
+            form.id === 'prescriptionForm' ||
+            form.id === 'examForm' ||
+            form.id === 'consultationNotesForm'
+        ) return;
         form.addEventListener('submit', function(e) {
             e.preventDefault();
+            const isSearch = form.method.toLowerCase() === 'get';
+            fetch(isSearch ? `${form.action}?${new URLSearchParams(new FormData(form))}` : form.action, {
+                method: form.method,
+                body: isSearch ? null : new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...(!isSearch && {'X-CSRFToken': getCookie('csrftoken')})
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('mainContent').innerHTML = html;
+                attachFormHandlers();
+                attachPrescriptionFormHandler();
+                attachExamFormHandler();
+            });
+        });
+    });
+    attachPrescriptionFormHandler();
+    attachConsultationNotesFormHandler();
+    handleAllergySearch();
+    setupDiagnosisTreatmentToggles();
+    setupDiseaseSearch();
+}
+
+// Diagnóstico y tratamiento toggles
+function setupDiagnosisTreatmentToggles() {
+    const diagnosisCheckbox = document.getElementById('showDiagnosis');
+    const diagnosisContainer = document.getElementById('diagnosisContainer');
+    const treatmentCheckbox = document.getElementById('showTreatment');
+    const treatmentContainer = document.getElementById('treatmentContainer');
+    if (diagnosisCheckbox && diagnosisContainer) {
+        diagnosisCheckbox.onchange = function() {
+            diagnosisContainer.classList.toggle('d-none', !this.checked);
+        };
+        diagnosisContainer.classList.toggle('d-none', !diagnosisCheckbox.checked);
+    }
+    if (treatmentCheckbox && treatmentContainer) {
+        treatmentCheckbox.onchange = function() {
+            treatmentContainer.classList.toggle('d-none', !this.checked);
+        };
+        treatmentContainer.classList.toggle('d-none', !treatmentCheckbox.checked);
+    }
+}
+
+// Búsqueda y selección de enfermedades (diagnóstico)
+function setupDiseaseSearch() {
+    const searchInput = document.getElementById('disease_search');
+    const select = document.getElementById('disease');
+    const descDiv = document.getElementById('disease_desc');
+    let lastQuery = '';
+    let diseaseDescriptions = {};
+
+    if (searchInput && select) {
+        searchInput.addEventListener('input', function() {
+            const query = searchInput.value.trim();
+            if (!query) {
+                select.innerHTML = '<option value="">Seleccione...</option>';
+                descDiv.textContent = '';
+                lastQuery = '';
+                diseaseDescriptions = {};
+                return;
+            }
+            if (query.length < 2 || query === lastQuery) return;
+            lastQuery = query;
+            fetch(`/ajax/disease-search/?q=${encodeURIComponent(query)}`)
+                .then(r => r.json())
+                .then(data => {
+                    select.innerHTML = '<option value="">Seleccione...</option>';
+                    diseaseDescriptions = {};
+                    data.results.forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d.id;
+                        opt.textContent = `${d.text} - ${d.desc}`;
+                        select.appendChild(opt);
+                        diseaseDescriptions[d.id] = d.desc;
+                    });
+                    descDiv.textContent = '';
+                });
+        });
+
+        select.addEventListener('change', function() {
+            const selectedId = select.value;
+            descDiv.textContent = diseaseDescriptions[selectedId] || '';
+        });
+    }
+
+    // Botón para agregar diagnóstico
+    const btn = document.getElementById('addDiagnosisBtn');
+    const form = document.getElementById('consultationNotesForm');
+    if (btn && form) {
+        btn.addEventListener('click', function() {
+            const disease = form.disease.value;
+            const diagnosis_notes = form.diagnosis_notes.value;
+            if (!disease) return alert("Seleccione una enfermedad");
+            const data = new FormData();
+            data.append('disease', disease);
+            data.append('diagnosis_notes', diagnosis_notes);
+
             fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
+                method: "POST",
+                body: data,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRFToken': getCookie('csrftoken')
@@ -246,62 +244,18 @@ function attachEditPatientFormHandler() {
             })
             .then(r => r.json())
             .then(data => {
-                if (data.success) {
-                    bootstrap.Modal.getOrCreateInstance(modalDiv).hide();
-                    document.body.classList.remove('modal-open');
-                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                    fetch('/patient/list/', {headers: {'X-Requested-With': 'XMLHttpRequest'}})
-                    .then(r => r.text())
-                    .then(html => {
-                        document.getElementById('mainContent').innerHTML = html;
-                        attachFormHandlers();
-                    });
-                } else {
-                    const errHtml = Object.values(data.errors).flat().join('<br>');
-                    modalDiv.querySelector('.modal-body').insertAdjacentHTML('afterbegin',
-                        `<div class="alert alert-danger">${errHtml}</div>`);
+                if (data.success && data.diagnosis_html) {
+                    document.getElementById('diagnosisList').innerHTML = data.diagnosis_html;
+                    form.disease.value = "";
+                    form.diagnosis_notes.value = "";
+                    descDiv.textContent = "";
                 }
             });
         });
     }
 }
 
-function attachEditDoctorFormHandler() {
-    const modalDiv = document.getElementById('ajaxModal');
-    const form = modalDiv?.querySelector('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    bootstrap.Modal.getOrCreateInstance(modalDiv).hide();
-                    document.body.classList.remove('modal-open');
-                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
-                    fetch('/doctor/list/', {headers: {'X-Requested-With': 'XMLHttpRequest'}})
-                    .then(r => r.text())
-                    .then(html => {
-                        document.getElementById('mainContent').innerHTML = html;
-                        attachFormHandlers();
-                    });
-                } else {
-                    const errHtml = Object.values(data.errors).flat().join('<br>');
-                    modalDiv.querySelector('.modal-body').insertAdjacentHTML('afterbegin',
-                        `<div class="alert alert-danger">${errHtml}</div>`);
-                }
-            });
-        });
-    }
-}
-
+// Handler para formulario de prescripción
 function attachPrescriptionFormHandler() {
     const prescriptionForm = document.getElementById('prescriptionForm');
     if (prescriptionForm) {
@@ -320,7 +274,7 @@ function attachPrescriptionFormHandler() {
             .then(r => r.json())
             .then(data => {
                 const msgDiv = document.getElementById('prescriptionMsg');
-                if(data.success) {
+                if (data.success) {
                     form.reset();
                     if (data.html) {
                         document.getElementById('prescriptionList').innerHTML = data.html;
@@ -333,6 +287,7 @@ function attachPrescriptionFormHandler() {
     }
 }
 
+// Handler para formulario de consulta (notas)
 function attachConsultationNotesFormHandler() {
     const notesForm = document.getElementById('consultationNotesForm');
     if (notesForm) {
@@ -340,8 +295,6 @@ function attachConsultationNotesFormHandler() {
             e.preventDefault();
             const form = this;
             const data = new FormData(form);
-
-            // Agrega los datos del caso (MedicalRecord)
             data.append('mr_status', document.getElementById('mr_status').value);
             data.append('mr_notes', document.getElementById('mr_notes').value);
 
@@ -369,33 +322,7 @@ function attachConsultationNotesFormHandler() {
     }
 }
 
-function attachMedicalRecordFormHandler() {
-    const form = document.getElementById('medicalRecordForm');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const data = new FormData(form);
-            fetch(form.action, {
-                method: "POST",
-                body: data,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(r => r.json())
-            .then(data => {
-                const msg = document.getElementById('medicalRecordMsg');
-                if (data.success) {
-                    msg.innerHTML = `<span class="text-success">Caso actualizado</span>`;
-                } else {
-                    msg.innerHTML = `<span class="text-danger">${data.error || "Error al actualizar el caso."}</span>`;
-                }
-            });
-        });
-    }
-}
-
+// Handler para formulario de exámenes
 function attachExamFormHandler() {
     const examForm = document.getElementById('examForm');
     if (examForm) {
@@ -415,7 +342,7 @@ function attachExamFormHandler() {
             .then(r => r.json())
             .then(data => {
                 const msgDiv = document.getElementById('examMsg');
-                if(data.success) {
+                if (data.success) {
                     form.reset();
                     if (data.html) {
                         document.getElementById('examList').innerHTML = data.html;
@@ -428,65 +355,51 @@ function attachExamFormHandler() {
     }
 }
 
-function attachFormHandlers() {
-    document.querySelectorAll('form').forEach(form => {
-        // Excluye los forms especiales
-        if (
-            form.id === 'addAllergyForm' ||
-            form.id === 'prescriptionForm' ||
-            form.id === 'examForm' ||
-            form.id === 'consultationNotesForm' // <-- agrega esta línea
-        ) return;
-        form.addEventListener('submit', function(e) {
+// Handler para formulario de alergias
+function attachAddAllergyFormHandler() {
+    const addAllergyForm = document.getElementById('addAllergyForm');
+    if (addAllergyForm) {
+        addAllergyForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const isSearch = form.method.toLowerCase() === 'get';
-            fetch(isSearch ? `${form.action}?${new URLSearchParams(new FormData(form))}` : form.action, {
-                method: form.method,
-                body: isSearch ? null : new FormData(form),
+            e.stopPropagation();
+
+            const name = document.getElementById('newAllergyName').value.trim();
+            const common_reactions = document.getElementById('newAllergyReactions').value.trim();
+            const errorDiv = document.getElementById('addAllergyError');
+            errorDiv.textContent = '';
+
+            fetch(addAllergyForm.action, {
+                method: 'POST',
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    ...(!isSearch && {'X-CSRFToken': getCookie('csrftoken')})
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new FormData(addAllergyForm)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Cierra el modal correctamente
+                    const modalEl = document.getElementById('addAllergyModal');
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.hide();
+                    document.body.classList.remove('modal-open');
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    addAllergyForm.reset();
+                    // Recarga la lista de alergias
+                    refreshAllergyList();
+                } else {
+                    errorDiv.textContent = data.error || 'Error al registrar la alergia.';
                 }
             })
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('mainContent').innerHTML = html;
-                attachFormHandlers();
-                attachPrescriptionFormHandler();
-                attachExamFormHandler();
+            .catch(() => {
+                errorDiv.textContent = 'Error de red.';
             });
         });
-    });
-    attachPrescriptionFormHandler();
-    attachConsultationNotesFormHandler();
-    initHandlers();
-    setupDiagnosisTreatmentToggles();
-    setupDiseaseSearch();
-}
-
-function setupDiagnosisTreatmentToggles() {
-    const diagnosisCheckbox = document.getElementById('showDiagnosis');
-    const diagnosisContainer = document.getElementById('diagnosisContainer');
-    const treatmentCheckbox = document.getElementById('showTreatment');
-    const treatmentContainer = document.getElementById('treatmentContainer');
-    
-    if (diagnosisCheckbox && diagnosisContainer) {
-        diagnosisCheckbox.onchange = function() {
-            diagnosisContainer.classList.toggle('d-none', !this.checked);
-        };
-        // Sincronizar estado inicial
-        diagnosisContainer.classList.toggle('d-none', !diagnosisCheckbox.checked);
-    }
-
-    if (treatmentCheckbox && treatmentContainer) {
-        treatmentCheckbox.onchange = function() {
-            treatmentContainer.classList.toggle('d-none', !this.checked);
-        };
-        // Sincronizar estado inicial
-        treatmentContainer.classList.toggle('d-none', !treatmentCheckbox.checked);
     }
 }
 
+// AJAX navigation (sidebar, links)
 document.getElementById('sidebarToggle')?.addEventListener('click', () => {
     document.getElementById('sidebar').classList.toggle('sidebar-collapsed');
 });
@@ -495,7 +408,6 @@ document.addEventListener('click', function(e) {
     const link = e.target.closest('a[data-ajax]');
     if (link) {
         e.preventDefault();
-        console.log('Interceptado AJAX', link.href);
         fetch(link.href, {
             headers: {'X-Requested-With': 'XMLHttpRequest'}
         })
@@ -509,63 +421,59 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// Botones de edición y modales
 document.addEventListener('click', function(e) {
-    const btn = e.target.closest('#btnAddAllergy');
-    if (btn) {
+    // Alergia
+    const btnAllergy = e.target.closest('#btnAddAllergy');
+    if (btnAllergy) {
         e.preventDefault();
-        const url = btn.getAttribute('data-url');
-        fetch(url, {
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
-        })
+        const url = btnAllergy.getAttribute('data-url');
+        fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
         .then(r => r.text())
         .then(html => {
-            showAllergyModal(html);
+            showModal(html, 'addAllergyModal');
+            attachAddAllergyFormHandler();
         });
     }
-
+    // Editar cita
     const btnEdit = e.target.closest('.btnEditAppointment');
     if (btnEdit) {
         e.preventDefault();
         const url = btnEdit.getAttribute('data-url');
-        fetch(url, {
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
-        })
+        fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
         .then(r => r.text())
         .then(html => {
-            showModal(html, 'Editar Cita');
-            attachEditAppointmentFormHandler();
+            const modalDiv = showModal(html, 'ajaxModal');
+            attachEditFormHandler(modalDiv, url, '/appointment/list/', attachFormHandlers);
         });
     }
-
+    // Editar paciente
     const btnEditPatient = e.target.closest('.btnEditPatient');
     if (btnEditPatient) {
         e.preventDefault();
         const url = btnEditPatient.getAttribute('data-url');
-        fetch(url, {
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
-        })
+        fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
         .then(r => r.text())
         .then(html => {
-            showModal(html, 'Editar Paciente');
-            attachEditPatientFormHandler();
+            const modalDiv = showModal(html, 'ajaxModal');
+            attachEditFormHandler(modalDiv, url, '/patient/list/', attachFormHandlers);
         });
     }
-
+    // Editar doctor
     const btnEditDoctor = e.target.closest('.btnEditDoctor');
     if (btnEditDoctor) {
         e.preventDefault();
         const url = btnEditDoctor.getAttribute('data-url');
-        fetch(url, {
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
-        })
+        fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
         .then(r => r.text())
         .then(html => {
-            showModal(html, 'Editar Médico');
-            attachEditDoctorFormHandler();
+            const modalDiv = showModal(html, 'ajaxModal');
+            attachEditFormHandler(modalDiv, url, '/doctor/list/', attachFormHandlers);
         });
     }
 });
 
+// Botones de eliminar (diagnóstico, prescripción, examen)
 document.addEventListener('click', function(e) {
     // Diagnóstico
     if (e.target.closest('.btn-delete-diagnosis')) {
@@ -620,108 +528,8 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// Inicialización
 document.addEventListener('DOMContentLoaded', function() {
-    const prescriptionForm = document.getElementById('prescriptionForm');
-    if (prescriptionForm) {
-        prescriptionForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const form = this;
-            const data = new FormData(form);
-            fetch(form.action, {
-                method: "POST",
-                body: data,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(r => r.json())
-            .then(data => {
-                const msgDiv = document.getElementById('prescriptionMsg');
-                if(data.success) {
-                    form.reset();
-                } else {
-                    msgDiv.innerHTML = `<div class="alert alert-danger">${data.error || "Error al registrar prescripción."}</div>`;
-                }
-            });
-        });
-    }
-    initHandlers();
     handleSidebar();
+    attachFormHandlers();
 });
-
-function setupDiseaseSearch() {
-    const searchInput = document.getElementById('disease_search');
-    const select = document.getElementById('disease');
-    const descDiv = document.getElementById('disease_desc');
-    let lastQuery = '';
-    let diseaseDescriptions = {};
-
-    if (searchInput && select) {
-        searchInput.addEventListener('input', function() {
-            const query = searchInput.value.trim();
-            if (!query) {
-                select.innerHTML = '<option value="">Seleccione...</option>';
-                descDiv.textContent = '';
-                lastQuery = '';
-                diseaseDescriptions = {};
-                return;
-            }
-            if (query.length < 2 || query === lastQuery) return;
-            lastQuery = query;
-            fetch(`/ajax/disease-search/?q=${encodeURIComponent(query)}`)
-                .then(r => r.json())
-                .then(data => {
-                    select.innerHTML = '<option value="">Seleccione...</option>';
-                    diseaseDescriptions = {};
-                    data.results.forEach(d => {
-                        const opt = document.createElement('option');
-                        opt.value = d.id;
-                        opt.textContent = `${d.text} - ${d.desc}`; // Código y nombre
-                        select.appendChild(opt);
-                        diseaseDescriptions[d.id] = d.desc;
-                    });
-                    descDiv.textContent = '';
-                });
-        });
-
-        select.addEventListener('change', function() {
-            const selectedId = select.value;
-            descDiv.textContent = diseaseDescriptions[selectedId] || '';
-        });
-    }
-
-    // Botón para agregar diagnóstico
-    const btn = document.getElementById('addDiagnosisBtn');
-    const form = document.getElementById('consultationNotesForm');
-    if (btn && form) {
-        btn.addEventListener('click', function() {
-            const disease = form.disease.value;
-            const diagnosis_notes = form.diagnosis_notes.value;
-            if (!disease) return alert("Seleccione una enfermedad");
-            const data = new FormData();
-            data.append('disease', disease);
-            data.append('diagnosis_notes', diagnosis_notes);
-
-            fetch(form.action, {
-                method: "POST",
-                body: data,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success && data.diagnosis_html) {
-                    document.getElementById('diagnosisList').innerHTML = data.diagnosis_html;
-                    form.disease.value = "";
-                    form.diagnosis_notes.value = "";
-                    descDiv.textContent = "";
-                }
-            });
-        });
-    }
-}
-window.addEventListener('resize', handleSidebar);
-handleSidebar();

@@ -5,7 +5,7 @@
             <i class="bi bi-calendar-plus me-2"></i>Nueva Alergía
         </h3>
     </div>
-    <form method="post" action="{% url 'allergy_register' %}">
+    <form id="addAllergyForm" method="post" action="{% url 'allergy_register' %}">
         {% csrf_token %}
         <div class="row g-3">
             {% for field in form %}
@@ -19,6 +19,7 @@
             {% endfor %}
         </div>
         <div class="mt-4">
+            <div id="addAllergyError" class="text-danger mb-2"></div>
             <button type="submit" class="btn btn-primary px-5">
                 <i class="bi bi-save me-1"></i> Guardar
             </button>

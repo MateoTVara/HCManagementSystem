@@ -67,7 +67,7 @@
                     </button>
                 </div>
                 <div class="border p-3 rounded bg-light">
-                    <div class="row g-3" id="allergyList">
+                    <div class="row g-3" id="allergyList" data-patient-id="{{ patient.id }}">
                         {% for allergy in allergies %}
                         <div class="col-md-4 col-sm-6 allergy-item">
                             <div class="card mb-3">

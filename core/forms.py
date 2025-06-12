@@ -70,11 +70,13 @@ class AllergyRegister(forms.ModelForm):
         fields = ['name', 'common_reactions']
         widgets = {
             'name': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'id': 'newAllergyName'
             }),
             'common_reactions': forms.Textarea(attrs={
                 'rows': 3,
-                'class': 'form-control'
+                'class': 'form-control',
+                'id': 'newAllergyReactions'
             }),
         }
 
