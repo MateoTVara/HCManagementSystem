@@ -1,6 +1,2 @@
-dirStructure.txt
-dirStructureToText.py
 __pycache__/
-core/import_diseases.py
-static/CIE10.xlsx
 management/
