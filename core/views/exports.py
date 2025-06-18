@@ -1,12 +1,13 @@
 from django.http import HttpResponse
-from core.models import Patient, Doctor, Appointment
+from core.models import Patient, PatientAllergy, EmergencyContact, Doctor, Appointment
 from .appointments import role_required
 import requests
+from core.models import MedicalRecord
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def export_patients_excel(request):
     patients = Patient.objects.values(
-        'dni', 'first_name', 'last_name', 'date_of_birth', 'gender', 'blood_type',
+        'id', 'dni', 'first_name', 'last_name', 'date_of_birth', 'gender', 'blood_type',
         'phone', 'address', 'email'
     )
     data = []
@@ -14,7 +15,42 @@ def export_patients_excel(request):
         p = dict(p)
         if p['date_of_birth']:
             p['date_of_birth'] = p['date_of_birth'].isoformat()
+        # Alergias relacionadas
+        allergies = PatientAllergy.objects.filter(patient_id=p['id']).select_related('allergy')
+        p['allergies'] = [
+            {
+                "name": a.allergy.name,
+                "severity": a.severity,
+                "patient_reactions": a.patient_reactions
+            }
+            for a in allergies
+        ]
+        # Contactos de emergencia relacionados
+        contacts = EmergencyContact.objects.filter(patient_id=p['id'])
+        p['emergency_contacts'] = [
+            {
+                "full_name": c.full_name,
+                "relationship": c.relationship,
+                "phone": c.phone,
+                "address": c.address
+            }
+            for c in contacts
+        ]
+        # Historiales médicos relacionados
+        records = MedicalRecord.objects.filter(patient_id=p['id']).select_related('attending_doctor')
+        p['medical_records'] = [
+            {
+                "created_at": r.created_at.isoformat() if r.created_at else "",
+                "status": r.status,
+                "attending_doctor": str(r.attending_doctor) if r.attending_doctor else "",
+                "additional_notes": r.additional_notes,
+            }
+            for r in records
+        ]
         data.append(p)
+    # Elimina el campo 'id' antes de enviar
+    for p in data:
+        p.pop('id', None)
     java_service_url = 'http://localhost:8080/generate/patients/excel'
     response = requests.post(java_service_url, json=data)
     if response.status_code == 200:
@@ -26,6 +62,7 @@ def export_patients_excel(request):
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def export_doctors_excel(request):
     doctors = Doctor.objects.select_related('user').values(
+        'id',
         'dni',
         'user__first_name',
         'user__last_name',
@@ -35,6 +72,18 @@ def export_doctors_excel(request):
     )
     data = []
     for d in doctors:
+        # Historiales médicos asociados a este doctor
+        medical_records = MedicalRecord.objects.filter(attending_doctor_id=d['id']).select_related('patient')
+        records_data = [
+            {
+                "created_at": mr.created_at.isoformat() if mr.created_at else "",
+                "status": mr.status,
+                "patient_name": f"{mr.patient.first_name} {mr.patient.last_name}",
+                "patient_dni": mr.patient.dni,
+                "additional_notes": mr.additional_notes,
+            }
+            for mr in medical_records
+        ]
         data.append({
             "dni": d['dni'],
             "first_name": d['user__first_name'],
@@ -42,6 +91,7 @@ def export_doctors_excel(request):
             "email": d['user__email'],
             "specialty": d['specialty'],
             "gender": str(d['gender']),
+            "medical_records": records_data,
         })
     java_service_url = 'http://localhost:8080/generate/doctors/excel'
     response = requests.post(java_service_url, json=data)
@@ -68,7 +118,19 @@ def export_appointments_excel(request):
             "doctor_last_name": a.doctor.user.last_name,
             "doctor_dni": a.doctor.dni,
             "treatment": a.treatment if a.treatment else "",
-            "notes": a.notes if a.notes else ""
+            "notes": a.notes if a.notes else "",
+            "diagnoses": [
+                {"code_4": d.disease.code_4, "name": d.disease.name, "notes": d.notes}
+                for d in a.diagnoses.all()
+            ],
+            "prescriptions": [
+                {"medication": str(p.medication), "dosage": p.dosage, "instructions": p.instructions}
+                for p in a.prescriptions.all()
+            ],
+            "exams": [
+                {"exam_type": e.get_exam_type_display()}
+                for e in a.medical_exams.all()
+            ]
         })
     java_service_url = 'http://localhost:8080/generate/appointments/excel'
     response = requests.post(java_service_url, json=data)

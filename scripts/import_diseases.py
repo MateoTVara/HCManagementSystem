@@ -1,3 +1,9 @@
+# -------------------------------
+# Instrucciones de uso:
+# 1. Coloca el archivo Excel (por ejemplo, CIE10.xlsx) en la carpeta 'docs' del proyecto.
+# 2. Ejecuta este script desde la raíz del proyecto con:
+#    python scripts/import_diseases.py CIE10.xlsx
+# -------------------------------
 import os
 import django
 import openpyxl
@@ -9,7 +15,7 @@ django.setup()
 from core.models import Disease
 
 def import_diseases_from_excel(filename):
-    excel_path = os.path.join(BASE_DIR, 'static', filename)
+    excel_path = os.path.join(BASE_DIR, 'docs', filename)
     print(f"Usando archivo: {excel_path}")
     wb = openpyxl.load_workbook(excel_path)
     ws = wb.active
