@@ -562,6 +562,22 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// Navegación al perfil del usuario
+document.addEventListener('click', function(e) {
+    const profileBtn = e.target.closest('#profileShortcut');
+    if (profileBtn) {
+        e.preventDefault();
+        fetch('/profile/', {
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.text())
+        .then(html => {
+            document.getElementById('mainContent').innerHTML = html;
+            attachFormHandlers();
+        });
+    }
+});
+
 // Inicialización
 document.addEventListener('DOMContentLoaded', function() {
     handleSidebar();

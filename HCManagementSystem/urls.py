@@ -26,6 +26,7 @@ urlpatterns = [
     path('', views.login_view, name='login'),  # Vista de inicio de sesión
     path('logout/', views.logout_view, name='logout'),  # Vista de cierre de sesión
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),  # Panel principal
+    path('profile/', views.user_profile, name='user_profile'),
 
     # Rutas para la gestión de citas
     path('appointment/register/', views.appointment_register, name='appointment_register'),  # Registrar cita

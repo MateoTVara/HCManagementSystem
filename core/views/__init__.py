@@ -1,4 +1,4 @@
-from .auth import login_view, logout_view, DashboardView
+from .auth import *
 from .appointments import *
 from .patients import *
 from .doctors import *
