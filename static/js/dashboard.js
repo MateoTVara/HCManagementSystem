@@ -528,6 +528,40 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// Navegación del calendario (meses)
+document.addEventListener('click', function(e) {
+    if (e.target.closest('#prevMonthBtn') || e.target.closest('#nextMonthBtn')) {
+        e.preventDefault();
+        const btn = e.target.closest('button');
+        const month = btn.getAttribute('data-month');
+        const year = btn.getAttribute('data-year');
+        fetch(`/appointment/calendar/?month=${month}&year=${year}`, {
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.text())
+        .then(html => {
+            document.getElementById('mainContent').innerHTML = html;
+        });
+    }
+});
+
+// Listado de citas por día
+document.addEventListener('click', function(e) {
+    const dayLink = e.target.closest('.calendar-day-link');
+    if (dayLink) {
+        e.preventDefault();
+        const date = dayLink.getAttribute('data-date');
+        fetch(`/appointment/list/?date=${date}`, {
+            headers: {'X-Requested-With': 'XMLHttpRequest'}
+        })
+        .then(r => r.text())
+        .then(html => {
+            document.getElementById('mainContent').innerHTML = html;
+            attachFormHandlers();
+        });
+    }
+});
+
 // Inicialización
 document.addEventListener('DOMContentLoaded', function() {
     handleSidebar();

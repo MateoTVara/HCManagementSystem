@@ -61,3 +61,12 @@
         transform: translateX(-100%);
     }
 }
+
+#sidebar .collapse .nav,
+#sidebar .collapsing .nav {
+    flex-direction: column !important;
+}
+#sidebar .collapse .nav-item,
+#sidebar .collapsing .nav-item {
+    width: 100%;
+}

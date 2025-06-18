@@ -5,7 +5,7 @@ from core.models import Appointment, MedicalRecord
 from core.forms import AppointmentRegister, AppointmentEdit
 from django.db.models import Q, Count, Value, CharField
 from django.db.models.functions import Concat
-from datetime import date
+from datetime import date, datetime
 import calendar
 from django.shortcuts import get_object_or_404, render, redirect
 
@@ -50,12 +50,21 @@ def appointment_register(request):
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_list(request):
     query = request.GET.get('q', '').strip()
+    date_str = request.GET.get('date', '').strip()
     appointments = Appointment.objects.all()
 
-    # Doctor filter
+    # Filtrar por doctor si aplica
     if hasattr(request.user, 'doctor_profile'):
         appointments = appointments.filter(doctor=request.user.doctor_profile)
-    
+
+    # Filtrar por fecha si viene en GET
+    if date_str:
+        try:
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+            appointments = appointments.filter(date=date_obj)
+        except ValueError:
+            pass
+
     if query:
         appointments = appointments.annotate(
             patient_full_name=Concat('patient__first_name', Value(' '), 'patient__last_name', output_field=CharField()),
@@ -140,24 +149,47 @@ def appointment_detail(request, pk):
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_calendar(request):
-    today = date.today()
-    current_year = today.year
-    current_month = today.month
+    # Obtén mes y año de GET, o usa el actual
+    try:
+        current_month = int(request.GET.get('month', ''))
+        current_year = int(request.GET.get('year', ''))
+    except (TypeError, ValueError):
+        today = date.today()
+        current_year = today.year
+        current_month = today.month
 
-    appointments = (Appointment.objects
-                    .filter(date__year=current_year, date__month=current_month)
-                    .values('date')
-                    .annotate(total=Count('id')))
-    
+    # Filtrar por doctor si el usuario es doctor
+    appointments_qs = Appointment.objects.filter(date__year=current_year, date__month=current_month)
+    if hasattr(request.user, 'doctor_profile'):
+        appointments_qs = appointments_qs.filter(doctor=request.user.doctor_profile)
+
+    appointments = appointments_qs.values('date').annotate(total=Count('id'))
     appointments_dict = {appt['date'].isoformat(): appt['total'] for appt in appointments}
 
     cal = calendar.Calendar(firstweekday=6)
     month_days = cal.monthdatescalendar(current_year, current_month)
 
+    # Calcular mes anterior y siguiente
+    prev_month = current_month - 1
+    prev_year = current_year
+    next_month = current_month + 1
+    next_year = current_year
+    if prev_month < 1:
+        prev_month = 12
+        prev_year -= 1
+    if next_month > 12:
+        next_month = 1
+        next_year += 1
+
     return render(request, 'appointments/appointment_calendar.html', {
         'month_days': month_days,
         'appointments_dict': appointments_dict,
-        'current_month': today.strftime('%B %Y'),
-        'current_month_num': today.month,
-        'weekday_headers': ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+        'current_month': date(current_year, current_month, 1).strftime('%B %Y'),
+        'current_month_num': current_month,
+        'weekday_headers': ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        'prev_month': prev_month,
+        'prev_year': prev_year,
+        'next_month': next_month,
+        'next_year': next_year,
+        'current_year': current_year,
     })
