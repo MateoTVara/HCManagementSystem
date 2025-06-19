@@ -1,8 +1,9 @@
 from django.http import HttpResponse
-from core.models import Patient, PatientAllergy, EmergencyContact, Doctor, Appointment
+from core.models import Patient, PatientAllergy, EmergencyContact, Doctor, Appointment, Diagnosis
 from .appointments import role_required
 import requests
 from core.models import MedicalRecord
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def export_patients_excel(request):
@@ -139,3 +140,18 @@ def export_appointments_excel(request):
         resp['Content-Disposition'] = 'attachment; filename="citas.xlsx"'
         return resp
     return HttpResponse("Error generando el archivo", status=500)
+
+@login_required
+@user_passes_test(lambda u: u.role in ['ADMIN', 'MANAGEMENT'])
+def export_top_diseases_pdf(request):
+    diseases = Diagnosis.get_top_diseases()
+    # Cambia la URL por la de tu servicio Java real
+    JAVA_SERVICE_URL = "http://localhost:8080/generate/diseases/pdf"
+    response = requests.post(JAVA_SERVICE_URL, json=diseases)
+    if response.status_code == 200:
+        pdf_bytes = response.content
+        resp = HttpResponse(pdf_bytes, content_type='application/pdf')
+        resp['Content-Disposition'] = 'attachment; filename="enfermedades_frecuentes.pdf"'
+        return resp
+    else:
+        return HttpResponse("Error generando el PDF", status=500)

@@ -211,13 +211,19 @@ def medicalrecord_update(request, pk):
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def medicalrecord_detail(request, pk):
     medical_record = get_object_or_404(MedicalRecord, pk=pk)
+    # Junta todos los diagnósticos de todas las citas asociadas a este historial médico
+    all_diagnoses = []
+    for appt in medical_record.appointments.all():
+        all_diagnoses.extend(appt.diagnoses.all())
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return render(request, 'medical_records/medical_record_detail.html', {
             'medical_record': medical_record,
+            'all_diagnoses': all_diagnoses,
         })
     return render(request, 'dashboard.html', {
         'fragment': 'medical_records/medical_record_detail.html',
         'medical_record': medical_record,
+        'all_diagnoses': all_diagnoses,
     })
 
 def disease_search(request):

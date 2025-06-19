@@ -63,6 +63,7 @@ urlpatterns = [
     path('export/patients/excel/', views.export_patients_excel, name='export_patients_excel'),
     path('export/doctors/excel/', views.export_doctors_excel, name='export_doctors_excel'),
     path('export/appointments/excel/', views.export_appointments_excel, name='export_appointments_excel'),
+    path('export/diseases/pdf/', views.export_top_diseases_pdf, name='export_top_diseases_pdf'),
 
     # Consultas de doctor
     path('consultation/list/', views.consultation_list, name='consultation_list'),

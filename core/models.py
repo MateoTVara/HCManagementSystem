@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.db.models import Count
 
 # =========================
 # Usuarios y Roles
@@ -214,6 +215,24 @@ class Diagnosis(models.Model):
 
     def __str__(self):
         return f"{self.disease} ({self.appointment})"
+    
+    def get_top_diseases(limit=10):
+    # Agrupa por enfermedad y cuenta ocurrencias
+        qs = (
+            Diagnosis.objects
+            .values('disease__code_4', 'disease__name')
+            .annotate(count=Count('id'))
+            .order_by('-count')[:limit]
+        )
+        # Devuelve una lista de diccionarios
+        return [
+            {
+                "code_4": d["disease__code_4"],
+                "name": d["disease__name"],
+                "count": d["count"],
+            }
+            for d in qs
+        ]
 
     class Meta:
         verbose_name = "Diagnóstico"
