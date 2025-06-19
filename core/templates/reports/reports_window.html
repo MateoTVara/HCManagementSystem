@@ -1,0 +1,45 @@
+<!-- filepath: core/templates/reports/reports_window.html -->
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="bi bi-clipboard2-pulse"></i> Reportes Personalizados</h2>
+    <div class="row g-3 mb-4" id="reportFilters">
+        <div class="col-md-4">
+            <label for="start_date" class="form-label">Fecha inicio</label>
+            <input type="date" class="form-control" id="start_date">
+        </div>
+        <div class="col-md-4">
+            <label for="end_date" class="form-label">Fecha fin</label>
+            <input type="date" class="form-control" id="end_date">
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="button" class="btn btn-secondary w-100" id="clearDatesBtn">
+                <i class="bi bi-eraser"></i> Limpiar Fechas
+            </button>
+        </div>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <button type="button" class="btn btn-success w-100" id="exportPatientsBtn">
+                <i class="bi bi-file-earmark-excel"></i> Exportar Pacientes (Excel)
+            </button>
+        </div>
+        <div class="col-md-4">
+            <button type="button" class="btn btn-success w-100" id="exportDoctorsBtn">
+                <i class="bi bi-file-earmark-excel"></i> Exportar Doctores (Excel)
+            </button>
+        </div>
+        <div class="col-md-4">
+            <button type="button" class="btn btn-success w-100" id="exportAppointmentsBtn">
+                <i class="bi bi-file-earmark-excel"></i> Exportar Citas (Excel)
+            </button>
+        </div>
+    </div>
+    <div class="row g-3 mt-4">
+        <div class="col-md-4">
+            <a href="{% url 'export_top_diseases_pdf' %}" class="btn btn-danger w-100">
+                <i class="bi bi-file-earmark-pdf"></i> Enfermedades más frecuentes (PDF)
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

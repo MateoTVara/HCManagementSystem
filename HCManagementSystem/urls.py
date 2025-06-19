@@ -60,6 +60,7 @@ urlpatterns = [
     path('allergy/partial_list/<int:patient_id>/', views.allergy_list_partial_patient, name='allergy_list_partial_patient'),  # Listar alergias por paciente
 
     # Rutas para la exportación de datos
+    path('reports/', views.reports_window, name='reports_window'),
     path('export/patients/excel/', views.export_patients_excel, name='export_patients_excel'),
     path('export/doctors/excel/', views.export_doctors_excel, name='export_doctors_excel'),
     path('export/appointments/excel/', views.export_appointments_excel, name='export_appointments_excel'),

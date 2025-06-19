@@ -140,9 +140,12 @@
                         </a>
                     </li>
                     {% endif %}
-                    <a href="{% url 'export_top_diseases_pdf' %}" class="btn btn-danger">
-                        <i class="bi bi-file-earmark-pdf"></i> Enfermedades más frecuentes (PDF)
-                    </a>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'reports_window' %}" data-ajax>
+                            <i class="bi bi-clipboard2-pulse me-2"></i>
+                            Reportes
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>

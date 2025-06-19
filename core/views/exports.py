@@ -4,10 +4,19 @@ from .appointments import role_required
 import requests
 from core.models import MedicalRecord
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render
+from datetime import datetime
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def export_patients_excel(request):
-    patients = Patient.objects.values(
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    patients = Patient.objects.all()
+    if start_date:
+        patients = patients.filter(created_at__gte=start_date)
+    if end_date:
+        patients = patients.filter(created_at__lte=end_date)
+    patients = patients.values(
         'id', 'dni', 'first_name', 'last_name', 'date_of_birth', 'gender', 'blood_type',
         'phone', 'address', 'email'
     )
@@ -60,9 +69,16 @@ def export_patients_excel(request):
         return resp
     return HttpResponse("Error generando el archivo", status=500)
 
-@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
+@role_required(['ADMIN', 'MANAGEMENT'])
 def export_doctors_excel(request):
-    doctors = Doctor.objects.select_related('user').values(
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    doctors = Doctor.objects.all()
+    if start_date:
+        doctors = doctors.filter(user__date_joined__gte=start_date)
+    if end_date:
+        doctors = doctors.filter(user__date_joined__lte=end_date)
+    doctors = doctors.select_related('user').values(
         'id',
         'dni',
         'user__first_name',
@@ -104,7 +120,14 @@ def export_doctors_excel(request):
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def export_appointments_excel(request):
-    appointments = Appointment.objects.select_related('patient', 'doctor__user')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    appointments = Appointment.objects.all()
+    if start_date:
+        appointments = appointments.filter(date__gte=start_date)
+    if end_date:
+        appointments = appointments.filter(date__lte=end_date)
+    # ... resto del código para exportar ...
     data = []
     for a in appointments:
         data.append({
@@ -155,3 +178,12 @@ def export_top_diseases_pdf(request):
         return resp
     else:
         return HttpResponse("Error generando el PDF", status=500)
+
+@login_required
+@user_passes_test(lambda u: u.role in ['ADMIN', 'MANAGEMENT'])
+def reports_window(request):
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return render(request, "reports/reports_window.html")
+    return render(request, "dashboard.html", {
+        "fragment": "reports/reports_window.html"
+    })

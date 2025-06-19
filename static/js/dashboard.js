@@ -158,6 +158,45 @@ function attachFormHandlers() {
     handleAllergySearch();
     setupDiagnosisTreatmentToggles();
     setupDiseaseSearch();
+    setupReportExportButtons();
+}
+
+// Configuración de botones de exportación de reportes
+function setupReportExportButtons() {
+    function getDateParams() {
+        const start = document.getElementById('start_date').value;
+        const end = document.getElementById('end_date').value;
+        let params = [];
+        if (start) params.push(`start_date=${encodeURIComponent(start)}`);
+        if (end) params.push(`end_date=${encodeURIComponent(end)}`);
+        return params.length ? '?' + params.join('&') : '';
+    }
+
+    const exportPatientsBtn = document.getElementById('exportPatientsBtn');
+    if (exportPatientsBtn) {
+        exportPatientsBtn.onclick = function() {
+            window.location.href = '/export/patients/excel/' + getDateParams();
+        };
+    }
+    const exportDoctorsBtn = document.getElementById('exportDoctorsBtn');
+    if (exportDoctorsBtn) {
+        exportDoctorsBtn.onclick = function() {
+            window.location.href = '/export/doctors/excel/' + getDateParams();
+        };
+    }
+    const exportAppointmentsBtn = document.getElementById('exportAppointmentsBtn');
+    if (exportAppointmentsBtn) {
+        exportAppointmentsBtn.onclick = function() {
+            window.location.href = '/export/appointments/excel/' + getDateParams();
+        };
+    }
+    const clearDatesBtn = document.getElementById('clearDatesBtn');
+    if (clearDatesBtn) {
+        clearDatesBtn.onclick = function() {
+            document.getElementById('start_date').value = '';
+            document.getElementById('end_date').value = '';
+        };
+    }
 }
 
 // Diagnóstico y tratamiento toggles
