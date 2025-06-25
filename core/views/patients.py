@@ -32,8 +32,8 @@ def patient_register(request):
             return redirect('dashboard')
     else:
         form = PatientRegister()
-    template = 'patients/patient_register.html' if request.headers.get('X-Requested-With') == 'XMLHttpRequest' else None
-    return render(request, template, {
+    # Siempre usa el nombre de plantilla, nunca None
+    return render(request, 'patients/patient_register.html', {
         'form': form,
         'allergies': allergies,
         'severity_choices': PatientAllergy.SEVERITY_CHOICES
