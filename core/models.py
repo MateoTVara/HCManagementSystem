@@ -3,9 +3,9 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.db.models import Count
 
-# =========================
-# Usuarios y Roles
-# =========================
+# ================================
+# Usuarios, roles, especialidades
+# ================================
 
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -44,14 +44,18 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.get_full_name()} ({self.get_role_display()})"
 
+class Specialty(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name="Especialidad Médica")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Especialidad"
+        verbose_name_plural = "Especialidades"
+
+
 class Doctor(models.Model):
-    SPECIALTY_CHOICES = [
-        ('CARDIOLOGY', 'Cardiología'),
-        ('DERMATOLOGY', 'Dermatología'),
-        ('NEUROLOGY', 'Neurología'),
-        ('PEDIATRICS', 'Pediatría'),
-        ('OTHER', 'Otra Especialidad'),
-    ]
     GENDER_CHOICES = [
         ('M', 'Masculino'),
         ('F', 'Femenino'),
@@ -62,17 +66,17 @@ class Doctor(models.Model):
         related_name='doctor_profile',
         verbose_name="Usuario asociado"
     )
-    specialty = models.CharField(
-        max_length=50,
-        choices=SPECIALTY_CHOICES,
-        default='OTHER',
+    specialty = models.ForeignKey(
+        Specialty,
+        on_delete=models.PROTECT,
+        related_name='doctors',
         verbose_name="Especialidad Médica"
     )
     dni = models.CharField(max_length=8, unique=True, verbose_name="DNI")
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, verbose_name="Género")
 
     def __str__(self):
-        return f"Dr(a). {self.user.get_full_name()} ({self.get_specialty_display()})"
+        return f"Dr(a). {self.user.get_full_name()} ({self.specialty})"
 
     class Meta:
         verbose_name = "Médico"
@@ -382,7 +386,7 @@ class Prescription(models.Model):
         verbose_name_plural = "Recetas Médicas"
 
 # =========================
-# Exámenes e Ingresos
+# Exámenes
 # =========================
 
 class MedicalExam(models.Model):
@@ -434,16 +438,3 @@ class MedicalExam(models.Model):
     def __str__(self):
         return f"{self.exam_type}"
 
-class Admission(models.Model):
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, verbose_name="Paciente")
-    admission_date = models.DateTimeField(verbose_name="Fecha de Ingreso")
-    discharge_date = models.DateTimeField(null=True, blank=True, verbose_name="Fecha de Alta")
-    reason = models.TextField(verbose_name="Motivo de Ingreso")
-
-    def __str__(self):
-        return f"Ingreso de {self.patient} el {self.admission_date.date()}"
-
-    class Meta:
-        verbose_name = "Ingreso"
-        verbose_name_plural = "Ingresos"
-        ordering = ['-admission_date']

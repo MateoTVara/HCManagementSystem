@@ -16,7 +16,7 @@ def doctor_list(request):
         ).filter(
             Q(user__first_name__icontains=query) |
             Q(user__last_name__icontains=query) |
-            Q(specialty__icontains=query) |
+            Q(specialty__name__icontains=query) |  # Cambia specialty__icontains por specialty__name__icontains
             Q(dni__icontains=query) |
             Q(full_name__icontains=query)
         )
@@ -60,7 +60,8 @@ def doctor_edit(request, pk):
                     'first_name': doctor.user.first_name,
                     'last_name': doctor.user.last_name,
                     'email': doctor.user.email,
-                    'specialty': doctor.specialty,
+                    'specialty': doctor.specialty.name,  # Cambia esto
+                    'specialty_id': doctor.specialty.id, # Opcional: agrega el ID si lo necesitas en JS
                     'dni': doctor.dni,
                     'gender': doctor.gender,
                 }
@@ -92,3 +93,19 @@ def doctor_detail(request, pk):
         'fragment': 'doctors/doctor_detail.html',
         'doctor': doctor
     })
+
+
+@role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
+def doctors_by_specialty(request):
+    specialty_id = request.GET.get('specialty_id')
+    if specialty_id:
+        doctors = Doctor.objects.filter(specialty_id=specialty_id).select_related('user', 'specialty')
+    else:
+        doctors = Doctor.objects.all().select_related('user', 'specialty')
+    data = {
+        'doctors': [
+            {'id': d.id, 'name': f"Dr(a). {d.user.first_name} {d.user.last_name} ({d.specialty.name})"}
+            for d in doctors
+        ]
+    }
+    return JsonResponse(data)

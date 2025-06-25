@@ -49,6 +49,7 @@ urlpatterns = [
     path('doctor/edit/<int:pk>/', views.doctor_edit, name='doctor_edit'),  # Editar doctor
     path('doctor/register/', views.doctor_register, name='doctor_register'),  # Registrar doctor
     path('doctor/detail/<int:pk>/', views.doctor_detail, name='doctor_detail'),  # Detalle de doctor
+    path('ajax/doctors_by_specialty/', views.doctors_by_specialty, name='doctors_by_specialty'), # Buscar doctores por especialidad
 
     # Rutas para la gestión de historial médico
     path('medicalrecord/<int:pk>/update/', views.medicalrecord_update, name='medicalrecord_update'),

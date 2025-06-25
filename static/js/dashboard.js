@@ -159,6 +159,7 @@ function attachFormHandlers() {
     setupDiagnosisTreatmentToggles();
     setupDiseaseSearch();
     setupReportExportButtons();
+    setupDoctorSpecialtyFilter();
 }
 
 // Configuración de botones de exportación de reportes
@@ -290,6 +291,40 @@ function setupDiseaseSearch() {
                     descDiv.textContent = "";
                 }
             });
+        });
+    }
+}
+
+// Configuración del filtro de especialidades de doctor
+function setupDoctorSpecialtyFilter() {
+    const specialtySelect = document.getElementById('specialty-select');
+    const doctorSelect = document.getElementById('id_doctor');
+    if (specialtySelect && doctorSelect) {
+        specialtySelect.addEventListener('change', function() {
+            const specialtyId = this.value;
+            fetch(`/ajax/doctors_by_specialty/?specialty_id=${specialtyId}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Limpiar opciones actuales
+                    doctorSelect.innerHTML = '';
+                    
+                    // Agregar opción por defecto
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = '-- Seleccione un doctor --';
+                    doctorSelect.appendChild(defaultOption);
+                    
+                    // Agregar nuevas opciones
+                    data.doctors.forEach(function(doctor) {
+                        const option = document.createElement('option');
+                        option.value = doctor.id;
+                        option.textContent = doctor.name;
+                        doctorSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al cargar doctores:', error);
+                });
         });
     }
 }
@@ -644,4 +679,5 @@ document.addEventListener('click', function(e) {
 document.addEventListener('DOMContentLoaded', function() {
     handleSidebar();
     attachFormHandlers();
+    setupDoctorSpecialtyFilter();
 });

@@ -5,10 +5,12 @@
 #    python scripts/import_diseases.py CIE10.xlsx
 # -------------------------------
 import os
+import sys
 import django
 import openpyxl
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'HCManagementSystem.settings')
 django.setup()
 

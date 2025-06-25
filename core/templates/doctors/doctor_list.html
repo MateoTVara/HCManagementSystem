@@ -49,7 +49,7 @@
                             Dr(a). {{ doctor.user.get_full_name }}
                         </a>
                     </td>
-                    <td>{{ doctor.get_specialty_display }}</td>
+                    <td>{{ doctor.specialty.name }}</td>
                     <td>
                         <div>{{ doctor.user.email }}</div>
                         <div class="text-muted small">Último acceso: {{ doctor.user.last_login|date:"d/m/Y"|default:"Nunca" }}</div>

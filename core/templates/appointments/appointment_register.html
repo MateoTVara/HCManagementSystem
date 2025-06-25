@@ -8,27 +8,37 @@
     <form method="post" action="{% url 'appointment_register' %}">
         {% csrf_token %}
         <div class="row g-3">
-            <!-- Primera Fila -->
+            <!-- Especialidad -->
             <div class="col-md-6">
-                <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.patient.label }}</label>
+                <label for="specialty-select" class="form-label">Especialidad</label>
+                <select id="specialty-select" class="form-select">
+                    <option value="">-- Todas --</option>
+                    {% for specialty in specialties %}
+                        <option value="{{ specialty.id }}">{{ specialty.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Paciente -->
+            <div class="col-md-6">
+                <label for="{{ form.patient.id_for_label }}" class="form-label">{{ form.patient.label }}</label>
                 {{ form.patient }}
             </div>
+            <!-- Doctor -->
             <div class="col-md-6">
-                <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.doctor.label }}</label>
+                <label for="id_doctor" class="form-label">{{ form.doctor.label }}</label>
                 {{ form.doctor }}
             </div>
-
-            <!-- Segunda Fila -->
+            <!-- Fecha -->
             <div class="col-md-6">
                 <label for="{{ form.date.id_for_label }}" class="form-label">{{ form.date.label }}</label>
                 {{ form.date }}
             </div>
+            <!-- Hora -->
             <div class="col-md-6">
                 <label for="{{ form.time.id_for_label }}" class="form-label">{{ form.time.label }}</label>
                 {{ form.time }}
             </div>
-
-            <!-- Tercera Fila -->
+            <!-- Motivo -->
             <div class="col-md-6">
                 <label for="{{ form.reason.id_for_label }}" class="form-label">{{ form.reason.label }}</label>
                 {{ form.reason }}

@@ -20,21 +20,21 @@
                         <div class="col-md-6">
                             <div class="info-item">
                                 <span class="info-label">Fecha:</span>
-                                <span class="info-value">15/06/2025</span>
+                                <span class="info-value">{{ appointment.date|date:"d/m/Y" }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Hora:</span>
-                                <span class="info-value">02:30 PM</span>
+                                <span class="info-value">{{ appointment.time|time:"h:i A" }}</span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="info-item">
                                 <span class="info-label">Estado:</span>
-                                <span class="status-badge status-programada">Programada</span>
+                                <span class="status-badge status-{{ appointment.status|lower }}">{{ appointment.get_status_display }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Motivo:</span>
-                                <span class="info-value">Control anual y dolor torácico ocasional</span>
+                                <span class="info-value">{{ appointment.reason|default:"Sin motivo especificado" }}</span>
                             </div>
                         </div>
                     </div>
@@ -46,19 +46,28 @@
                         <i class="fas fa-stethoscope"></i>
                         Diagnósticos
                     </h5>
-                    <div class="diagnosis-item">
-                        <div>
-                            <span class="diagnosis-code">I10</span>
-                            <span class="diagnosis-name">- HIPERTENSION ESENCIAL (PRIMARIA)</span>
+                    {% for diagnosis in diagnoses %}
+                        <div class="diagnosis-item">
+                            <div>
+                                <span class="diagnosis-code">{{ diagnosis.disease.code_4 }}</span>
+                                <span class="diagnosis-name">- {{ diagnosis.disease.name|upper }}</span>
+                            </div>
+                            {% if diagnosis.notes %}
+                                <div class="diagnosis-notes">
+                                    <strong>Notas:</strong> {{ diagnosis.notes }}
+                                </div>
+                            {% endif %}
+                            <div class="diagnosis-meta">
+                                <i class="fas fa-user-md me-1"></i>
+                                Registrado por {{ diagnosis.author|default:"Médico no especificado" }} el {{ diagnosis.date|date:"d/m/Y H:i" }}
+                            </div>
                         </div>
-                        <div class="diagnosis-notes">
-                            <strong>Notas:</strong> PA: 150/95 mmHg en dos tomas consecutivas
+                    {% empty %}
+                        <div class="empty-state">
+                            <i class="fas fa-stethoscope"></i>
+                            <p>No hay diagnósticos registrados para esta cita.</p>
                         </div>
-                        <div class="diagnosis-meta">
-                            <i class="fas fa-user-md me-1"></i>
-                            Registrado por Dr(a). Juan Pérez Rodríguez el 13/06/2025 18:01
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
 
                 <!-- Notas posteriores -->
@@ -68,7 +77,7 @@
                         Notas Posteriores
                     </h5>
                     <div class="notes-box">
-                        Sin notas
+                        {{ appointment.notes|default:"Sin notas" }}
                     </div>
                 </div>
 
@@ -82,21 +91,21 @@
                         <div class="col-md-6">
                             <div class="info-item">
                                 <span class="info-label">Nombre:</span>
-                                <span class="info-value">Dr(a). Juan Pérez Rodríguez</span>
+                                <span class="info-value">Dr(a). {{ appointment.doctor.user.get_full_name }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Especialidad:</span>
-                                <span class="info-value">Cardiología</span>
+                                <span class="info-value">{{ appointment.doctor.specialty.name }}</span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="info-item">
                                 <span class="info-label">DNI:</span>
-                                <span class="info-value">48563217</span>
+                                <span class="info-value">{{ appointment.doctor.dni }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Email:</span>
-                                <span class="info-value">j.perez@clinicaperu.pe</span>
+                                <span class="info-value">{{ appointment.doctor.user.email|default:"No especificado" }}</span>
                             </div>
                         </div>
                     </div>
@@ -115,59 +124,61 @@
                         <div class="col-md-6">
                             <div class="info-item">
                                 <span class="info-label">Nombre:</span>
-                                <span class="info-value">María García López</span>
+                                <span class="info-value">{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">DNI:</span>
-                                <span class="info-value">73451206</span>
+                                <span class="info-value">{{ appointment.patient.dni }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Fecha de nacimiento:</span>
-                                <span class="info-value">15/07/1985</span>
+                                <span class="info-value">{{ appointment.patient.date_of_birth|date:"d/m/Y" }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Edad:</span>
-                                <span class="info-value">39 años, 11 meses</span>
+                                <span class="info-value">{{ appointment.patient.date_of_birth|timesince }}</span>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="info-item">
                                 <span class="info-label">Sexo:</span>
-                                <span class="info-value">Femenino</span>
+                                <span class="info-value">{{ appointment.patient.get_gender_display }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Teléfono:</span>
-                                <span class="info-value">+51987654321</span>
+                                <span class="info-value">{{ appointment.patient.phone|default:"No especificado" }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Correo:</span>
-                                <span class="info-value">maria.garcia@mail.com</span>
+                                <span class="info-value">{{ appointment.patient.email|default:"No especificado" }}</span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Dirección:</span>
-                                <span class="info-value">Av. Arequipa 1230, Lima</span>
+                                <span class="info-value">{{ appointment.patient.address|default:"No especificada" }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Historia médica asociada -->
-                <div class="info-card">
-                    <h5 class="section-title">
-                        <i class="fas fa-file-medical"></i>
-                        Historia Médica Asociada
-                    </h5>
-                    <div class="info-item">
-                        <span class="info-label">Estado:</span>
-                        <span class="status-badge status-activo">Activo</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Notas del caso:</span>
-                        <div class="notes-box mt-2">
-                            Paciente con antecedentes familiares de cardiopatías
+                {% if appointment.medical_record %}
+                    <div class="info-card">
+                        <h5 class="section-title">
+                            <i class="fas fa-file-medical"></i>
+                            Historia Médica Asociada
+                        </h5>
+                        <div class="info-item">
+                            <span class="info-label">Estado:</span>
+                            <span class="status-badge status-{{ appointment.medical_record.status|lower }}">{{ appointment.medical_record.get_status_display }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Notas del caso:</span>
+                            <div class="notes-box mt-2">
+                                {{ appointment.medical_record.additional_notes|default:"Sin notas adicionales" }}
+                            </div>
                         </div>
                     </div>
-                </div>
+                {% endif %}
             </div>
         </div>
 
@@ -193,13 +204,19 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><strong>Losartán Potásico</strong></td>
-                                    <td>1 tableta</td>
-                                    <td>Una vez al día</td>
-                                    <td>30 días</td>
-                                    <td>Tomar en ayunas, controlar presión semanal</td>
-                                </tr>
+                                {% for prescription in prescriptions %}
+                                    <tr>
+                                        <td><strong>{{ prescription.medication.name }}</strong></td>
+                                        <td>{{ prescription.dosage }}</td>
+                                        <td>{{ prescription.frequency }}</td>
+                                        <td>{{ prescription.duration }}</td>
+                                        <td>{{ prescription.instructions|default:"-" }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">No hay prescripciones registradas</td>
+                                    </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
@@ -220,12 +237,15 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td><i class="fas fa-heartbeat me-2 text-primary"></i>Electrocardiograma</td>
-                                </tr>
-                                <tr>
-                                    <td><i class="fas fa-x-ray me-2 text-primary"></i>Radiografía</td>
-                                </tr>
+                                {% for exam in exams %}
+                                    <tr>
+                                        <td><i class="fas fa-heartbeat me-2 text-primary"></i>{{ exam.get_exam_type_display }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td class="text-center text-muted">No hay exámenes solicitados</td>
+                                    </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>

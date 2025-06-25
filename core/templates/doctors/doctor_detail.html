@@ -13,6 +13,7 @@
         <ul class="list-group mb-4 ">
             <li class="list-group-item"><strong>DNI:</strong> {{ doctor.dni }}</li>
             <li class="list-group-item"><strong>Género:</strong> {{ doctor.get_gender_display }}</li>
+            <li class="list-group-item"><strong>Especialidad:</strong> {{ doctor.specialty.name }}</li>
             <li class="list-group-item"><strong>Nombre de usuario: </strong> {{ doctor.user.username }}</li>
             <li class="list-group-item"><strong> Correo electrónico:</strong> {{ doctor.user.email}}</li>
             <li class="list-group-item"><strong> Última sesión:</strong> {{ doctor.user.last_login|default:"Nunca"}}

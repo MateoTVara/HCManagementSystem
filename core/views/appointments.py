@@ -1,7 +1,7 @@
 from functools import wraps
 from django.http import HttpResponseForbidden, JsonResponse
 from django.utils import timezone
-from core.models import Appointment, MedicalRecord
+from core.models import Appointment, MedicalRecord, Specialty  # Agrega Specialty
 from core.forms import AppointmentRegister, AppointmentEdit
 from django.db.models import Q, Count, Value, CharField
 from django.db.models.functions import Concat
@@ -39,13 +39,19 @@ def appointment_register(request):
             appointment.medical_record = medical_record
             appointment.save()
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return render(request, 'appointments/appointment_register.html', {'form': AppointmentRegister()})
+                return render(request, 'appointments/appointment_register.html', {
+                    'form': AppointmentRegister(),
+                    'specialties': Specialty.objects.all()  # <-- Agrega esto
+                })
             return redirect('dashboard')
     else:
         form = AppointmentRegister()
 
-    template = 'appointments/appointment_register.html' if request.headers.get('X-Requested-With') == 'XMLHttpRequest' else None
-    return render(request, template, {'form': form})
+    # Siempre pasa specialties al contexto
+    return render(request, 'appointments/appointment_register.html', {
+        'form': form,
+        'specialties': Specialty.objects.all()  # <-- Agrega esto
+    })
 
 @role_required(['ADMIN', 'MANAGEMENT', 'DOCTOR', 'ATTENDANT'])
 def appointment_list(request):

@@ -3,9 +3,8 @@ from django.contrib.auth.admin import UserAdmin
 from .models import (
     User, Doctor, Patient, Appointment,
     MedicalRecord, Medication,
-    Prescription, EmergencyContact,
-    Admission, Allergy, PatientAllergy,
-    MedicalExam, Diagnosis, Disease
+    Prescription, EmergencyContact, Allergy, PatientAllergy,
+    MedicalExam, Diagnosis, Disease, Specialty
 )
 
 @admin.register(User)
@@ -92,15 +91,6 @@ class EmergencyContactAdmin(admin.ModelAdmin):
     list_display = ('patient', 'full_name', 'relationship', 'phone')
     search_fields = ('patient__first_name', 'patient__last_name', 'full_name')
 
-@admin.register(Admission)
-class AdmissionAdmin(admin.ModelAdmin):
-    list_display = ('patient', 'admission_date', 'discharge_status')
-    date_hierarchy = 'admission_date'
-    
-    def discharge_status(self, obj):
-        return "Alta dada" if obj.discharge_date else "Hospitalizado"
-    discharge_status.short_description = 'Estado'
-
 @admin.register(MedicalExam)
 class MedicalExamAdmin(admin.ModelAdmin):
     list_display = ('appointment', 'exam_type')
@@ -118,3 +108,8 @@ class DiagnosisAdmin(admin.ModelAdmin):
     list_display = ('appointment', 'disease', 'author', 'date')
     search_fields = ('disease__name', 'appointment__patient__first_name', 'appointment__patient__last_name')
     list_filter = ('disease', 'author', 'date')
+
+@admin.register(Specialty)
+class SpecialtyAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
