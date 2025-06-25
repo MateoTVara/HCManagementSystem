@@ -6,84 +6,316 @@
         </a>
     </div>
     <div class="card-body">
-        <h5 class="mb-3">Datos del Paciente</h5>
-        <ul class="list-group mb-4">
+        <h5 class="mb-3 section-title">Datos del Paciente</h5>
+        <ul class="list-group mb-4 ">
             <li class="list-group-item"><strong>Nombre:</strong> {{ medical_record.patient.first_name }} {{ medical_record.patient.last_name }}</li>
             <li class="list-group-item"><strong>DNI:</strong> {{ medical_record.patient.dni }}</li>
             <li class="list-group-item"><strong>Género:</strong> {{ medical_record.patient.get_gender_display }}</li>
             <li class="list-group-item"><strong>Fecha de nacimiento:</strong> {{ medical_record.patient.date_of_birth|date:"d/m/Y" }}</li>
             <li class="list-group-item"><strong>Tipo de sangre:</strong> {{ medical_record.patient.blood_type }}</li>
         </ul>
-        <h5 class="mb-3">Información del Historial Médico</h5>
+        <h5 class="mb-3 section-title">Información del Historial Médico</h5>
         <ul class="list-group mb-4">
             <li class="list-group-item"><strong>Fecha de creación:</strong> {{ medical_record.created_at|date:"d/m/Y H:i" }}</li>
             <li class="list-group-item"><strong>Médico tratante:</strong>
                 {% if medical_record.attending_doctor %}
-                    Dr(a). {{ medical_record.attending_doctor.user.get_full_name }}
+                Dr(a). {{ medical_record.attending_doctor.user.get_full_name }}
                 {% else %}
-                    <span class="text-muted">No asignado</span>
+                <span class="text-muted">No asignado</span>
                 {% endif %}
             </li>
             <li class="list-group-item"><strong>Estado:</strong> {{ medical_record.get_status_display }}</li>
             <li class="list-group-item"><strong>Notas adicionales:</strong> {{ medical_record.additional_notes|default:"Sin notas" }}</li>
         </ul>
-        <h5 class="mb-3">Diagnósticos del Caso</h5>
+        <h5 class="mb-3 section-title ">Diagnósticos del Caso</h5>
         {% if all_diagnoses %}
-            <ul class="list-group mb-4">
-                {% for diag in all_diagnoses %}
-                    <li class="list-group-item">
-                        <strong>{{ diag.disease.code_4 }} - {{ diag.disease.name }}</strong>
-                        {% if diag.notes %}
-                            <br><em class="text-muted small">Notas: {{ diag.notes }}</em>
-                        {% endif %}
-                        <br>
-                        <span class="text-muted small">
-                            Registrado por Dr(a). {{ diag.author.user.get_full_name }} el {{ diag.date|date:"d/m/Y H:i" }}
-                        </span>
-                    </li>
-                {% endfor %}
-            </ul>
+        <ul class="list-group mb-4">
+            {% for diag in all_diagnoses %}
+            <li class="list-group-item">
+                <strong>{{ diag.disease.code_4 }} - {{ diag.disease.name }}</strong>
+                {% if diag.notes %}
+                <br><em class="text-muted small">Notas: {{ diag.notes }}</em>
+                {% endif %}
+                <br>
+                <span class="text-muted small">
+                    Registrado por Dr(a). {{ diag.author.user.get_full_name }} el {{ diag.date|date:"d/m/Y H:i" }}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
         {% else %}
-            <div class="text-muted mb-4">No hay diagnósticos registrados para este caso.</div>
+        <div class="text-muted mb-4">No hay diagnósticos registrados para este caso.</div>
         {% endif %}
-        <h5 class="mb-3">Citas Asociadas</h5>
+        <h5 class="mb-3 section-title">Citas Asociadas</h5>
+
+
+
+
         {% if medical_record.appointments.exists %}
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Hora</th>
-                            <th>Médico</th>
-                            <th>Motivo</th>
-                            <th>Estado</th>
-                            <th>Tratamiento</th>
-                            <th>Notas</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for appt in medical_record.appointments.all %}
-                        <tr>
-                            <td>{{ appt.date|date:"d/m/Y" }}</td>
-                            <td>{{ appt.time|time:"H:i" }}</td>
-                            <td>
-                                {% if appt.doctor %}
-                                    Dr(a). {{ appt.doctor.user.get_full_name }}
-                                {% else %}
-                                    <span class="text-muted">No asignado</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ appt.reason|truncatechars:30 }}</td>
-                            <td>{{ appt.get_status_display }}</td>
-                            <td>{{ appt.treatment|truncatechars:30|default:"-" }}</td>
-                            <td>{{ appt.notes|truncatechars:30|default:"-" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>    
-            </div>
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Hora</th>
+                        <th>Médico</th>
+                        <th>Motivo</th>
+                        <th>Estado</th>
+                        <th>Tratamiento</th>
+                        <th>Notas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appt in medical_record.appointments.all %}
+                    <tr>
+                        <td>{{ appt.date|date:"d/m/Y" }}</td>
+                        <td>{{ appt.time|time:"H:i" }}</td>
+                        <td>
+                            {% if appt.doctor %}
+                            Dr(a). {{ appt.doctor.user.get_full_name }}
+                            {% else %}
+                            <span class="text-muted">No asignado</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ appt.reason|truncatechars:30 }}</td>
+                        <td>{{ appt.get_status_display }}</td>
+                        <td>{{ appt.treatment|truncatechars:30|default:"-" }}</td>
+                        <td>{{ appt.notes|truncatechars:30|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
         {% else %}
-            <div class="text-muted">No hay citas asociadas a este historial médico.</div>
+        <div class="text-muted">No hay citas asociadas a este historial médico.</div>
         {% endif %}
     </div>
 </div>
+
+
+<style>
+    :root {
+        --primary-blue: #007bff;
+        --light-blue: #e3f2fd;
+        --dark-text: #2c3e50;
+        --muted-text: #6c757d;
+        --border-color: #dee2e6;
+        --background-light: #f8f9fa;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #ffffff;
+        color: var(--dark-text);
+        line-height: 1.6;
+    }
+
+    .main-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-blue), #0056b3);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .card-header a {
+        color: white !important;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .card-header a:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .section-title {
+        color: var(--primary-blue);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--light-blue);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-card {
+        background: var(--background-light);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .info-item {
+        margin-bottom: 0.75rem;
+    }
+
+    .info-label {
+        color: var(--muted-text);
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+
+    .info-value {
+        color: var(--dark-text);
+        font-weight: 500;
+    }
+
+    .diagnosis-item {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .diagnosis-code {
+        color: var(--primary-blue);
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .diagnosis-name {
+        color: var(--dark-text);
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    .diagnosis-notes {
+        background: var(--light-blue);
+        padding: 0.75rem;
+        border-radius: 6px;
+        margin-top: 0.5rem;
+        font-style: italic;
+        color: var(--dark-text);
+    }
+
+    .diagnosis-meta {
+        color: var(--muted-text);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .notes-box {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 100px;
+        background: white;
+        color: var(--dark-text);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background: var(--primary-blue);
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        padding: 1rem 0.75rem;
+    }
+
+    .table tbody td {
+        padding: 0.875rem 0.75rem;
+        vertical-align: middle;
+        border-color: var(--border-color);
+        font-size: 0.9rem;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--light-blue);
+    }
+
+    .empty-state {
+        text-align: center;
+        color: var(--muted-text);
+        padding: 2rem;
+        background: var(--background-light);
+        border-radius: 8px;
+        border: 2px dashed var(--border-color);
+    }
+
+    .empty-state i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.5;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-programada {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .status-activo {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+
+    .divider {
+        height: 1px;
+        background: linear-gradient(to right, transparent, var(--border-color), transparent);
+        margin: 2rem 0;
+    }
+
+
+
+
+    @media (max-width: 768px) {
+        .card-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .info-card {
+            margin-bottom: 1rem;
+        }
+
+        .table-responsive {
+            font-size: 0.85rem;
+        }
+    }
+</style>

@@ -6,143 +6,454 @@
             Regresar al listado
         </a>
     </div>
-    <div class="card-body">
+    <div class="card-body p-4">
         <div class="row">
             <!-- Columna izquierda -->
-            <div class="col-md-6">
+            <div class="col-lg-6">
                 <!-- Datos de la cita -->
-                <h5 class="mb-3">Datos de la Cita</h5>
-                <p>
-                    <strong>Fecha:</strong> {{ appointment.date|date:"d/m/Y" }}<br>
-                    <strong>Hora:</strong> {{ appointment.time|time:"h:i A" }}<br>
-                    <strong>Estado:</strong> {{ appointment.get_status_display }}<br>
-                    <strong>Motivo:</strong> {{ appointment.reason }}<br>
-                </p>
+                <div class="info-card">
+                    <h5 class="section-title">
+                        <i class="fas fa-calendar-alt"></i>
+                        Datos de la Cita
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <span class="info-label">Fecha:</span>
+                                <span class="info-value">15/06/2025</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Hora:</span>
+                                <span class="info-value">02:30 PM</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <span class="info-label">Estado:</span>
+                                <span class="status-badge status-programada">Programada</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Motivo:</span>
+                                <span class="info-value">Control anual y dolor torácico ocasional</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Diagnósticos -->
-                <h5 class="mb-3">Diagnósticos</h5>
-                {% if diagnoses %}
-                    <ul class="list-group mb-3">
-                        {% for diag in diagnoses %}
-                        <li class="list-group-item">
-                            <strong>{{ diag.disease.code_4 }} - {{ diag.disease.name }}</strong>
-                            {% if diag.notes %}
-                                <br><em>Notas: {{ diag.notes }}</em>
-                            {% endif %}
-                            <br>
-                            <span class="text-muted small">
-                                Registrado por Dr(a). {{ diag.author.user.get_full_name }} el {{ diag.date|date:"d/m/Y H:i" }}
-                            </span>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <div class="text-muted mb-3">No hay diagnósticos registrados.</div>
-                {% endif %}
-                {% if appointment.treatment %}
-                <strong>Tratamiento:</strong> {{ appointment.treatment }}<br>
-                {% endif %}
                 <div class="mb-4">
-                    <strong>Notas posteriores:</strong>
-                    <div style="border:1px solid #ddd; border-radius:4px; padding:8px; height:90px; overflow-y:auto; background:#f9f9f9;">
-                        {{ appointment.notes|default:"Sin notas" }}
+                    <h5 class="section-title">
+                        <i class="fas fa-stethoscope"></i>
+                        Diagnósticos
+                    </h5>
+                    <div class="diagnosis-item">
+                        <div>
+                            <span class="diagnosis-code">I10</span>
+                            <span class="diagnosis-name">- HIPERTENSION ESENCIAL (PRIMARIA)</span>
+                        </div>
+                        <div class="diagnosis-notes">
+                            <strong>Notas:</strong> PA: 150/95 mmHg en dos tomas consecutivas
+                        </div>
+                        <div class="diagnosis-meta">
+                            <i class="fas fa-user-md me-1"></i>
+                            Registrado por Dr(a). Juan Pérez Rodríguez el 13/06/2025 18:01
+                        </div>
                     </div>
                 </div>
+
+                <!-- Notas posteriores -->
+                <div class="mb-4">
+                    <h5 class="section-title">
+                        <i class="fas fa-sticky-note"></i>
+                        Notas Posteriores
+                    </h5>
+                    <div class="notes-box">
+                        Sin notas
+                    </div>
+                </div>
+
                 <!-- Médico asignado -->
-                <h5 class="mb-3">Médico Asignado</h5>
-                <p>
-                    <strong>Nombre:</strong> Dr(a). {{ appointment.doctor.user.get_full_name }}<br>
-                    <strong>Especialidad:</strong> {{ appointment.doctor.get_specialty_display }}<br>
-                    <strong>DNI:</strong> {{ appointment.doctor.dni }}<br>
-                    <strong>Email:</strong> {{ appointment.doctor.user.email }}<br>
-                </p>
-            </div>
-            <!-- Columna derecha -->
-            <div class="col-md-6">
-                <!-- Datos del paciente -->
-                <h5 class="mb-3">Datos del Paciente</h5>
-                <p>
-                    <strong>Nombre:</strong> {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}<br>
-                    <strong>DNI:</strong> {{ appointment.patient.dni }}<br>
-                    <strong>Fecha de nacimiento:</strong> {{ appointment.patient.date_of_birth|date:"d/m/Y" }}<br>
-                    <strong>Edad:</strong> {{ appointment.patient.date_of_birth|timesince }}<br>
-                    <strong>Sexo:</strong> {{ appointment.patient.get_gender_display }}<br>
-                    <strong>Teléfono:</strong> {{ appointment.patient.phone|default:"-" }}<br>
-                    <strong>Correo:</strong> {{ appointment.patient.email|default:"-" }}<br>
-                    <strong>Dirección:</strong> {{ appointment.patient.address|default:"-" }}<br>
-                </p>
-                <!-- Historia médica asociada -->
-                <h5 class="mb-3">Historia Médica Asociada</h5>
-                {% if appointment.medical_record %}
-                <p>
-                    <strong>Estado:</strong> {{ appointment.medical_record.get_status_display }}<br>
-                </p>
-                <div class="mb-4">
-                    <strong>Notas del caso:</strong>
-                    <div style="border:1px solid #ddd; border-radius:4px; padding:8px; height:90px; overflow-y:auto; background:#f9f9f9;">
-                        {{ appointment.medical_record.additional_notes|default:"Sin notas" }}
+                <div class="info-card">
+                    <h5 class="section-title">
+                        <i class="fas fa-user-md"></i>
+                        Médico Asignado
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <span class="info-label">Nombre:</span>
+                                <span class="info-value">Dr(a). Juan Pérez Rodríguez</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Especialidad:</span>
+                                <span class="info-value">Cardiología</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <span class="info-label">DNI:</span>
+                                <span class="info-value">48563217</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Email:</span>
+                                <span class="info-value">j.perez@clinicaperu.pe</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                {% else %}
-                <div class="text-muted mb-3">No hay historial médico asociado.</div>
-                {% endif %}
+            </div>
+
+            <!-- Columna derecha -->
+            <div class="col-lg-6">
+                <!-- Datos del paciente -->
+                <div class="info-card">
+                    <h5 class="section-title">
+                        <i class="fas fa-user"></i>
+                        Datos del Paciente
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <span class="info-label">Nombre:</span>
+                                <span class="info-value">María García López</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">DNI:</span>
+                                <span class="info-value">73451206</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Fecha de nacimiento:</span>
+                                <span class="info-value">15/07/1985</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Edad:</span>
+                                <span class="info-value">39 años, 11 meses</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <span class="info-label">Sexo:</span>
+                                <span class="info-value">Femenino</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Teléfono:</span>
+                                <span class="info-value">+51987654321</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Correo:</span>
+                                <span class="info-value">maria.garcia@mail.com</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Dirección:</span>
+                                <span class="info-value">Av. Arequipa 1230, Lima</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Historia médica asociada -->
+                <div class="info-card">
+                    <h5 class="section-title">
+                        <i class="fas fa-file-medical"></i>
+                        Historia Médica Asociada
+                    </h5>
+                    <div class="info-item">
+                        <span class="info-label">Estado:</span>
+                        <span class="status-badge status-activo">Activo</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Notas del caso:</span>
+                        <div class="notes-box mt-2">
+                            Paciente con antecedentes familiares de cardiopatías
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <!-- Parte inferior: Prescripciones y Exámenes en 2 columnas (tablas) -->
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <h5 class="mb-3">Prescripciones</h5>
-                {% if appointment.prescriptions.exists %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-sm">
-                        <thead>
-                            <tr>
-                                <th>Medicamento</th>
-                                <th>Dosis</th>
-                                <th>Frecuencia</th>
-                                <th>Duración</th>
-                                <th>Instrucciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for p in appointment.prescriptions.all %}
-                            <tr>
-                                <td>{{ p.medication.name }}</td>
-                                <td>{{ p.dosage }}</td>
-                                <td>{{ p.frequency }}</td>
-                                <td>{{ p.duration }}</td>
-                                <td>{{ p.instructions|default:"-" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+
+        <div class="divider"></div>
+
+        <!-- Parte inferior: Prescripciones y Exámenes -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <h5 class="section-title">
+                    <i class="fas fa-pills"></i>
+                    Prescripciones
+                </h5>
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Medicamento</th>
+                                    <th>Dosis</th>
+                                    <th>Frecuencia</th>
+                                    <th>Duración</th>
+                                    <th>Instrucciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Losartán Potásico</strong></td>
+                                    <td>1 tableta</td>
+                                    <td>Una vez al día</td>
+                                    <td>30 días</td>
+                                    <td>Tomar en ayunas, controlar presión semanal</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                {% else %}
-                <div class="text-muted mb-3">No hay prescripciones registradas.</div>
-                {% endif %}
             </div>
-            <div class="col-md-6">
-                <h5 class="mb-3">Exámenes Solicitados</h5>
-                {% if appointment.medical_exams.exists %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-sm">
-                        <thead>
-                            <tr>
-                                <th>Tipo de Examen</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for exam in appointment.medical_exams.all %}
-                            <tr>
-                                <td>{{ exam.get_exam_type_display }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+
+            <div class="col-lg-6 mb-4">
+                <h5 class="section-title">
+                    <i class="fas fa-microscope"></i>
+                    Exámenes Solicitados
+                </h5>
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Tipo de Examen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><i class="fas fa-heartbeat me-2 text-primary"></i>Electrocardiograma</td>
+                                </tr>
+                                <tr>
+                                    <td><i class="fas fa-x-ray me-2 text-primary"></i>Radiografía</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                {% else %}
-                <div class="text-muted mb-3">No hay exámenes solicitados.</div>
-                {% endif %}
             </div>
         </div>
     </div>
 </div>
+<style>
+    :root {
+        --primary-blue: #007bff;
+        --light-blue: #e3f2fd;
+        --dark-text: #2c3e50;
+        --muted-text: #6c757d;
+        --border-color: #dee2e6;
+        --background-light: #f8f9fa;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #ffffff;
+        color: var(--dark-text);
+        line-height: 1.6;
+    }
+
+    .main-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-blue), #0056b3);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .card-header a {
+        color: white !important;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .card-header a:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .section-title {
+        color: var(--primary-blue);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--light-blue);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-card {
+        background: var(--background-light);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .info-item {
+        margin-bottom: 0.75rem;
+    }
+
+    .info-label {
+        color: var(--muted-text);
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+
+    .info-value {
+        color: var(--dark-text);
+        font-weight: 500;
+    }
+
+    .diagnosis-item {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .diagnosis-code {
+        color: var(--primary-blue);
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .diagnosis-name {
+        color: var(--dark-text);
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    .diagnosis-notes {
+        background: var(--light-blue);
+        padding: 0.75rem;
+        border-radius: 6px;
+        margin-top: 0.5rem;
+        font-style: italic;
+        color: var(--dark-text);
+    }
+
+    .diagnosis-meta {
+        color: var(--muted-text);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .notes-box {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 100px;
+        background: white;
+        color: var(--dark-text);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background: var(--primary-blue);
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        padding: 1rem 0.75rem;
+    }
+
+    .table tbody td {
+        padding: 0.875rem 0.75rem;
+        vertical-align: middle;
+        border-color: var(--border-color);
+        font-size: 0.9rem;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--light-blue);
+    }
+
+    .empty-state {
+        text-align: center;
+        color: var(--muted-text);
+        padding: 2rem;
+        background: var(--background-light);
+        border-radius: 8px;
+        border: 2px dashed var(--border-color);
+    }
+
+    .empty-state i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.5;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-programada {
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .status-activo {
+        background: #e8f5e8;
+        color: #2e7d32;
+    }
+
+    .divider {
+        height: 1px;
+        background: linear-gradient(to right, transparent, var(--border-color), transparent);
+        margin: 2rem 0;
+    }
+
+    @media (max-width: 768px) {
+        .card-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+
+        .info-card {
+            margin-bottom: 1rem;
+        }
+
+        .table-responsive {
+            font-size: 0.85rem;
+        }
+    }
+</style>

@@ -217,14 +217,12 @@ class Diagnosis(models.Model):
         return f"{self.disease} ({self.appointment})"
     
     def get_top_diseases(limit=10):
-    # Agrupa por enfermedad y cuenta ocurrencias
         qs = (
             Diagnosis.objects
             .values('disease__code_4', 'disease__name')
             .annotate(count=Count('id'))
             .order_by('-count')[:limit]
         )
-        # Devuelve una lista de diccionarios
         return [
             {
                 "code_4": d["disease__code_4"],

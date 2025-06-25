@@ -447,6 +447,10 @@ document.addEventListener('click', function(e) {
     const link = e.target.closest('a[data-ajax]');
     if (link) {
         e.preventDefault();
+        // Guarda la URL antes de cargar el perfil
+        if (!link.href.endsWith('/profile/')) {
+            localStorage.setItem('lastAjaxUrl', link.href);
+        }
         fetch(link.href, {
             headers: {'X-Requested-With': 'XMLHttpRequest'}
         })
@@ -614,6 +618,25 @@ document.addEventListener('click', function(e) {
             document.getElementById('mainContent').innerHTML = html;
             attachFormHandlers();
         });
+    }
+});
+
+// Handler para el botón "Regresar" en el perfil de usuario
+document.addEventListener('click', function(e) {
+    const backBtn = e.target.closest('#btnBackProfile');
+    if (backBtn) {
+        const lastUrl = localStorage.getItem('lastAjaxUrl');
+        if (lastUrl) {
+            e.preventDefault();
+            fetch(lastUrl, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+            .then(r => r.text())
+            .then(html => {
+                document.getElementById('mainContent').innerHTML = html;
+                attachFormHandlers();
+                attachExamFormHandler();
+            });
+        }
+        // Si no hay lastUrl, deja que el enlace funcione normalmente (irá al dashboard)
     }
 });
 

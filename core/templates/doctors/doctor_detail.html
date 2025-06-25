@@ -6,15 +6,78 @@
         </a>
     </div>
     <div class="card-body">
-        <h5 class="card-title">{{ doctor.user.first_name }} {{ doctor.user.last_name }}</h5>
-        <p class="card-text">
-            DNI: {{ doctor.dni }}<br>
-            Género: {{ doctor.get_gender_display }}<br>
-            Especialidad: {{ doctor.get_specialty_display }}<br>
-            Nombre de usuario: {{ doctor.user.username }}<br>
-            Correo electrónico: {{ doctor.user.email }}<br>
-            Última sesión: {{ doctor.user.last_login|default:"Nunca" }}<br>
-            Fecha de registro: {{ doctor.user.date_joined }}<br>
-        </p>
+
+
+        <h5 class="mb-3 section-title">{{ doctor.user.first_name }} {{ doctor.user.last_name }}</h5>
+
+        <ul class="list-group mb-4 ">
+            <li class="list-group-item"><strong>DNI:</strong> {{ doctor.dni }}</li>
+            <li class="list-group-item"><strong>Género:</strong> {{ doctor.get_gender_display }}</li>
+            <li class="list-group-item"><strong>Nombre de usuario: </strong> {{ doctor.user.username }}</li>
+            <li class="list-group-item"><strong> Correo electrónico:</strong> {{ doctor.user.email}}</li>
+            <li class="list-group-item"><strong> Última sesión:</strong> {{ doctor.user.last_login|default:"Nunca"}}
+            </li>
+            <li class="list-group-item"><strong> Fecha de registro: </strong> {{ doctor.user.date_joined}}</li>
+        </ul>
+
     </div>
 </div>
+
+
+
+<style>
+    :root {
+        --primary-blue: #007bff;
+        --light-blue: #e3f2fd;
+        --muted-text: #6c757d;
+        --border-color: #dee2e6;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-blue), #0056b3);
+        color: white;
+        border: none;
+        padding: 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .card-header a {
+        color: white !important;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .card-header a:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .section-title {
+        color: var(--primary-blue);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--light-blue);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .text-muted {
+        color: var(--muted-text) !important;
+    }
+
+    @media (max-width: 768px) {
+        .card-header {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+    }
+</style>
