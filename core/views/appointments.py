@@ -187,15 +187,18 @@ def appointment_calendar(request):
         next_month = 1
         next_year += 1
 
+    current_date = date(current_year, current_month, 1)
+
     return render(request, 'appointments/appointment_calendar.html', {
         'month_days': month_days,
         'appointments_dict': appointments_dict,
         'current_month': date(current_year, current_month, 1).strftime('%B %Y'),
         'current_month_num': current_month,
-        'weekday_headers': ['Sun','Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        'weekday_headers': ['Dom','Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
         'prev_month': prev_month,
         'prev_year': prev_year,
         'next_month': next_month,
         'next_year': next_year,
         'current_year': current_year,
+        'current_date': current_date,  # <-- Agrega esto
     })

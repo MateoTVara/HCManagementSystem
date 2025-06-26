@@ -1,8 +1,28 @@
+/* Estilo para el dashboard principal */
+body, html {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #f8f9fa;
+    color: #2c3e50;
+}
+
+.navbar {
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
 #sidebar {
-    width: 280px;
+    width: 220px; /* Antes 280px */
+    min-width: 180px;
+    max-width: 240px;
     height: 100vh;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
     transition: transform 0.3s;
     z-index: 1000;
+    background: #fff;
+    border-right: 1px solid #dee2e6;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.03);
+    border-radius: 0 0 12px 0 !important; /* Solo abajo y derecha */
 }
 .sidebar-collapsed {
     transform: translateX(-280px);
@@ -10,6 +30,17 @@
 #mainContent {
     flex: 1;
     transition: margin-left 0.3s;
+    background: #fff;
+    border-radius: 0 0 12px 12px !important; /* Solo abajo */
+    box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    padding: 1.5rem;
+    min-height: 75vh;
+    margin: 1.5rem 0 1.5rem 0;
+    margin-top: 0 !important;
+    margin-bottom: 1.5rem;
+}
+.card, #mainContent, #sidebar {
+    border-radius: 10px !important;
 }
 .nav-item .nav-item {
     font-size: 0.9rem;
@@ -56,9 +87,18 @@
         position: fixed;
         background: white;
         box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        width: 100vw;
+        min-width: unset;
+        max-width: unset;
+        border-radius: 0 0 12px 12px;
     }
     .sidebar-collapsed {
         transform: translateX(-100%);
+    }
+    #mainContent {
+        margin-top: 0 !important;
+        margin-bottom: 1rem;
+        padding: 1rem;
     }
 }
 
@@ -69,4 +109,83 @@
 #sidebar .collapse .nav-item,
 #sidebar .collapsing .nav-item {
     width: 100%;
+}
+
+#sidebar h5 {
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+}
+
+#sidebar .nav-link {
+    color: #2c3e50;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+    font-weight: 500;
+    margin-bottom: 0.1rem;
+    padding-left: 1rem;
+}
+
+#sidebar .nav-link.active, #sidebar .nav-link:focus, #sidebar .nav-link:hover {
+    background: #e3f2fd;
+    color: #007bff;
+}
+
+#sidebar .nav-link i {
+    font-size: 0.95rem;
+    margin-right: 0.4rem;
+    vertical-align: middle;
+}
+
+#sidebar .nav-item .nav-link[data-ajax] {
+    padding-left: 1.8rem;
+}
+
+#sidebar .collapse .nav-link {
+    font-size: 0.97rem;
+}
+
+#sidebar .bi-chevron-right {
+    font-size: 1rem;
+    margin-left: 0.5rem;
+    transition: transform 0.2s;
+}
+
+#sidebar .collapsed .bi-chevron-right {
+    transform: rotate(0deg);
+}
+
+#sidebar .bi-chevron-right {
+    transform: rotate(90deg);
+}
+
+.alert-success {
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    background: linear-gradient(90deg, #e3f2fd 60%, #fff 100%);
+    color: #1976d2;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.05);
+}
+
+#sidebar .nav > .nav-item > .nav-link:not([data-bs-toggle]) {
+    padding-left: 1rem;
+}
+
+#sidebar .nav.flex-column.ms-3 {
+    margin-left: 1rem !important;
+}
+
+@media (max-width: 991px) {
+    #sidebar {
+        width: 100vw;
+        min-width: unset;
+        max-width: unset;
+        border-radius: 0 0 12px 12px;
+    }
+    #mainContent {
+        margin-top: 0 !important;
+        margin-bottom: 1rem;
+        padding: 1rem;
+    }
 }

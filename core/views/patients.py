@@ -84,6 +84,8 @@ def patient_edit(request, pk):
                     'date_of_birth': patient.date_of_birth.isoformat(),
                     'gender': patient.gender,
                     'blood_type': patient.blood_type,
+                    'height': str(patient.height) if patient.height else '',  # Agrega height
+                    'weight': str(patient.weight) if patient.weight else '',  # Agrega weight
                     'phone': patient.phone,
                     'address': patient.address,
                     'email': patient.email,

@@ -1,109 +1,214 @@
 <!-- patient_register.html -->
-<div class="h-100 p-4 bg-white rounded-3 shadow-sm">
-    <div class="border-bottom border-success border-3 pb-2 mb-4">
-        <h3 class="text-success mb-0">
-            <i class="bi bi-person-plus me-2"></i>Registrar Paciente
-        </h3>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span><i class="bi bi-person-plus me-2"></i>Registrar Paciente</span>
     </div>
-    <form method="post" action="{% url 'patient_register' %}">
-        {% csrf_token %}
-        <div class="row g-3">
-            <!-- Primera fila -->
-            <div class="col-md-4">
-                <label for="{{ form.first_name.id_for_label }}" class="form-label">{{ form.first_name.label }}</label>
-                {{ form.first_name }}
-            </div>
-            <div class="col-md-4">
-                <label for="{{ form.last_name.id_for_label }}" class="form-label">{{ form.last_name.label }}</label>
-                {{ form.last_name }}
-            </div>
-            <div class="col-md-4">
-                <label for="{{ form.dni.id_for_label }}" class="form-label">{{ form.dni.label }}</label>
-                {{ form.dni }}
+    <div class="card-body p-4">
+        <form method="post" action="{% url 'patient_register' %}">
+            {% csrf_token %}
+            
+            <!-- SECCIÓN 1: DATOS PERSONALES -->
+            <div class="info-card">
+                <h5 class="section-title">
+                    <i class="fas fa-user"></i>
+                    Datos Personales
+                </h5>
+                <div class="row g-3">
+                    <!-- Nombre -->
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <span class="info-label">{{ form.first_name.label }}</span>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger small">{{ form.first_name.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Apellido -->
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <span class="info-label">{{ form.last_name.label }}</span>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="text-danger small">{{ form.last_name.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Tipo y número de documento juntos -->
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <span class="info-label">{{ form.document_type.label }}</span>
+                            {{ form.document_type }}
+                            {% if form.document_type.errors %}
+                                <div class="text-danger small">{{ form.document_type.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Fecha de nacimiento -->
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <span class="info-label">{{ form.date_of_birth.label }}</span>
+                            {{ form.date_of_birth }}
+                            {% if form.date_of_birth.errors %}
+                                <div class="text-danger small">{{ form.date_of_birth.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <!-- Género -->
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <span class="info-label">{{ form.gender.label }}</span>
+                            {{ form.gender }}
+                            {% if form.gender.errors %}
+                                <div class="text-danger small">{{ form.gender.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <span class="info-label">{{ form.dni.label }}</span>
+                            {{ form.dni }}
+                            {% if form.dni.errors %}
+                                <div class="text-danger small">{{ form.dni.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Segunda fila -->
-            <div class="col-md-6">
-                <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">{{ form.date_of_birth.label }}</label>
-                {{ form.date_of_birth }}
-            </div>
-            <div class="col-md-3">
-                <label for="{{ form.gender.id_for_label }}" class="form-label">{{ form.gender.label }}</label>
-                {{ form.gender }}
-            </div>
-            <div class="col-md-3">
-                <label for="{{ form.blood_type.id_for_label }}" class="form-label">{{ form.blood_type.label }}</label>
-                {{ form.blood_type }}
+            <!-- SECCIÓN 2: DATOS FÍSICOS -->
+            <div class="info-card">
+                <h5 class="section-title">
+                    <i class="fas fa-heartbeat"></i>
+                    Datos Físicos
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <span class="info-label">{{ form.blood_type.label }}</span>
+                            {{ form.blood_type }}
+                            {% if form.blood_type.errors %}
+                                <div class="text-danger small">{{ form.blood_type.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <span class="info-label">{{ form.height.label }}</span>
+                            {{ form.height }}
+                            {% if form.height.help_text %}
+                                <div class="form-text">{{ form.height.help_text }}</div>
+                            {% endif %}
+                            {% if form.height.errors %}
+                                <div class="text-danger small">{{ form.height.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <span class="info-label">{{ form.weight.label }}</span>
+                            {{ form.weight }}
+                            {% if form.weight.help_text %}
+                                <div class="form-text">{{ form.weight.help_text }}</div>
+                            {% endif %}
+                            {% if form.weight.errors %}
+                                <div class="text-danger small">{{ form.weight.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Tercera fila -->
-            <div class="col-md-6">
-                <label for="{{ form.phone.id_for_label }}" class="form-label">{{ form.phone.label }}</label>
-                {{ form.phone }}
-            </div>
-            <div class="col-md-6">
-                <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
-                {{ form.email }}
+            <!-- SECCIÓN 3: INFORMACIÓN DE CONTACTO -->
+            <div class="info-card">
+                <h5 class="section-title">
+                    <i class="fas fa-phone"></i>
+                    Información de Contacto
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <span class="info-label">{{ form.phone.label }}</span>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                                <div class="text-danger small">{{ form.phone.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <span class="info-label">{{ form.email.label }}</span>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small">{{ form.email.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-group">
+                            <span class="info-label">{{ form.address.label }}</span>
+                            {{ form.address }}
+                            {% if form.address.errors %}
+                                <div class="text-danger small">{{ form.address.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Cuarta fila -->
-            <div class="col-12">
-                <label for="{{ form.address.id_for_label }}" class="form-label">{{ form.address.label }}</label>
-                {{ form.address }}
-            </div>
-
-            <!-- Quinta fila -->
-            <!-- Sección de alergias -->
-            <div class="col-12">
-                <label class="form-label">Alergias</label>
-                
+            <!-- SECCIÓN 4: ALERGIAS -->
+            <div class="info-card">
+                <h5 class="section-title">
+                    <i class="fas fa-shield-virus"></i>
+                    Alergias
+                </h5>
                 <!-- Buscador y botón para nueva alergia -->
-                <div class="mb-3 d-flex align-items-center gap-2">
-                    <input type="text" 
-                        class="form-control"
-                        placeholder="Buscar alergias..." 
-                        id="allergySearch"
-                        style="max-width: 300px;">
-                    <button id="btnAddAllergy" type="button" class="btn btn-outline-success" data-url="{% url 'allergy_register' %}">
-                        <i class="bi bi-plus-circle"></i> Nueva Alergia
-                    </button>
-
+                <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+                    <div class="flex-grow-1" style="max-width: 300px;">
+                        <input type="text" 
+                            class="form-control"
+                            placeholder="Buscar alergias..." 
+                            id="allergySearch">
+                    </div>
+                    <div class="flex-shrink-0">
+                        <button id="btnAddAllergy" type="button" class="btn btn-outline-success" data-url="{% url 'allergy_register' %}">
+                            <i class="bi bi-plus-circle"></i> Nueva Alergia
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Contenedor de checkboxes -->
-                <div class="border p-3 rounded bg-light">
+                <div class="table-container">
                     <div class="row g-3" id="allergyList">
                         {% for allergy in allergies %}
                         <div class="col-md-4 col-sm-6 allergy-item">
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <div class="form-check">
-                                        <input type="checkbox" 
-                                            name="allergy_{{ allergy.id }}" 
-                                            id="allergy_{{ allergy.id }}" 
-                                            class="form-check-input">
-                                        <label class="form-check-label" for="allergy_{{ allergy.id }}">
-                                            {{ allergy.name }}
-                                        </label>
-                                    </div>
-                                    
-                                    <!-- Severidad -->
-                                    <div class="mt-2">
-                                        <select name="severity_{{ allergy.id }}" 
-                                                class="form-select">
-                                            {% for value, label in severity_choices %}
-                                            <option value="{{ value }}">{{ label }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    
-                                    <!-- Reacciones -->
-                                    <div class="mt-2">
-                                        <textarea name="reactions_{{ allergy.id }}" 
-                                                rows="2" 
-                                                class="form-control"
-                                                placeholder="Reacciones del paciente..."></textarea>
-                                    </div>
+                            <div class="allergy-card">
+                                <div class="form-check">
+                                    <input type="checkbox" 
+                                        name="allergy_{{ allergy.id }}" 
+                                        id="allergy_{{ allergy.id }}" 
+                                        class="form-check-input">
+                                    <label class="form-check-label" for="allergy_{{ allergy.id }}">
+                                        {{ allergy.name }}
+                                    </label>
+                                </div>
+                                
+                                <!-- Severidad -->
+                                <div class="mt-2">
+                                    <select name="severity_{{ allergy.id }}" 
+                                            class="form-select form-select-sm">
+                                        {% for value, label in severity_choices %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <!-- Reacciones -->
+                                <div class="mt-2">
+                                    <textarea name="reactions_{{ allergy.id }}" 
+                                            rows="2" 
+                                            class="form-control form-control-sm"
+                                            placeholder="Reacciones del paciente..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -111,67 +216,313 @@
                     </div>
                     
                     <!-- Mensaje cuando no hay resultados -->
-                    <div id="noResults" class="text-muted text-center d-none">
-                        No se encontraron alergias
+                    <div id="noResults" class="empty-state d-none">
+                        <i class="fas fa-search"></i>
+                        <p>No se encontraron alergias</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Sexta fila -->
-            <div class="col-12">
-                <label for="{{ form.notes.id_for_label }}" class="form-label">{{ form.notes.label }}</label>
-                {{ form.notes }}
-            </div>
-
-            <!-- Nueva sección: Contacto de emergencia -->
-            <div class="col-12 mt-4">
-                <h5 class="mb-3 text-primary"><i class="bi bi-person-lines-fill me-2"></i>Contacto de Emergencia</h5>
+            <!-- SECCIÓN 5: CONTACTO DE EMERGENCIA -->
+            <div class="info-card">
+                <h5 class="section-title">
+                    <i class="fas fa-phone-alt"></i>
+                    Contacto de Emergencia
+                </h5>
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label for="{{ form.emergency_full_name.id_for_label }}" class="form-label">{{ form.emergency_full_name.label }}</label>
-                        {{ form.emergency_full_name }}
+                        <div class="form-group">
+                            <span class="info-label">{{ form.emergency_full_name.label }}</span>
+                            {{ form.emergency_full_name }}
+                            {% if form.emergency_full_name.errors %}
+                                <div class="text-danger small">{{ form.emergency_full_name.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label for="{{ form.emergency_relationship.id_for_label }}" class="form-label">{{ form.emergency_relationship.label }}</label>
-                        {{ form.emergency_relationship }}
+                        <div class="form-group">
+                            <span class="info-label">{{ form.emergency_relationship.label }}</span>
+                            {{ form.emergency_relationship }}
+                            {% if form.emergency_relationship.errors %}
+                                <div class="text-danger small">{{ form.emergency_relationship.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label for="{{ form.emergency_phone.id_for_label }}" class="form-label">{{ form.emergency_phone.label }}</label>
-                        {{ form.emergency_phone }}
+                        <div class="form-group">
+                            <span class="info-label">{{ form.emergency_phone.label }}</span>
+                            {{ form.emergency_phone }}
+                            {% if form.emergency_phone.errors %}
+                                <div class="text-danger small">{{ form.emergency_phone.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label for="{{ form.emergency_address.id_for_label }}" class="form-label">{{ form.emergency_address.label }}</label>
-                        {{ form.emergency_address }}
+                        <div class="form-group">
+                            <span class="info-label">{{ form.emergency_address.label }}</span>
+                            {{ form.emergency_address }}
+                            {% if form.emergency_address.errors %}
+                                <div class="text-danger small">{{ form.emergency_address.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="mt-4">
-            <button type="submit" class="btn btn-success px-5">
-                <i class="bi bi-save me-1"></i> Registrar
-            </button>
-        </div>
-    </form>
+
+            <!-- BOTÓN DE ENVÍO -->
+            <div class="divider"></div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-success btn-lg px-5">
+                    <i class="bi bi-save me-2"></i> Registrar Paciente
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <style>
-#allergySearch {
-    max-width: 300px;
-    margin-bottom: 1rem;
-}
+    :root {
+        --primary-blue: #007bff;
+        --light-blue: #e3f2fd;
+        --dark-text: #2c3e50;
+        --muted-text: #6c757d;
+        --border-color: #dee2e6;
+        --background-light: #f8f9fa;
+        --success-green: #28a745;
+    }
 
-.allergy-item .card {
-    transition: transform 0.2s;
-    border: 1px solid #dee2e6;
-}
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #ffffff;
+        color: var(--dark-text);
+        line-height: 1.6;
+    }
 
-.allergy-item .form-check-input {
-    margin-top: 0;
-}
+    .card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
 
-#allergyList {
-    max-height: calc(2 * 160px);
-    overflow-y: auto;
-    min-height: unset;
-}
+    .card-header {
+        background: linear-gradient(135deg, var(--success-green), #20632b);
+        color: white;
+        border: none;
+        padding: 0.9rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .section-title {
+        color: var(--primary-blue);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--light-blue);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-card {
+        background: var(--background-light);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .info-label {
+        color: var(--muted-text);
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+
+    .form-control, .form-select {
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--success-green);
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+    }
+
+    .allergy-card {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1rem;
+        height: 100%;
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .allergy-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .form-check-input {
+        margin-top: 0;
+    }
+
+    .form-check-label {
+        font-weight: 500;
+        color: var(--dark-text);
+    }
+
+    .empty-state {
+        text-align: center;
+        color: var(--muted-text);
+        padding: 2rem;
+        background: var(--background-light);
+        border-radius: 8px;
+        border: 2px dashed var(--border-color);
+    }
+
+    .empty-state i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.5;
+    }
+
+    .divider {
+        height: 1px;
+        background: linear-gradient(to right, transparent, var(--border-color), transparent);
+        margin: 2rem 0;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--success-green), #20632b);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-outline-success {
+        border-color: var(--success-green);
+        color: var(--success-green);
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-success:hover {
+        background: var(--success-green);
+        border-color: var(--success-green);
+        transform: translateY(-1px);
+    }
+
+    .form-text {
+        color: var(--muted-text);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    #allergySearch {
+        margin-bottom: 0; /* Quita el margin-bottom que tenía */
+    }
+
+    .allergy-search-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .allergy-search-container .form-control {
+        height: calc(2.25rem + 2px); /* Altura estándar del form-control */
+    }
+
+    .allergy-search-container .btn {
+        height: calc(2.25rem + 2px); /* Misma altura que el input */
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 576px) {
+        .allergy-search-container {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.5rem;
+        }
+        
+        .allergy-search-container .form-control,
+        .allergy-search-container .btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .card-header {
+            text-align: center;
+        }
+
+        .info-card {
+            margin-bottom: 1rem;
+        }
+
+        .allergy-item {
+            margin-bottom: 1rem;
+        }
+
+        .d-md-flex {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+
+    /* Estilos específicos para los selects de tipo de documento */
+    select[name="document_type"], #id_document_type {
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.95rem;
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+    select[name="document_type"]:focus, #id_document_type:focus {
+        border-color: var(--success-green);
+        box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.15);
+    }
 </style>

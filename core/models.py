@@ -97,12 +97,25 @@ class Patient(models.Model):
         ('M', 'Masculino'),
         ('F', 'Femenino'),
     ]
-    dni = models.CharField(max_length=8, unique=True, verbose_name="DNI")
+    DOCUMENT_TYPE_CHOICES = [
+        ('DNI', 'DNI'),
+        ('CE', 'Carnet de Extranjería'),
+        ('PAS', 'Pasaporte'),
+    ]
+    document_type = models.CharField(
+        max_length=10,
+        choices=DOCUMENT_TYPE_CHOICES,
+        default='DNI',
+        verbose_name="Tipo de documento"
+    )
+    dni = models.CharField(max_length=15, unique=True, verbose_name="N° de documento")
     first_name = models.CharField(max_length=100, verbose_name="Nombre")
     last_name = models.CharField(max_length=100, verbose_name="Apellido")
     date_of_birth = models.DateField(verbose_name="Fecha de nacimiento")
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, verbose_name="Género")
     blood_type = models.CharField(max_length=3, choices=BLOOD_TYPE_CHOICES, blank=True, verbose_name="Tipo de Sangre")
+    height = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, verbose_name="Talla (cm)", help_text="Talla en centímetros")
+    weight = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, verbose_name="Peso (kg)", help_text="Peso en kilogramos")
     phone = models.CharField(max_length=20, blank=True, verbose_name="Teléfono")
     address = models.TextField(blank=True, verbose_name="Dirección")
     email = models.EmailField(blank=True, verbose_name="Correo Electrónico")
@@ -119,6 +132,27 @@ class Patient(models.Model):
 
     def get_active_medical_record(self):
         return self.medicalrecord_set.filter(status='ACTIVE').first()
+
+    def get_bmi(self):
+        """Calcula el IMC (Índice de Masa Corporal) si hay talla y peso"""
+        if self.height and self.weight and self.height > 0:
+            height_m = float(self.height) / 100  # Convertir cm a metros
+            return round(float(self.weight) / (height_m ** 2), 2)
+        return None
+
+    def get_bmi_category(self):
+        """Categoría del IMC según los estándares de la OMS"""
+        bmi = self.get_bmi()
+        if bmi is None:
+            return "No disponible"
+        elif bmi < 18.5:
+            return "Bajo peso"
+        elif bmi < 25:
+            return "Peso normal"
+        elif bmi < 30:
+            return "Sobrepeso"
+        else:
+            return "Obesidad"
 
     class Meta:
         verbose_name = "Paciente"

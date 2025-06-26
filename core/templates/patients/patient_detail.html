@@ -1,6 +1,6 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <span>Detalle de Paciente</span>
+        <span class="ms-3">Detalle de Paciente</span>
         <a href="{% url 'patient_list' %}" class="text-decoration-none" data-ajax>
             regresar al listado
         </a>
@@ -11,7 +11,10 @@
             <div class="patient-info-card mb-3">
                 <h5 class="card-title section-title">{{ patient.first_name }} {{ patient.last_name }}</h5>
                 <ul class="list-group mb-4">
-                    <li class="list-group-item"><span class="info-label">DNI:</span> <span class="info-value">{{ patient.dni }}</span></li>
+                    <li class="list-group-item">
+                        <span class="info-label">{{ patient.get_document_type_display }}:</span>
+                        <span class="info-value">{{ patient.dni }}</span>
+                    </li>
                     <li class="list-group-item"><span class="info-label">Fecha de nacimiento:</span> <span
                             class="info-value">{{ patient.date_of_birth|date:"d/m/Y" }}</span></li>
                     <li class="list-group-item"><span class="info-label">Sexo:</span> <span class="info-value">{{ patient.get_gender_display }}</span></li>
@@ -116,7 +119,7 @@
         background: linear-gradient(135deg, var(--primary-blue), #0056b3);
         color: white;
         border: none;
-        padding: 1.5rem;
+        padding: 0.33rem;
         font-size: 1.1rem;
         font-weight: 600;
     }

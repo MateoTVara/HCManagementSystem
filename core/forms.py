@@ -84,24 +84,24 @@ class PatientRegister(forms.ModelForm):
     emergency_full_name = forms.CharField(
         label="Nombre completo del contacto de emergencia", 
         max_length=200, required=True, 
-        widget=forms.TextInput(attrs={'class': 'form-control'}))
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: María González Pérez'}))
     emergency_relationship = forms.CharField(
         label="Parentesco", max_length=100, 
         required=True, 
-        widget=forms.TextInput(attrs={'class': 'form-control'}))
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Madre, Esposo, Hermana'}))
     emergency_phone = forms.CharField(
         label="Teléfono de emergencia", 
         max_length=20, required=True, 
-        widget=forms.TextInput(attrs={'class': 'form-control'}))
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 987654321'}))
     emergency_address = forms.CharField(
         label="Dirección de emergencia", 
-        widget=forms.Textarea(attrs={'rows': 1, 'class': 'form-control'}), 
+        widget=forms.Textarea(attrs={'rows': 1, 'class': 'form-control', 'placeholder': 'Ej: Jr. Los Laureles 123, San Borja'}), 
         required=True)
 
     class Meta:
         model = Patient
-        fields = ['dni', 'first_name', 'last_name', 'date_of_birth', 'gender', 'blood_type',
-                  'phone', 'address', 'email', 'allergies']
+        fields = ['document_type', 'dni', 'first_name', 'last_name', 'date_of_birth', 'gender', 'blood_type',
+                  'height', 'weight', 'phone', 'address', 'email', 'allergies']
         widgets = {
             'date_of_birth': forms.DateInput(attrs={
                 'type': 'date',
@@ -113,24 +113,40 @@ class PatientRegister(forms.ModelForm):
             'blood_type': forms.Select(attrs={
                 'class': 'form-select'
             }),
+            'height': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Ej: 170.5'
+            }),
+            'weight': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Ej: 70.5'
+            }),
             'address': forms.Textarea(attrs={
                 'rows': 2,
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ej: Av. Universitaria 1801, San Miguel, Lima'
             }),
             'dni': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ej: 12345678'
             }),
             'first_name': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ej: Juan Carlos'
             }),
             'last_name': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ej: Pérez García'
             }),
             'phone': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ej: 987654321'
             }),
             'email': forms.EmailInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ej: juan.perez@email.com'
             }),
             'allergies': forms.CheckboxSelectMultiple(attrs={
                 'class': 'form-check-input'
@@ -181,33 +197,36 @@ class PatientEdit(forms.ModelForm):
     emergency_full_name = forms.CharField(
         label="Nombre completo del contacto de emergencia", 
         max_length=200, required=True, 
-        widget=forms.TextInput(attrs={'class': 'form-control'}))
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: María González Pérez'}))
     emergency_relationship = forms.CharField(
         label="Parentesco", max_length=100, 
         required=True, 
-        widget=forms.TextInput(attrs={'class': 'form-control'}))
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Madre, Esposo, Hermana'}))
     emergency_phone = forms.CharField(
         label="Teléfono de emergencia", 
         max_length=20, required=True, 
-        widget=forms.TextInput(attrs={'class': 'form-control'}))
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 987654321'}))
     emergency_address = forms.CharField(
         label="Dirección de emergencia", 
-        widget=forms.Textarea(attrs={'rows': 1, 'class': 'form-control'}), 
+        widget=forms.Textarea(attrs={'rows': 1, 'class': 'form-control', 'placeholder': 'Ej: Jr. Los Laureles 123, San Borja'}), 
         required=True)
     
     class Meta:
         model = Patient
-        fields = ['dni', 'first_name', 'last_name', 'date_of_birth', 'gender'
-                  , 'blood_type', 'phone', 'address', 'email', 'allergies']
+        fields = ['document_type', 'dni', 'first_name', 'last_name', 'date_of_birth', 'gender',
+                  'blood_type', 'height', 'weight', 'phone', 'address', 'email', 'allergies']
         widgets = {
-            'dni' : forms.TextInput(attrs={
-                'class': 'form-control'
+            'dni': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ej: 12345678'
             }),
             'first_name': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ej: Juan Carlos'
             }),
             'last_name': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ej: Pérez García'
             }),
             'date_of_birth': forms.DateInput(attrs={
                 'type': 'date',
@@ -220,15 +239,28 @@ class PatientEdit(forms.ModelForm):
             'blood_type': forms.Select(attrs={
                 'class': 'form-select'
             }),
+            'height': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Ej: 170.5'
+            }),
+            'weight': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': 'Ej: 70.5'
+            }),
             'phone': forms.TextInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ej: 987654321'
             }),
             'address': forms.Textarea(attrs={
                 'rows': 2,
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ej: Av. Universitaria 1801, San Miguel, Lima'
             }),
             'email': forms.EmailInput(attrs={
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Ej: juan.perez@email.com'
             }),
             'allergies': forms.CheckboxSelectMultiple(attrs={
                 'class': 'form-check-input'
